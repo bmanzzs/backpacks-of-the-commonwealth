@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="referrer" content="no-referrer">
 <title>Backpacks of the Commonwealth</title>
 <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@400;700;900&family=VT323&display=swap" rel="stylesheet">
 <style>
@@ -219,19 +220,21 @@
     font-size: 44px;
     color: var(--green-dim);
     line-height: 1;
-    position: absolute;
-    top: 14px;
-    left: 18px;
+    flex-shrink: 0;
     pointer-events: none;
   }
 
   /* Card header */
   .card-header {
-    padding-left: 44px;
-    min-height: 52px;
     display: flex;
-    flex-direction: column;
-    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    min-height: 52px;
+  }
+
+  .card-name-wrap {
+    flex: 1;
+    min-width: 0;
   }
 
   .card-name {
@@ -272,26 +275,171 @@
   .qs-wt { border-color: var(--amber-dim); color: var(--amber); }
   .qs-val { border-color: #996600; color: #cc9900; }
 
-  /* Global floating tooltip — lives on body, not inside clipped cards */
-  #floating-tooltip {
+  /* Image preview on hover */
+  #img-preview {
     position: fixed;
-    width: 320px;
+    width: 180px;
     background: #040d04;
     border: 1px solid var(--green);
-    box-shadow: 0 0 30px var(--green-glow), 0 0 60px rgba(57,255,20,0.1);
+    box-shadow: 0 0 24px var(--green-glow);
     opacity: 0;
     pointer-events: none;
     transition: opacity 0.15s ease, transform 0.15s ease;
     z-index: 10000;
-    clip-path: polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 12px 100%, 0 calc(100% - 12px));
-    transform: translateY(4px);
-    max-height: 90vh;
-    overflow-y: auto;
+    transform: translateY(6px);
+    clip-path: polygon(0 0, calc(100% - 10px) 0, 100% 10px, 100% 100%, 10px 100%, 0 calc(100% - 10px));
   }
-
-  #floating-tooltip.visible {
+  #img-preview.visible {
     opacity: 1;
     transform: translateY(0);
+  }
+  #img-preview img {
+    width: 100%;
+    height: 140px;
+    object-fit: contain;
+    display: block;
+    background: #0a160a;
+    padding: 8px;
+  }
+  #img-preview .preview-label {
+    font-family: 'VT323', monospace;
+    font-size: 13px;
+    color: var(--green-dim);
+    letter-spacing: 2px;
+    text-align: center;
+    padding: 5px 8px;
+    border-top: 1px solid var(--border);
+  }
+  #img-preview .preview-hint {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 8px;
+    color: var(--amber);
+    letter-spacing: 2px;
+    text-align: center;
+    padding: 4px 8px 7px;
+    text-transform: uppercase;
+  }
+
+  /* Modal overlay */
+  #modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.85);
+    backdrop-filter: blur(3px);
+    z-index: 20000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s ease;
+  }
+  #modal-overlay.visible {
+    opacity: 1;
+    pointer-events: all;
+  }
+
+  /* Modal window */
+  #modal {
+    background: #040d04;
+    border: 1px solid var(--green);
+    box-shadow: 0 0 60px var(--green-glow), 0 0 120px rgba(57,255,20,0.08);
+    width: 100%;
+    max-width: 560px;
+    max-height: 90vh;
+    overflow-y: auto;
+    position: relative;
+    clip-path: polygon(0 0, calc(100% - 18px) 0, 100% 18px, 100% 100%, 18px 100%, 0 calc(100% - 18px));
+    transform: translateY(16px) scale(0.97);
+    transition: transform 0.2s ease;
+  }
+  #modal-overlay.visible #modal {
+    transform: translateY(0) scale(1);
+  }
+
+  .modal-close {
+    position: absolute;
+    top: 12px;
+    right: 14px;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 14px;
+    color: var(--bg);
+    background: none;
+    border: none;
+    cursor: pointer;
+    line-height: 1;
+    z-index: 2;
+    opacity: 0.7;
+    transition: opacity 0.15s;
+  }
+  .modal-close:hover { opacity: 1; }
+
+  .modal-hero {
+    display: flex;
+    gap: 0;
+    background: var(--green);
+    align-items: stretch;
+  }
+  .modal-img-wrap {
+    width: 160px;
+    flex-shrink: 0;
+    background: #0a1a0a;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 12px;
+    border-right: 1px solid rgba(0,0,0,0.3);
+  }
+  .modal-img-wrap img {
+    width: 100%;
+    height: 120px;
+    object-fit: contain;
+  }
+  .modal-img-wrap .no-img {
+    font-family: 'VT323', monospace;
+    font-size: 13px;
+    color: var(--green-dim);
+    text-align: center;
+    letter-spacing: 1px;
+  }
+  .modal-title-wrap {
+    flex: 1;
+    padding: 16px 40px 16px 16px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 4px;
+  }
+  .modal-name {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 13px;
+    font-weight: 900;
+    color: var(--bg);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    line-height: 1.3;
+  }
+  .modal-id {
+    font-size: 10px;
+    color: rgba(0,0,0,0.5);
+    letter-spacing: 2px;
+  }
+  .modal-level {
+    display: inline-block;
+    margin-top: 6px;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 9px;
+    font-weight: 700;
+    background: var(--bg);
+    color: var(--green);
+    padding: 3px 10px;
+    letter-spacing: 2px;
+    align-self: flex-start;
+  }
+
+  .modal-body {
+    padding: 18px;
   }
 
   .tt-header {
@@ -987,75 +1135,16 @@ const BACKPACKS = [
 ];
 
 function renderCard(bp) {
-  const colors = bp.colors.map(c =>
-    `<span class="color-tag">${c}</span>`
-  ).join('');
-
-  // Build tier rows
-  const tierRows = bp.upgrades.map((u, i) => {
-    const segs = u.split('|').map(s => s.trim());
-    const cells = segs.map((seg, si) => {
-      let cls = 'fx';
-      if (si === 0) cls = 'cc';                          // first segment always CC
-      else if (/^[+-]?\d+\s*(AGI|STR|END|INT|PER|CHR|LCK)/.test(seg)) {
-        cls = seg.startsWith('-') ? 'neg' : 'pos';
-      } else if (seg.startsWith('-')) cls = 'neg';
-      else if (seg.startsWith('+')) cls = 'pos';
-      else cls = 'neu';
-      return `<span class="tier-cell ${cls}">${seg}</span>`;
-    }).join('');
-    return `<tr>
-      <td class="tier-num">T${i + 1}</td>
-      <td><div class="tier-cells">${cells}</div></td>
-    </tr>`;
-  }).join('');
-
-  // Compact base stats: DR, weight, value inline
-  const baseStats = `
-    <div class="tt-stat-grid">
-      <div class="tt-stat">
-        <span class="tt-stat-key">Damage Resist</span>
-        <span class="tt-stat-val blue">${bp.dr}</span>
-      </div>
-      <div class="tt-stat">
-        <span class="tt-stat-key">Item Weight</span>
-        <span class="tt-stat-val amber">${bp.weight}</span>
-      </div>
-      <div class="tt-stat">
-        <span class="tt-stat-key">Value</span>
-        <span class="tt-stat-val amber">${bp.value}</span>
-      </div>
-    </div>`;
-
-  const tooltipHTML = `
-    <div class="tt-header">
-      <span>${bp.name}</span>
-      <span class="tt-level-tag">LVL ${bp.level}</span>
-    </div>
-    <div class="tt-body">
-      <div class="tt-desc">${bp.desc}</div>
-      <div class="tt-section-label">▸ Item Stats</div>
-      ${baseStats}
-      <div class="tt-section-label">▸ Upgrade Progression</div>
-      <table class="tier-table">${tierRows}</table>
-      <div class="tt-section-label">▸ Crafting Requirements</div>
-      <div class="location-box" style="font-size:14px;color:#88aa88;">${bp.crafting}</div>
-      ${bp.colors.length > 0 ? `
-      <div class="tt-section-label">▸ Available Colors</div>
-      <div class="colors-row">${colors}</div>
-      ` : ''}
-      <div class="tt-section-label">▸ World Location</div>
-      <div class="location-box">${bp.location}</div>
-    </div>`;
-
   return `
-  <div class="card" data-tooltip="${encodeURIComponent(tooltipHTML)}">
+  <div class="card" data-idx="${bp.num - 1}" style="cursor:pointer;">
     <div class="level-badge">LVL ${bp.level}</div>
     <div class="card-inner">
-      <div class="card-num">${String(bp.num).padStart(2,'0')}</div>
       <div class="card-header">
-        <div class="card-name">${bp.name}</div>
-        <div class="card-id">${bp.id}</div>
+        <div class="card-num">${String(bp.num).padStart(2,'0')}</div>
+        <div class="card-name-wrap">
+          <div class="card-name">${bp.name}</div>
+          <div class="card-id">${bp.id}</div>
+        </div>
       </div>
       <div class="quick-stats">
         <span class="qs-chip qs-cc">${bp.cc.split('/')[0].trim()}</span>
@@ -1065,7 +1154,7 @@ function renderCard(bp) {
       </div>
       <div class="card-footer">
         <div class="location-snippet">${bp.location.split('—')[0].trim()}</div>
-        <div class="hover-hint">◉ HOVER</div>
+        <div class="hover-hint">◉ TAP FOR STATS</div>
       </div>
     </div>
   </div>`;
@@ -1073,48 +1162,177 @@ function renderCard(bp) {
 
 document.getElementById('grid').innerHTML = BACKPACKS.map(renderCard).join('');
 
-// Global floating tooltip
-const tt = document.createElement('div');
-tt.id = 'floating-tooltip';
-document.body.appendChild(tt);
+// Image URLs indexed to match BACKPACKS array (null = no image available)
+const IMGS = [
+  'https://i.imgur.com/8DVGSnI.png', // 1  Small Shoulder Bag
+  'https://i.imgur.com/SsbRLJj.png', // 2  Postman's Mailbag
+  'https://i.imgur.com/J64Zgxv.png', // 3  Leather Shoulder Bag
+  'https://i.imgur.com/iMv5C7S.png', // 4  Raider's Harnessed Metal Container
+  'https://i.imgur.com/kB55eYi.png', // 5  Outcast's Travel Pouch
+  'https://i.imgur.com/1hz3oXD.png', // 6  Makeshift Backpack
+  'https://i.imgur.com/vd9HfBQ.png', // 7  Trapper's Back Pouch
+  null,                               // 8  Bedroll Backpack
+  null,                               // 9  Military Duffle Bag
+  'https://i.imgur.com/5tOiAOz.png', // 10 Tinker's Rucksack
+  'https://i.imgur.com/9fvxk7J.png', // 11 Sling Pouch
+  'https://i.imgur.com/MDVzIbZ.png', // 12 Mountaineer's Backpack
+  'https://i.imgur.com/LyiHqVV.png', // 13 Wastelander's Backpack
+  'https://i.imgur.com/wuhVIVR.png', // 14 Squire's Backpack
+  'https://i.imgur.com/o2oknz7.png', // 15 Super Mutant's Trunk
+  'https://i.imgur.com/8tCAvFK.png', // 16 Manpack Portable Radio Transceiver
+  'https://i.imgur.com/JHW5Di0.png', // 17 R.O.B.B. Personal Carrying Device Mk I
+  null,                               // 18 Limited Edition Nuka-Pack!
+  null,                               // 19 Junkie's Chem Stash
+  'https://i.imgur.com/pr8glNX.png', // 20 Scribe's Backpack
+  'https://i.imgur.com/UMICgvv.png', // 21 Military Backpack
+  null,                               // 22 G.A.R.I. Personal Carrying Device Mk II
+  'https://i.imgur.com/N9186NP.png', // 23 Woodsman's Backpack
+  'https://i.imgur.com/yWjnxNa.png', // 24 Mercenary's Rucksack
+  null,                               // 25 Vault-Tec Utility Backpack
+  'https://i.imgur.com/g2OdIkf.png', // 26 P.E.G.A. Fusion Powered P.C.D. Mk III
+];
 
-const TOOLTIP_W = 320;
-const TOOLTIP_GAP = 12;
+// ── Image preview on hover ──────────────────────────────────────────────────
+const preview = document.createElement('div');
+preview.id = 'img-preview';
+preview.innerHTML = `<img src="" alt="" referrerpolicy="no-referrer"><div class="preview-label"></div><div class="preview-hint">◉ Click for full stats</div>`;
+document.body.appendChild(preview);
 
+const previewImg   = preview.querySelector('img');
+const previewLabel = preview.querySelector('.preview-label');
+const PREVIEW_W = 180, PREVIEW_GAP = 14;
+let hideTimer;
+
+// ── Modal ──────────────────────────────────────────────────────────────────
+const overlay = document.createElement('div');
+overlay.id = 'modal-overlay';
+overlay.innerHTML = `<div id="modal"></div>`;
+document.body.appendChild(overlay);
+const modal = document.getElementById('modal');
+
+function buildTierRows(bp) {
+  return bp.upgrades.map((u, i) => {
+    const segs = u.split('|').map(s => s.trim());
+    const cells = segs.map((seg, si) => {
+      let cls = si === 0 ? 'cc'
+        : /^[+-]?\d+\s*(AGI|STR|END|INT|PER|CHR|LCK)/.test(seg)
+          ? (seg.startsWith('-') ? 'neg' : 'pos')
+        : seg.startsWith('-') ? 'neg'
+        : seg.startsWith('+') ? 'pos'
+        : 'neu';
+      return `<span class="tier-cell ${cls}">${seg}</span>`;
+    }).join('');
+    return `<tr><td class="tier-num">T${i+1}</td><td><div class="tier-cells">${cells}</div></td></tr>`;
+  }).join('');
+}
+
+function openModal(idx) {
+  const bp  = BACKPACKS[idx];
+  const img = IMGS[idx];
+  const colors = bp.colors.map(c => `<span class="color-tag">${c}</span>`).join('');
+  const imgHTML = img
+    ? `<img src="${img}" alt="${bp.name}" referrerpolicy="no-referrer">`
+    : `<div class="no-img">NO IMAGE<br>AVAILABLE</div>`;
+
+  modal.innerHTML = `
+    <button class="modal-close" id="modal-close-btn">✕</button>
+    <div class="modal-hero">
+      <div class="modal-img-wrap">${imgHTML}</div>
+      <div class="modal-title-wrap">
+        <div class="modal-name">${bp.name}</div>
+        <div class="modal-id">${bp.id}</div>
+        <div class="modal-level">LVL ${bp.level}</div>
+      </div>
+    </div>
+    <div class="modal-body">
+      <div class="tt-desc">${bp.desc}</div>
+
+      <div class="tt-section-label">▸ Item Stats</div>
+      <div class="tt-stat-grid">
+        <div class="tt-stat">
+          <span class="tt-stat-key">Damage Resist</span>
+          <span class="tt-stat-val blue">${bp.dr}</span>
+        </div>
+        <div class="tt-stat">
+          <span class="tt-stat-key">Item Weight</span>
+          <span class="tt-stat-val amber">${bp.weight}</span>
+        </div>
+        <div class="tt-stat">
+          <span class="tt-stat-key">Value</span>
+          <span class="tt-stat-val amber">${bp.value}</span>
+        </div>
+      </div>
+
+      <div class="tt-section-label">▸ Upgrade Progression</div>
+      <table class="tier-table">${buildTierRows(bp)}</table>
+
+      <div class="tt-section-label">▸ Crafting Requirements</div>
+      <div class="location-box" style="font-size:14px;color:#88aa88;">${bp.crafting}</div>
+
+      ${bp.colors.length > 0 ? `
+      <div class="tt-section-label">▸ Available Colors</div>
+      <div class="colors-row">${colors}</div>` : ''}
+
+      <div class="tt-section-label">▸ World Location</div>
+      <div class="location-box">${bp.location}</div>
+    </div>`;
+
+  overlay.classList.add('visible');
+  document.body.style.overflow = 'hidden';
+
+  document.getElementById('modal-close-btn').addEventListener('click', closeModal);
+}
+
+function closeModal() {
+  overlay.classList.remove('visible');
+  document.body.style.overflow = '';
+}
+
+overlay.addEventListener('click', e => { if (e.target === overlay) closeModal(); });
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+
+// ── Wire up cards ──────────────────────────────────────────────────────────
 document.querySelectorAll('.card').forEach(card => {
-  card.addEventListener('mouseenter', () => {
-    const html = decodeURIComponent(card.dataset.tooltip);
-    tt.innerHTML = html;
+  const idx = parseInt(card.dataset.idx);
+  const img = IMGS[idx];
+
+  // Hover: image preview (desktop only)
+  card.addEventListener('mouseenter', e => {
+    clearTimeout(hideTimer);
+    if (img) {
+      previewImg.src = img;
+      previewImg.style.display = 'block';
+    } else {
+      previewImg.style.display = 'none';
+    }
+    previewLabel.textContent = BACKPACKS[idx].name;
 
     const rect = card.getBoundingClientRect();
-    const vpW = window.innerWidth;
-    const vpH = window.innerHeight;
-
-    // Try right side first, then left
-    let left = rect.right + TOOLTIP_GAP;
-    if (left + TOOLTIP_W > vpW - 8) {
-      left = rect.left - TOOLTIP_W - TOOLTIP_GAP;
-    }
-    // Clamp to viewport
-    left = Math.max(8, Math.min(left, vpW - TOOLTIP_W - 8));
-
-    // Align top with card, but don't overflow bottom (fixed = viewport coords only, no scrollY)
+    const vpW  = window.innerWidth;
+    let left = rect.right + PREVIEW_GAP;
+    if (left + PREVIEW_W > vpW - 8) left = rect.left - PREVIEW_W - PREVIEW_GAP;
+    left = Math.max(8, Math.min(left, vpW - PREVIEW_W - 8));
     let top = rect.top;
-    const ttH = Math.min(tt.scrollHeight, vpH * 0.9);
-    if (top + ttH > vpH - 8) {
-      top = vpH - ttH - 8;
-    }
+    const ph = preview.offsetHeight || 210;
+    if (top + ph > window.innerHeight - 8) top = window.innerHeight - ph - 8;
     top = Math.max(8, top);
 
-    tt.style.left = left + 'px';
-    tt.style.top = top + 'px';
-    tt.classList.add('visible');
+    preview.style.left = left + 'px';
+    preview.style.top  = top  + 'px';
+    preview.classList.add('visible');
   });
 
   card.addEventListener('mouseleave', () => {
-    tt.classList.remove('visible');
+    hideTimer = setTimeout(() => preview.classList.remove('visible'), 80);
+  });
+
+  // Click: open modal
+  card.addEventListener('click', () => {
+    preview.classList.remove('visible');
+    openModal(idx);
   });
 });
+
 </script>
 </body>
 </html>
