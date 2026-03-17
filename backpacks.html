@@ -1,0 +1,1099 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Backpacks of the Commonwealth</title>
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@400;700;900&family=VT323&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --green: #39ff14;
+    --green-dim: #1a7a08;
+    --green-glow: rgba(57,255,20,0.3);
+    --amber: #ffb000;
+    --amber-dim: #7a5200;
+    --red: #ff4444;
+    --bg: #050f03;
+    --bg2: #090f07;
+    --card-bg: #0a160a;
+    --border: #1e3a1e;
+    --text-dim: #4a7a4a;
+    --scanline: rgba(0,0,0,0.15);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--green);
+    font-family: 'Share Tech Mono', monospace;
+    min-height: 100vh;
+    overflow-x: hidden;
+    position: relative;
+  }
+
+  /* Scanlines overlay */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 2px,
+      var(--scanline) 2px,
+      var(--scanline) 4px
+    );
+    pointer-events: none;
+    z-index: 9999;
+  }
+
+  /* CRT flicker */
+  body::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: radial-gradient(ellipse at center, transparent 60%, rgba(0,0,0,0.5) 100%);
+    pointer-events: none;
+    z-index: 9998;
+  }
+
+  /* Noise texture */
+  .noise {
+    position: fixed;
+    inset: 0;
+    opacity: 0.03;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 9997;
+  }
+
+  header {
+    text-align: center;
+    padding: 60px 20px 40px;
+    position: relative;
+  }
+
+  .pip-logo {
+    font-family: 'VT323', monospace;
+    font-size: clamp(14px, 2vw, 18px);
+    color: var(--amber);
+    letter-spacing: 6px;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+    opacity: 0.8;
+    animation: flicker 8s infinite;
+  }
+
+  .main-title {
+    font-family: 'Orbitron', sans-serif;
+    font-size: clamp(28px, 6vw, 72px);
+    font-weight: 900;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    color: var(--green);
+    text-shadow:
+      0 0 20px var(--green),
+      0 0 40px var(--green-glow),
+      0 0 80px rgba(57,255,20,0.1);
+    line-height: 1;
+    animation: pulse-glow 3s ease-in-out infinite;
+  }
+
+  .subtitle {
+    font-family: 'VT323', monospace;
+    font-size: clamp(18px, 3vw, 28px);
+    color: var(--amber);
+    letter-spacing: 8px;
+    margin-top: 12px;
+    text-shadow: 0 0 10px var(--amber);
+  }
+
+  .divider {
+    width: 100%;
+    max-width: 900px;
+    margin: 30px auto;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--green), transparent);
+    box-shadow: 0 0 10px var(--green-glow);
+    position: relative;
+  }
+
+  .divider::before, .divider::after {
+    content: '◆';
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--amber);
+    font-size: 14px;
+  }
+  .divider::before { left: 20px; }
+  .divider::after { right: 20px; }
+
+  .stats-bar {
+    display: flex;
+    justify-content: center;
+    gap: 40px;
+    flex-wrap: wrap;
+    margin: 0 auto 40px;
+    max-width: 800px;
+    padding: 0 20px;
+  }
+
+  .stat-item {
+    text-align: center;
+  }
+
+  .stat-num {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 36px;
+    font-weight: 700;
+    color: var(--amber);
+    text-shadow: 0 0 15px var(--amber);
+    display: block;
+  }
+
+  .stat-label {
+    font-size: 10px;
+    color: var(--text-dim);
+    letter-spacing: 3px;
+    text-transform: uppercase;
+  }
+
+  /* Grid */
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 16px;
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0 20px 80px;
+  }
+
+  .card {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    position: relative;
+    overflow: visible;
+    cursor: crosshair;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    clip-path: polygon(0 0, calc(100% - 16px) 0, 100% 16px, 100% 100%, 16px 100%, 0 calc(100% - 16px));
+  }
+
+  .card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(57,255,20,0.03) 0%, transparent 60%);
+    pointer-events: none;
+  }
+
+  .card:hover {
+    border-color: var(--green);
+    box-shadow: 0 0 20px var(--green-glow), inset 0 0 20px rgba(57,255,20,0.05);
+    z-index: 100;
+  }
+
+  .card-inner {
+    padding: 18px;
+  }
+
+  /* Level badge */
+  .level-badge {
+    position: absolute;
+    top: -1px;
+    right: 20px;
+    background: var(--green);
+    color: var(--bg);
+    font-family: 'Orbitron', sans-serif;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    padding: 3px 10px;
+    clip-path: polygon(0 0, 100% 0, 100% 100%, 8px 100%);
+  }
+
+  /* Number */
+  .card-num {
+    font-family: 'VT323', monospace;
+    font-size: 44px;
+    color: var(--green-dim);
+    line-height: 1;
+    position: absolute;
+    top: 14px;
+    left: 18px;
+    pointer-events: none;
+  }
+
+  /* Card header */
+  .card-header {
+    padding-left: 44px;
+    min-height: 52px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+
+  .card-name {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--green);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    line-height: 1.3;
+  }
+
+  .card-id {
+    font-size: 9px;
+    color: var(--text-dim);
+    letter-spacing: 1px;
+    margin-top: 3px;
+  }
+
+  /* Quick stats row */
+  .quick-stats {
+    display: flex;
+    gap: 8px;
+    margin-top: 14px;
+    flex-wrap: wrap;
+  }
+
+  .qs-chip {
+    font-family: 'VT323', monospace;
+    font-size: 16px;
+    padding: 2px 8px;
+    border: 1px solid;
+    line-height: 1.4;
+  }
+
+  .qs-cc { border-color: var(--green); color: var(--green); }
+  .qs-dr { border-color: #4488ff; color: #4488ff; }
+  .qs-wt { border-color: var(--amber-dim); color: var(--amber); }
+  .qs-val { border-color: #996600; color: #cc9900; }
+
+  /* Hover tooltip panel */
+  .tooltip {
+    position: absolute;
+    left: calc(100% + 10px);
+    top: 0;
+    width: 320px;
+    background: #040d04;
+    border: 1px solid var(--green);
+    box-shadow: 0 0 30px var(--green-glow), 0 0 60px rgba(57,255,20,0.1);
+    opacity: 0;
+    pointer-events: none;
+    transform: translateX(-8px);
+    transition: opacity 0.18s, transform 0.18s;
+    z-index: 200;
+    clip-path: polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 12px 100%, 0 calc(100% - 12px));
+  }
+
+  .card:hover .tooltip {
+    opacity: 1;
+    transform: translateX(0);
+  }
+
+  /* Adjust for cards on right side */
+  .card:nth-child(3n) .tooltip,
+  .card:nth-child(3n+2) .tooltip {
+    left: auto;
+    right: calc(100% + 10px);
+    transform: translateX(8px);
+  }
+  .card:nth-child(3n) .tooltip:hover,
+  .card:nth-child(3n+2) .tooltip:hover {
+    transform: translateX(0);
+  }
+  .card:nth-child(3n):hover .tooltip,
+  .card:nth-child(3n+2):hover .tooltip {
+    transform: translateX(0);
+  }
+
+  .tt-header {
+    background: var(--green);
+    color: var(--bg);
+    padding: 10px 14px;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .tt-level-tag {
+    background: var(--bg);
+    color: var(--green);
+    padding: 2px 8px;
+    font-size: 9px;
+    letter-spacing: 2px;
+  }
+
+  .tt-body {
+    padding: 14px;
+  }
+
+  .tt-desc {
+    font-family: 'VT323', monospace;
+    font-size: 17px;
+    color: #aaddaa;
+    line-height: 1.4;
+    margin-bottom: 14px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .tt-section-label {
+    font-size: 9px;
+    color: var(--text-dim);
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+    margin-top: 12px;
+  }
+
+  .tt-section-label:first-of-type { margin-top: 0; }
+
+  .tt-stat-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6px;
+  }
+
+  .tt-stat {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .tt-stat-key {
+    font-size: 8px;
+    color: var(--text-dim);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+  }
+
+  .tt-stat-val {
+    font-family: 'VT323', monospace;
+    font-size: 20px;
+    line-height: 1.2;
+  }
+
+  .tt-stat-val.green { color: var(--green); text-shadow: 0 0 8px var(--green-glow); }
+  .tt-stat-val.blue { color: #66aaff; }
+  .tt-stat-val.amber { color: var(--amber); }
+  .tt-stat-val.red { color: var(--red); }
+  .tt-stat-val.purple { color: #cc88ff; }
+
+  .upgrades-list {
+    list-style: none;
+  }
+
+  .upgrades-list li {
+    font-family: 'VT323', monospace;
+    font-size: 16px;
+    color: #88bb88;
+    padding: 3px 0;
+    border-bottom: 1px solid rgba(30,58,30,0.5);
+    display: flex;
+    align-items: baseline;
+    gap: 6px;
+  }
+
+  .upgrades-list li:last-child { border-bottom: none; }
+
+  .upgrades-list li::before {
+    content: '▶';
+    color: var(--green-dim);
+    font-size: 10px;
+    flex-shrink: 0;
+  }
+
+  .special-pills {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+  }
+
+  .special-pill {
+    font-family: 'VT323', monospace;
+    font-size: 15px;
+    padding: 2px 7px;
+    border: 1px solid;
+  }
+
+  .special-pill.buff { border-color: #44aa44; color: #66cc66; }
+  .special-pill.nerf { border-color: #aa4444; color: #cc6666; }
+  .special-pill.neutral { border-color: #446688; color: #6699cc; }
+
+  .colors-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+  }
+
+  .color-tag {
+    font-size: 9px;
+    letter-spacing: 1px;
+    color: var(--amber);
+    border: 1px solid var(--amber-dim);
+    padding: 2px 6px;
+    text-transform: uppercase;
+  }
+
+  .location-box {
+    font-family: 'VT323', monospace;
+    font-size: 16px;
+    color: #55aa55;
+    padding: 8px 10px;
+    background: rgba(57,255,20,0.04);
+    border-left: 2px solid var(--green-dim);
+    margin-top: 10px;
+    word-break: break-all;
+  }
+
+  /* Bottom bar */
+  .card-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 12px;
+    padding-top: 10px;
+    border-top: 1px solid var(--border);
+  }
+
+  .location-snippet {
+    font-size: 9px;
+    color: var(--text-dim);
+    letter-spacing: 1px;
+    flex: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .hover-hint {
+    font-size: 8px;
+    color: var(--green-dim);
+    letter-spacing: 2px;
+    flex-shrink: 0;
+  }
+
+  /* Flicker animation */
+  @keyframes flicker {
+    0%, 95%, 100% { opacity: 1; }
+    96% { opacity: 0.6; }
+    97% { opacity: 1; }
+    98% { opacity: 0.7; }
+    99% { opacity: 1; }
+  }
+
+  @keyframes pulse-glow {
+    0%, 100% { text-shadow: 0 0 20px var(--green), 0 0 40px var(--green-glow), 0 0 80px rgba(57,255,20,0.1); }
+    50% { text-shadow: 0 0 30px var(--green), 0 0 60px rgba(57,255,20,0.5), 0 0 100px rgba(57,255,20,0.2); }
+  }
+
+  @keyframes scanin {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .card {
+    animation: scanin 0.4s ease both;
+  }
+
+  /* stagger */
+  .card:nth-child(1)  { animation-delay: 0.02s }
+  .card:nth-child(2)  { animation-delay: 0.04s }
+  .card:nth-child(3)  { animation-delay: 0.06s }
+  .card:nth-child(4)  { animation-delay: 0.08s }
+  .card:nth-child(5)  { animation-delay: 0.10s }
+  .card:nth-child(6)  { animation-delay: 0.12s }
+  .card:nth-child(7)  { animation-delay: 0.14s }
+  .card:nth-child(8)  { animation-delay: 0.16s }
+  .card:nth-child(9)  { animation-delay: 0.18s }
+  .card:nth-child(10) { animation-delay: 0.20s }
+  .card:nth-child(11) { animation-delay: 0.22s }
+  .card:nth-child(12) { animation-delay: 0.24s }
+  .card:nth-child(13) { animation-delay: 0.26s }
+  .card:nth-child(14) { animation-delay: 0.28s }
+  .card:nth-child(15) { animation-delay: 0.30s }
+  .card:nth-child(16) { animation-delay: 0.32s }
+  .card:nth-child(17) { animation-delay: 0.34s }
+  .card:nth-child(18) { animation-delay: 0.36s }
+  .card:nth-child(19) { animation-delay: 0.38s }
+  .card:nth-child(20) { animation-delay: 0.40s }
+  .card:nth-child(21) { animation-delay: 0.42s }
+  .card:nth-child(22) { animation-delay: 0.44s }
+  .card:nth-child(23) { animation-delay: 0.46s }
+  .card:nth-child(24) { animation-delay: 0.48s }
+  .card:nth-child(25) { animation-delay: 0.50s }
+  .card:nth-child(26) { animation-delay: 0.52s }
+
+  /* Version tag */
+  .version-badge {
+    display: inline-block;
+    margin-top: 14px;
+    font-size: 10px;
+    letter-spacing: 4px;
+    color: var(--green-dim);
+    border: 1px solid var(--green-dim);
+    padding: 4px 14px;
+  }
+
+  footer {
+    text-align: center;
+    padding: 20px;
+    font-size: 10px;
+    color: var(--text-dim);
+    letter-spacing: 3px;
+    border-top: 1px solid var(--border);
+    max-width: 1400px;
+    margin: 0 auto;
+  }
+
+  /* Responsive: hide tooltip on mobile, show inline */
+  @media (max-width: 700px) {
+    .tooltip {
+      display: none;
+    }
+    .grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>
+</head>
+<body>
+<div class="noise"></div>
+
+<header>
+  <div class="pip-logo">◈ Pip-Boy Database v2.0 ◈</div>
+  <div class="main-title">Backpacks of the<br>Commonwealth</div>
+  <div class="subtitle">Field Equipment Catalog</div>
+  <div class="version-badge">v2.0.0 · 26 ITEMS INDEXED</div>
+  <div class="divider"></div>
+  <div class="stats-bar">
+    <div class="stat-item">
+      <span class="stat-num">26</span>
+      <span class="stat-label">Unique Packs</span>
+    </div>
+    <div class="stat-item">
+      <span class="stat-num">100+</span>
+      <span class="stat-label">Workbench Mods</span>
+    </div>
+    <div class="stat-item">
+      <span class="stat-num">50+</span>
+      <span class="stat-label">Skins & Colors</span>
+    </div>
+    <div class="stat-item">
+      <span class="stat-num">5</span>
+      <span class="stat-label">New Magazines</span>
+    </div>
+  </div>
+</header>
+
+<div class="grid" id="grid"></div>
+
+<footer>
+  ◈ BACKPACKS OF THE COMMONWEALTH · BY BMANZZS · NEXUS MODS ◈<br>
+  <span style="color:#1e3a1e;margin-top:6px;display:block;">HOVER OVER ANY ENTRY TO VIEW FULL FIELD SPECIFICATIONS</span>
+</footer>
+
+<script>
+const BACKPACKS = [
+  {
+    num: 1, level: 1,
+    name: "Small Shoulder Bag",
+    id: "BPShoulder",
+    desc: "Increases the wearer's overall carry capacity by +10.",
+    location: "RedRocketCaveExt — Inside house southeast of Red Rocket Truck Stop",
+    cc: "+10 / +15 / +20 CC",
+    dr: "+2 DR",
+    special: [],
+    crafting: "Cloth ×6 · Leather ×3 · Adhesive ×3 · Wonderglue ×1",
+    weight: "1 lbs",
+    value: "59 caps",
+    colors: ["Default"],
+    upgrades: ["+10 CC Base", "+15 CC Reinforced", "+20 CC Heavy Duty"]
+  },
+  {
+    num: 2, level: 5,
+    name: "Postman's Mailbag",
+    id: "BPMailbag",
+    desc: "Increases the wearer's overall carry capacity by +15. Extra mail storage.",
+    location: "USAFSatellite01 — USAF Satellite Station Olivia",
+    cc: "+15 / +20 / +25 CC",
+    dr: "+2 DR → +10 DR",
+    special: [],
+    crafting: "Cloth ×7 · Leather ×4 · Adhesive ×4 · Duct Tape ×1",
+    weight: "2 lbs",
+    value: "78 caps",
+    colors: ["Default"],
+    upgrades: ["+15 CC Base", "+20 CC Reinforced", "+25 CC Heavy Duty"]
+  },
+  {
+    num: 3, level: 5,
+    name: "Leather Shoulder Bag",
+    id: "BPLeather",
+    desc: "Increases the wearer's overall carry capacity by +20. Rugged leather construction.",
+    location: "DrumlinDiner — Drumlin Diner",
+    cc: "+20 / +25 CC",
+    dr: "+5 DR → +15 DR",
+    special: [],
+    crafting: "Leather ×8 · Cloth ×4 · Adhesive ×4 · Wonderglue ×1",
+    weight: "2 lbs",
+    value: "97 caps",
+    colors: ["Brown Leather", "Black Leather"],
+    upgrades: ["+20 CC Base", "+25 CC Reinforced"]
+  },
+  {
+    num: 4, level: 10,
+    name: "Raider's Harnessed Metal Container",
+    id: "BPRaider",
+    desc: "Increases the wearer's overall carry capacity by +30. -1 Agility. Jury-rigged with whatever wasn't nailed down.",
+    location: "FederalRationStockpile01 — Federal Ration Stockpile",
+    cc: "+30 / +35 CC",
+    dr: "+10 DR → +30 DR",
+    special: ["-1 AGI", "→ +0 AGI"],
+    crafting: "Leather ×8 · Steel ×5 · Adhesive ×5 · Screws ×3 · Metal Bucket ×1 · [Armorer 1]",
+    weight: "5 lbs",
+    value: "135 caps",
+    colors: ["Default"],
+    upgrades: ["+30 CC | -1 AGI Base", "+35 CC | +0 AGI Reinforced"]
+  },
+  {
+    num: 5, level: 15,
+    name: "Outcast's Travel Pouch",
+    id: "BPOutcast",
+    desc: "Increases the wearer's overall carry capacity by +25. -2 Agility. Standard Brotherhood Outcast field pack.",
+    location: "SuperDuperMart01 — Super Duper Mart",
+    cc: "+25 / +30 / +35 / +40 CC",
+    dr: "+5 DR → +20 DR",
+    special: ["-2 AGI", "-1 AGI", "+0 AGI", "+1 END"],
+    crafting: "Cloth ×8 · Leather ×5 · Adhesive ×5 · Aluminum ×3 · Brahmin Hide ×1 · [Armorer 1]",
+    weight: "3 lbs",
+    value: "213 caps",
+    colors: ["Green", "Tan"],
+    upgrades: ["+25 CC | -2 AGI", "+30 CC | -1 AGI", "+35 CC | +0 AGI", "+40 CC | +1 END"]
+  },
+  {
+    num: 6, level: 15,
+    name: "Makeshift Backpack",
+    id: "BPMakeshift",
+    desc: "Increases the wearer's overall carry capacity by +30. -1 Agility. Built from scratch with salvaged materials.",
+    location: "MaldenCenter01 — Malden Center",
+    cc: "+30 / +35 / +40 CC",
+    dr: "+10 DR → +20 DR",
+    special: ["-1 AGI", "+0 AGI", "+1 LCK (Lucky)"],
+    crafting: "Cloth ×9 · Leather ×5 · Adhesive ×5 · Steel ×3 · Bag of Cement ×1 · Duct Tape ×1",
+    weight: "4 lbs",
+    value: "232 caps",
+    colors: ["Default"],
+    upgrades: ["+30 CC | -1 AGI", "+35 CC | -1 AGI", "+40 CC Water | +0 AGI", "+40 CC Lucky | +1 LCK"]
+  },
+  {
+    num: 7, level: 20,
+    name: "Trapper's Back Pouch",
+    id: "BPTrapper",
+    desc: "Increases the wearer's overall carry capacity by +35. -1 Agility. +10% damage against bugs.",
+    location: "BADTFL01 — BADTFL Regional Office",
+    cc: "+35 / +40 / +45 CC",
+    dr: "+5 DR → +15 DR → +30 DR",
+    special: ["-1 AGI", "+0 AGI", "Bug Dmg Bonus"],
+    crafting: "Leather ×8 · Cloth ×5 · Adhesive ×6 · Bone ×3 · Aluminum ×3 · Radstag Hide ×1",
+    weight: "3 lbs",
+    value: "281 caps",
+    colors: ["Default"],
+    upgrades: ["+35 CC | -1 AGI | Bug Dmg", "+40 CC | -1 AGI | Bug Dmg", "+45 CC | +0 AGI | Bug Dmg"]
+  },
+  {
+    num: 8, level: 20,
+    name: "Bedroll Backpack",
+    id: "BPBedroll",
+    desc: "Increases the wearer's overall carry capacity by +30. -1 Agility. Built-in bedroll for survival situations.",
+    location: "LynnWoodsExt02 — Lynn Woods",
+    cc: "+30 / +35 / +40 / +45 CC",
+    dr: "+8 DR",
+    special: ["-1 AGI", "+0 AGI", "+1 CHR (Charisma)"],
+    crafting: "Cloth ×10 · Leather ×6 · Adhesive ×6 · Straw Pillow ×1 · Comfy Pillow ×1",
+    weight: "4 lbs",
+    value: "339 caps",
+    colors: ["Default"],
+    upgrades: ["+30 CC | -1 AGI", "+35 CC | +0 AGI", "+40 CC | +0 AGI", "+45 CC | +1 CHR"]
+  },
+  {
+    num: 9, level: 25,
+    name: "Military Duffle Bag",
+    id: "BPDuffle",
+    desc: "Increases the wearer's overall carry capacity by +40. -1 Agility. Weapon reload speed increased.",
+    location: "NationalGuardTrainingYard03 — National Guard Training Yard",
+    cc: "+40 / +45 / +50 CC",
+    dr: "+10 DR → +20 DR",
+    special: ["-1 AGI", "+0 AGI", "+Reload Speed"],
+    crafting: "Cloth ×10 · Leather ×7 · Adhesive ×7 · Aluminum ×4 · Military Ammo Bag ×1 · [Armorer 2]",
+    weight: "4 lbs",
+    value: "377 caps",
+    colors: ["Default", "Blue"],
+    upgrades: ["+40 CC | -1 AGI | +Reload", "+45 CC | -1 AGI | +Reload", "+50 CC | +0 AGI | +Reload"]
+  },
+  {
+    num: 10, level: 25,
+    name: "Tinker's Rucksack",
+    id: "BPTinker",
+    desc: "Increases the wearer's overall carry capacity by +40. -2 Agility. Heavy-duty toolbag for serious work.",
+    location: "BeantownBrewery01 — Beantown Brewery",
+    cc: "+40 / +45 / +50 CC",
+    dr: "+25 DR → +35 DR",
+    special: ["-2 AGI", "-1 AGI", "+0 AGI"],
+    crafting: "Leather ×8 · Cloth ×6 · Adhesive ×7 · Gears ×4 · Screws ×3 · Adjustable Wrench ×1 · [Armorer 2]",
+    weight: "6 lbs",
+    value: "412 caps",
+    colors: ["Default"],
+    upgrades: ["+40 CC | -2 AGI", "+45 CC | -1 AGI", "+45 CC Plus | -1 AGI", "+50 CC | +0 AGI", "+50 CC Plus | +0 AGI"]
+  },
+  {
+    num: 11, level: 30,
+    name: "Sling Pouch",
+    id: "BPSling",
+    desc: "Increases the wearer's overall carry capacity by +40. -1 Agility. Increased AP regeneration.",
+    location: "HubrisComics01 — Hubris Comics",
+    cc: "+40 / +45 / +50 / +55 CC",
+    dr: "+5 DR",
+    special: ["-1 AGI", "+0 AGI", "+10–20 AP Regen"],
+    crafting: "Leather ×8 · Cloth ×5 · Adhesive ×7 · Rubber ×3 · Tongs ×1 · Clipboard ×1 · [Armorer 2]",
+    weight: "2 lbs",
+    value: "349 caps",
+    colors: ["Default"],
+    upgrades: ["+40 CC | -1 AGI | +10 AP Regen", "+45 CC | +0 AGI | +15 AP Regen", "+50 CC | +0 AGI | +20 AP Regen", "+55 CC | +0 AGI | +20 AP Sprint Regen"]
+  },
+  {
+    num: 12, level: 30,
+    name: "Mountaineer's Backpack",
+    id: "BPMountaineer",
+    desc: "Increases the wearer's overall carry capacity by +45. -1 Agility. Built for rough terrain.",
+    location: "WestEverettEstates01 — West Everett Estates",
+    cc: "+45 / +50 / +55 CC",
+    dr: "+15 DR",
+    special: ["-1 AGI", "+0 AGI", "+1 END (Endurance)"],
+    crafting: "Cloth ×10 · Leather ×7 · Adhesive ×8 · Aluminum ×4 · Military Grade Duct Tape ×1 · [Armorer 2]",
+    weight: "4 lbs",
+    value: "438 caps",
+    colors: ["Green", "Blue", "Rose"],
+    upgrades: ["+45 CC | -1 AGI", "+50 CC | +0 AGI", "+55 CC | +0 AGI | +1 END"]
+  },
+  {
+    num: 13, level: 30,
+    name: "Wastelander's Backpack",
+    id: "BPWastelander",
+    desc: "Increases the wearer's overall carry capacity by +50. -1 Agility. Water and radiation management features.",
+    location: "BackBayFence01 — Trinity Tower area",
+    cc: "+50 / +55 / +60 CC",
+    dr: "+20 DR",
+    special: ["-1 AGI", "+0 AGI", "+Water", "+Rad Scrub"],
+    crafting: "Cloth ×10 · Leather ×8 · Adhesive ×8 · Aluminum ×4 · Molerat Hide ×2",
+    weight: "3 lbs",
+    value: "467 caps",
+    colors: ["Green", "Blue"],
+    upgrades: ["+50 CC | -1 AGI", "+55 CC | +0 AGI", "+60 CC | +0 AGI", "+60 CC | +Water Mgmt", "+60 CC | +Water+Rads"]
+  },
+  {
+    num: 14, level: 35,
+    name: "Squire's Backpack",
+    id: "BPSquire",
+    desc: "Increases the wearer's overall carry capacity by +50. -2 Agility. Brotherhood of Steel field pack.",
+    location: "BostonAirportRuins01 — Boston Airport Ruins",
+    cc: "+50 / +55 / +60 CC",
+    dr: "+10 DR → +20 DR → +30 DR",
+    special: ["-2 AGI", "-1 AGI", "+0 AGI", "+1 END"],
+    crafting: "Leather ×9 · Cloth ×7 · Adhesive ×8 · Ballistic Fiber ×2 · Basketball ×1 · Baseball ×1 · [Armorer 2]",
+    weight: "3 lbs",
+    value: "528 caps",
+    colors: ["Brown Leather", "Army Green Canvas", "Black Leather"],
+    upgrades: ["+50 CC | -2 AGI", "+55 CC | -1 AGI", "+60 CC | +0 AGI", "+60 CC Plus | +1 END"]
+  },
+  {
+    num: 15, level: 35,
+    name: "Super Mutant's Trunk",
+    id: "BPMutant",
+    desc: "Increases the wearer's overall carry capacity by +50. -2 Agility. Salvaged from a super mutant camp. Guarded by a legendary super mutant.",
+    location: "BigJohnsSalvage01 — Big John's Salvage (shelter)",
+    cc: "+50 / +55 / +60 / +65 CC",
+    dr: "+30 DR → +40 DR",
+    special: ["-2 AGI", "-1 AGI", "+0 AGI", "+1 END", "+1 LCK (Lucky)"],
+    crafting: "Leather ×11 · Steel ×7 · Adhesive ×8 · Ballistic Fiber ×3 · Shopping Basket ×1 · [Strong Bonus]",
+    weight: "9 lbs",
+    value: "489 caps",
+    colors: ["Default"],
+    upgrades: ["+50 CC | -2 AGI", "+55 CC | -1 AGI", "+60 CC | +0 AGI", "+65 CC Lucky | +1 LCK", "+65 CC Unarmed | +0 AGI"]
+  },
+  {
+    num: 16, level: 35,
+    name: "Manpack Portable Radio Transceiver",
+    id: "BPRadio",
+    desc: "Increases the wearer's overall carry capacity by +50. -2 Agility. +5% Accuracy in V.A.T.S.",
+    location: "zPOIJoel06 — Electrical Hobbyist's Club",
+    cc: "+50 / +55 / +60 / +65 CC",
+    dr: "+30 DR | +5 ER",
+    special: ["-2 AGI", "-1 AGI", "+0 AGI", "+VATS Accuracy"],
+    crafting: "Aluminum ×7 · Leather ×7 · Adhesive ×8 · Circuitry ×3 · Vacuum Tube ×1 · Sensor Module ×1",
+    weight: "7 lbs",
+    value: "531 caps",
+    colors: ["Default"],
+    upgrades: ["+50 CC | -2 AGI | VATS", "+55 CC | -1 AGI | VATS", "+60 CC | +0 AGI | VATS", "+65 CC | +0 AGI | VATS"]
+  },
+  {
+    num: 17, level: 40,
+    name: "R.O.B.B. Personal Carrying Device Mk I",
+    id: "BPStealth",
+    desc: "Increases the wearer's overall carry capacity by +55. -1 Agility. Advanced robotic carrying system.",
+    location: "InstituteAdvSystems — Institute Advanced Systems",
+    cc: "+55 / +60 / +65 CC",
+    dr: "+20 DR",
+    special: ["-1 AGI", "+0 AGI", "+1 END", "+Sneak", "+Water/Rads"],
+    crafting: "Aluminum ×8 · Leather ×7 · Adhesive ×9 · Circuitry ×4 · Sensor Module ×1 · Biometric Scanner ×1",
+    weight: "6 lbs",
+    value: "590 caps",
+    colors: ["Default"],
+    upgrades: ["+55 CC | -1 AGI", "+60 CC Sneak | +0 AGI", "+65 CC Plus | +0 AGI", "+65 CC Rads | +1 END", "+65 CC Water+Rads | +1 END"]
+  },
+  {
+    num: 18, level: 40,
+    name: "Limited Edition Nuka-Pack!",
+    id: "BPNuka",
+    desc: "Increases the wearer's overall carry capacity by +60. Nuka-Cola branded collector's pack with extensive upgrades.",
+    location: "DLC04BradbertonsOffice01 — Bradberton's Office (Nuka-World)",
+    cc: "+60 / +65 / +70 / +100 / +110 CC",
+    dr: "+20 DR | +10 ER",
+    special: ["+2 INT", "+2 END", "+2 PER", "+2 AGI", "+2 STR", "+2 LCK"],
+    crafting: "Aluminum ×8 · Leather ×7 · Adhesive ×9 · Nuclear Material ×3 · Nuka-Cola ×6 · Military-Grade items",
+    weight: "6 lbs",
+    value: "893 caps",
+    colors: ["Many Nuka variants"],
+    upgrades: ["+60 CC Base", "+65 CC | +2 INT/STR/etc", "+70 CC Max HP/AP", "+70 CC | +20DR/+20RR", "+70 CC Rads", "+100 CC", "+110 CC"]
+  },
+  {
+    num: 19, level: 45,
+    name: "Junkie's Chem Stash",
+    id: "BPChem",
+    desc: "Increases the wearer's overall carry capacity by +55. -2 Agility. +5% damage resistance per chem.",
+    location: "FourLeafFishpacking02 — Four Leaf Fishpacking Plant",
+    cc: "+55 / +60 / +65 / +70 CC",
+    dr: "+10 DR",
+    special: ["-2 AGI", "-1 AGI", "+0 AGI", "+5% Dmg Resist per Chem"],
+    crafting: "Cloth ×9 · Leather ×7 · Adhesive ×8 · Antiseptic ×4 · Mentats ×1 · Psycho ×1 · Table Spoon ×1",
+    weight: "5 lbs",
+    value: "569 caps",
+    colors: ["Default"],
+    upgrades: ["+55 CC | -2 AGI | +Add 5", "+60 CC | -1 AGI | +Add 5/5", "+65 CC | +0 AGI | +Add 5/10", "+70 CC | +0 AGI | +Add 10/10"]
+  },
+  {
+    num: 20, level: 45,
+    name: "Scribe's Backpack",
+    id: "BPScribe",
+    desc: "Increases the wearer's overall carry capacity by +60. -2 Agility. Brotherhood Scribe issue field pack.",
+    location: "VirgilsLab01 — Virgil's Laboratory (Glowing Sea)",
+    cc: "+60 / +65 / +70 / +75 CC",
+    dr: "+10 DR",
+    special: ["-2 AGI", "-1 AGI", "+0 AGI", "+1 END"],
+    crafting: "Cloth ×10 · Leather ×8 · Adhesive ×9 · Ballistic Fiber ×4 · Military-Grade Duct Tape ×1",
+    weight: "4 lbs",
+    value: "642 caps",
+    colors: ["Default"],
+    upgrades: ["+60 CC | -2 AGI", "+65 CC | -1 AGI", "+70 CC | +0 AGI", "+75 CC | +1 END"]
+  },
+  {
+    num: 21, level: 50,
+    name: "Military Backpack",
+    id: "BPMilitary",
+    desc: "Increases the wearer's overall carry capacity by +70. -1 Agility. Standard U.S. Army issue field pack.",
+    location: "QuincyRuinsExt — Quincy Ruins",
+    cc: "+70 / +75 / +80 CC",
+    dr: "+10 DR → +30 DR",
+    special: ["-1 AGI", "+0 AGI", "+1 END", "+Reload Speed"],
+    crafting: "Cloth ×11 · Leather ×9 · Adhesive ×10 · Ballistic Fiber ×3 · Military Ammo Bag ×1",
+    weight: "3 lbs",
+    value: "701 caps",
+    colors: ["Rebel Canvas", "U.S. Army Green", "Dark Blood Ruby", "Shadow Black"],
+    upgrades: ["+70 CC | -1 AGI", "+75 CC | +0 AGI", "+80 CC | +1 END", "+80 CC | +0 AGI | +Reload"]
+  },
+  {
+    num: 22, level: 50,
+    name: "G.A.R.I. Personal Carrying Device Mk II",
+    id: "BPBattery",
+    desc: "Increases the wearer's overall carry capacity by +80. -1 Agility. Powered by fusion cell. Jump height bonus.",
+    location: "GlowingSeaPOIRJ03 — Decayed Reactor Site (Glowing Sea)",
+    cc: "+80 / +85 CC",
+    dr: "+10 DR | +20 ER",
+    special: ["-1 AGI", "+0 AGI", "+Jump Height", "+Dmg Bonus"],
+    crafting: "Aluminum ×10 · Leather ×8 · Adhesive ×9 · Circuitry ×4 · Fiber Optics ×3 · Fusion Core ×1",
+    weight: "8 lbs",
+    value: "843 caps",
+    colors: ["Default"],
+    upgrades: ["+80 CC | -1 AGI", "+85 CC | +0 AGI | +Dmg", "+85 CC | +0 AGI | +Jump"]
+  },
+  {
+    num: 23, level: 55,
+    name: "Woodsman's Backpack",
+    id: "BPWoodsman",
+    desc: "Increases the wearer's overall carry capacity by +75. -2 Agility. +10% melee damage. Knife sharpening sheath included.",
+    location: "MuseumOfWitchcraft01 — Museum of Witchcraft",
+    cc: "+75 / +80 / +85 / +90 CC",
+    dr: "+15 DR",
+    special: ["-2 AGI", "-1 AGI", "+1 END", "+Melee Dmg", "+Sneak", "+Water"],
+    crafting: "Cloth ×11 · Leather ×11 · Adhesive ×9 · Oil ×3 · Comfy Pillow ×1 · Hack Saw ×1 · [Armorer 3]",
+    weight: "4 lbs",
+    value: "853 caps",
+    colors: ["Black", "Orange Rust"],
+    upgrades: ["+75 CC | -2 AGI", "+80 CC | -1 AGI", "+85 CC | +0 AGI | +Water", "+85 CC | +0 AGI | +Melee", "+90 CC | +0 AGI | +Sneak"]
+  },
+  {
+    num: 24, level: 55,
+    name: "Mercenary's Rucksack",
+    id: "BPMercenary",
+    desc: "Increases the wearer's overall carry capacity by +80. -1 Agility. Mercenary grade field pack. World location: hand-placed.",
+    location: "GNN01 — Gunner's Plaza",
+    cc: "+80 / +85 CC",
+    dr: "+10 DR → +20 DR",
+    special: ["-1 AGI", "+1 END", "+Reload Speed"],
+    crafting: "Leather ×11 · Cloth ×10 · Adhesive ×10 · Aluminum ×5 · Ballistic Fiber ×4 · Military Ammo Bag ×1",
+    weight: "4 lbs",
+    value: "864 caps",
+    colors: ["Khaki", "Green", "Brown"],
+    upgrades: ["+80 CC | -1 AGI", "+85 CC | -1 AGI", "+85 CC | +1 END | +Reload"]
+  },
+  {
+    num: 25, level: 60,
+    name: "Vault-Tec Utility Backpack",
+    id: "BPVault",
+    desc: "Increases the wearer's overall carry capacity by +90. -2 Agility. Vault-Tec engineered. Features bobblehead keychain.",
+    location: "Vault95 — Vault 95",
+    cc: "+90 / +95 / +100 CC",
+    dr: "+10 DR | +10 RR",
+    special: ["-2 AGI", "+0 AGI", "+1 CHR", "+Charisma", "+Small Guns", "+Energy", "+Sneak"],
+    crafting: "Leather ×12 · Adhesive ×12 · Cloth ×12 · Circuitry ×5 · Nuclear Material ×4 · Vault-Tec Lunchbox ×1",
+    weight: "5 lbs",
+    value: "1,011 caps",
+    colors: ["Default"],
+    upgrades: ["+90 CC | -2 AGI", "+95 CC | +0 AGI", "+100 CC | +1 CHR", "+100 CC | +Small Guns", "+100 CC | +Energy", "+100 CC | +Sneak"]
+  },
+  {
+    num: 26, level: 60,
+    name: "P.E.G.A. Fusion Powered P.C.D. Mk III",
+    id: "BPFusion",
+    desc: "Increases the wearer's overall carry capacity by +85. -2 Agility. Fusion-powered pinnacle of backpack technology. Found in Boston Backpacks HQ.",
+    location: "BackpackRoom — Boston Backpacks HQ (discoverable location)",
+    cc: "+85 / +90 / +95 / +100 CC",
+    dr: "+30 DR | +10 ER | +10 RR → +50 DR | +20 ER | +30 RR",
+    special: ["-2 AGI", "-1 AGI", "+0 AGI", "+1 END", "+Water/Rads"],
+    crafting: "Aluminum ×12 · Adhesive ×12 · Circuitry ×6 · Nuclear Material ×4 · Ballistic Fiber ×6 · Hi-Tech Components",
+    weight: "7 lbs",
+    value: "1,137 caps",
+    colors: ["Yellow", "Green", "Red", "Purple", "Orange", "Blue"],
+    upgrades: ["+85 CC | -2 AGI", "+90 CC | -1 AGI", "+95 CC | +0 AGI", "+100 CC Plus | +0 AGI", "+100 CC Water+Rads | +0 AGI", "+100 CC W+R+Plus | +0 AGI"]
+  }
+];
+
+function specialClass(s) {
+  if (!s) return 'neutral';
+  if (s.startsWith('-')) return 'nerf';
+  if (s.startsWith('+')) return 'buff';
+  return 'neutral';
+}
+
+function renderCard(bp) {
+  const specials = bp.special.map(s =>
+    `<span class="special-pill ${specialClass(s)}">${s}</span>`
+  ).join('');
+
+  const upgrades = bp.upgrades.map(u =>
+    `<li>${u}</li>`
+  ).join('');
+
+  const colors = bp.colors.map(c =>
+    `<span class="color-tag">${c}</span>`
+  ).join('');
+
+  const isHighLevel = bp.level >= 50;
+  const isMaxLevel = bp.level >= 60;
+
+  return `
+  <div class="card">
+    <div class="level-badge">LVL ${bp.level}</div>
+    <div class="card-inner">
+      <div class="card-num">${String(bp.num).padStart(2,'0')}</div>
+      <div class="card-header">
+        <div class="card-name">${bp.name}</div>
+        <div class="card-id">${bp.id}</div>
+      </div>
+
+      <div class="quick-stats">
+        <span class="qs-chip qs-cc">${bp.cc.split('/')[0].trim()}</span>
+        <span class="qs-chip qs-dr">${bp.dr.split('→')[0].trim()}</span>
+        <span class="qs-chip qs-wt">${bp.weight}</span>
+        <span class="qs-chip qs-val">${bp.value}</span>
+      </div>
+
+      <div class="card-footer">
+        <div class="location-snippet">${bp.location.split('—')[0].trim()}</div>
+        <div class="hover-hint">◉ HOVER</div>
+      </div>
+    </div>
+
+    <!-- TOOLTIP -->
+    <div class="tooltip">
+      <div class="tt-header">
+        <span>${bp.name}</span>
+        <span class="tt-level-tag">LVL ${bp.level}</span>
+      </div>
+      <div class="tt-body">
+        <div class="tt-desc">${bp.desc}</div>
+
+        <div class="tt-section-label">▸ Base Statistics</div>
+        <div class="tt-stat-grid">
+          <div class="tt-stat">
+            <span class="tt-stat-key">Carry Weight</span>
+            <span class="tt-stat-val green">${bp.cc}</span>
+          </div>
+          <div class="tt-stat">
+            <span class="tt-stat-key">Damage Resist</span>
+            <span class="tt-stat-val blue">${bp.dr}</span>
+          </div>
+          <div class="tt-stat">
+            <span class="tt-stat-key">Weight</span>
+            <span class="tt-stat-val amber">${bp.weight}</span>
+          </div>
+          <div class="tt-stat">
+            <span class="tt-stat-key">Value</span>
+            <span class="tt-stat-val amber">${bp.value}</span>
+          </div>
+        </div>
+
+        ${bp.special.length > 0 ? `
+        <div class="tt-section-label">▸ SPECIAL Effects</div>
+        <div class="special-pills">${specials}</div>
+        ` : ''}
+
+        <div class="tt-section-label">▸ Upgrade Tiers</div>
+        <ul class="upgrades-list">${upgrades}</ul>
+
+        <div class="tt-section-label">▸ Crafting Requirements</div>
+        <div class="location-box" style="font-size:14px;color:#88aa88;">${bp.crafting}</div>
+
+        ${bp.colors.length > 0 ? `
+        <div class="tt-section-label">▸ Available Colors</div>
+        <div class="colors-row">${colors}</div>
+        ` : ''}
+
+        <div class="tt-section-label">▸ World Location</div>
+        <div class="location-box">${bp.location}</div>
+      </div>
+    </div>
+  </div>`;
+}
+
+document.getElementById('grid').innerHTML = BACKPACKS.map(renderCard).join('');
+</script>
+</body>
+</html>
