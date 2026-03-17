@@ -519,6 +519,42 @@
   .tt-stat-val.red { color: var(--red); }
   .tt-stat-val.purple { color: #cc88ff; }
 
+  /* OMOD upgrade list */
+  .omod-list { list-style: none; margin-top: 2px; }
+  .omod-item {
+    display: flex;
+    gap: 10px;
+    padding: 6px 0;
+    border-bottom: 1px solid rgba(30,58,30,0.5);
+    align-items: flex-start;
+  }
+  .omod-item:last-child { border-bottom: none; }
+  .omod-tier {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 8px;
+    color: var(--green-dim);
+    letter-spacing: 1px;
+    flex-shrink: 0;
+    padding-top: 3px;
+    width: 20px;
+    text-align: right;
+  }
+  .omod-content { flex: 1; min-width: 0; }
+  .omod-name {
+    font-family: 'VT323', monospace;
+    font-size: 16px;
+    color: var(--green);
+    line-height: 1.2;
+  }
+  .omod-desc {
+    font-size: 9px;
+    color: #7aaa7a;
+    line-height: 1.4;
+    letter-spacing: 0.3px;
+  }
+  .omod-dr .omod-name { color: #66aaff; }
+  .omod-dr .omod-tier { color: #335588; }
+
   /* Tier progression table */
   .tier-table {
     width: 100%;
@@ -576,21 +612,42 @@
   .color-tag {
     font-size: 9px;
     letter-spacing: 1px;
-    color: var(--amber);
-    border: 1px solid var(--amber-dim);
-    padding: 2px 6px;
+    padding: 2px 8px 2px 20px;
     text-transform: uppercase;
+    position: relative;
+    border: 1px solid rgba(255,255,255,0.15);
+    color: #cccccc;
+  }
+  .color-tag::before {
+    content: '';
+    position: absolute;
+    left: 6px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--swatch, #888);
   }
 
   .location-box {
-    font-family: 'VT323', monospace;
-    font-size: 16px;
-    color: #55aa55;
     padding: 8px 10px;
     background: rgba(57,255,20,0.04);
     border-left: 2px solid var(--green-dim);
     margin-top: 10px;
-    word-break: break-all;
+  }
+  .location-name {
+    font-family: 'VT323', monospace;
+    font-size: 18px;
+    color: #55dd55;
+    line-height: 1.3;
+  }
+  .location-edid {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 10px;
+    color: #336633;
+    letter-spacing: 1px;
+    margin-top: 2px;
   }
 
   /* Bottom bar */
@@ -1154,7 +1211,7 @@ function renderCard(bp) {
       </div>
       <div class="card-footer">
         <div class="location-snippet">${bp.location.split('—')[0].trim()}</div>
-        <div class="hover-hint">◉ TAP FOR STATS</div>
+        <div class="hover-hint">◉ CLICK FOR STATS</div>
       </div>
     </div>
   </div>`;
@@ -1192,6 +1249,8 @@ const IMGS = [
   'https://i.imgur.com/g2OdIkf.png', // 26 P.E.G.A. Fusion Powered P.C.D. Mk III
 ];
 
+const OMODS = {"BPShoulder": {"cc": [{"name": "Cloth Bag", "desc": "Increases the wearer's overall carry capacity by +10."}, {"name": "Additional Cloth Pouch", "desc": "Increases the wearer's overall carry capacity by +15."}, {"name": "Large Cloth Bag", "desc": "Increases the wearer's overall carry capacity by +20."}], "dr": []}, "BPMailBag": {"cc": [{"name": "Cloth Frame", "desc": "Increases the wearer's overall carry capacity by +15."}, {"name": "Flexible Cloth Frame", "desc": "Increases the wearer's overall carry capacity by +20."}, {"name": "Additional Pocket", "desc": "Increases the wearer's overall carry capacity by +25."}], "dr": [{"name": "Cloth Shell", "desc": "+2 Damage Resistance."}, {"name": "Hardened Cloth Shell", "desc": "+10 Damage Resistance."}]}, "BPLeather": {"cc": [{"name": "Leather Frame", "desc": "Increases the wearer's overall carry capacity by +20."}, {"name": "Sturdy Leather Frame", "desc": "Increases the wearer's overall carry capacity by +25."}], "dr": [{"name": "Leather Shell", "desc": "Damage resistance +5."}, {"name": "Treated Leather Shell", "desc": "Damage resistance +15."}]}, "BPRaider": {"cc": [{"name": "Aluminum Frame", "desc": "Increases the wearer's overall carry capacity by +30. -1 Agility."}, {"name": "Softened Metal Frame", "desc": "Increases the wearer's overall carry capacity by +35."}], "dr": [{"name": "Aluminum Plating", "desc": "Damage resistance +10."}, {"name": "Steel Plating", "desc": "+30 Damage Resistance."}]}, "BPOutcast": {"cc": [{"name": "Leather Frame", "desc": "Increases the wearer's overall carry capacity by +25. -2 Agility."}, {"name": "Sturdy Leather Frame", "desc": "Increases the wearer's overall carry capacity by +30. -1 Agility."}, {"name": "Reinforced Leather Frame", "desc": "Increases the wearer's overall carry capacity by +35."}, {"name": "Strengthened Leather Frame", "desc": "Increases the wearer's overall carry capacity by +40. +1 Endurance."}], "dr": [{"name": "Canvas Shell", "desc": "+5 damage resistance."}, {"name": "Hardened Canvas Shell", "desc": "+20 damage resistance."}]}, "BPMakeshift": {"cc": [{"name": "Leather Frame", "desc": "Increases the wearer's overall carry capacity by +30. -1 Agility."}, {"name": "Sturdy Leather Frame", "desc": "Increases the wearer's overall carry capacity by +35. -1 Agility."}, {"name": "Strapped Water Canteen", "desc": "Increases the wearer's overall carry capacity by +40. Fresh water drink periodically."}, {"name": "Lucky Sloth", "desc": "Increases the wearer's overall carry capacity by +40. +1 Luck."}, {"name": "Strengthened Leather Frame", "desc": "Increases the wearer's overall carry capacity by +40."}], "dr": [{"name": "Leather Shell", "desc": "Damage resistance +10."}, {"name": "Hardened Leather Shell", "desc": "Damage resistance +20."}]}, "BPTrapper": {"cc": [{"name": "Leather Frame", "desc": "Increases the wearer's overall carry capacity by +35. -1 Agility. +10% damage against animals and sea creatures."}, {"name": "Sturdy Leather Frame", "desc": "Increases the wearer's overall carry capacity by +40. +20% damage against animals and sea creatures."}, {"name": "Reinforced Leather Frame", "desc": "Increases the wearer's overall carry capacity by +40. +20% damage against animals and sea creatures."}], "dr": [{"name": "Brahmin Leather Shell", "desc": "Damage resistance +5."}, {"name": "Radstag Leather Shell", "desc": "Damage resistance +15."}, {"name": "Yao Guai Hide Shell", "desc": "Damage resistance +30."}]}, "BPBedroll": {"cc": [{"name": "Single Pouch", "desc": "Increases the wearer's overall carry capacity by +30. -1 Agility."}, {"name": "Additional Side Pouch", "desc": "Increases the wearer's overall carry capacity by +35."}, {"name": "Brahamin Leather Frame", "desc": "Increases the wearer's overall carry capacity by +40."}, {"name": "Souvenir Badges", "desc": "Increases the wearer's overall carry capacity by +45. +1 Charisma."}], "dr": []}, "BPDuffle": {"cc": [{"name": "Large Bag", "desc": "Increases the wearer's overall carry capacity by +40. -1 Agility. Weapon reload speed slightly increased."}, {"name": "Side Pouch", "desc": "Increases the wearer's overall carry capacity by +45. Weapon reload speed slightly increased."}, {"name": "Ammo Strap", "desc": "Increases the wearer's overall carry capacity by +50. Weapon reload speed slightly increased."}], "dr": [{"name": "Canvas Shell", "desc": "Damage resistance +10."}, {"name": "Reinforced Canvas Shell", "desc": "Damage resistance +20."}]}, "BPTinker": {"cc": [{"name": "Brahmin Leather Frame", "desc": "Increases the wearer's overall carry capacity by +40. -2 Agility."}, {"name": "Additional Canvas Bag", "desc": "Increases the wearer's overall carry capacity by +45. -2 Agility."}, {"name": "Stash Toolbox", "desc": "Increases the wearer's overall carry capacity by +50. -1 Agility."}, {"name": "Strapped Water Flask", "desc": "Increases the wearer's overall carry capacity by +55. Fresh water drink periodically."}, {"name": "Extra Leather Pouch", "desc": "Increases the wearer's overall carry capacity by +55."}], "dr": []}, "BPSling": {"cc": [{"name": "Small Pouch", "desc": "Increases the wearer's overall carry capacity by +40. -1 Agility. Increased AP regeneration rate when AP is below 10%."}, {"name": "Medium Pouch", "desc": "Increases the wearer's overall carry capacity by +45. Increased AP regeneration rate when AP is below 15%."}, {"name": "Large Pouch", "desc": "Increases the wearer's overall carry capacity by +50. Increased AP regeneration rate when AP is below 20%."}, {"name": "Large Pouch with Action Belt", "desc": "Increases the wearer's overall carry capacity by +55. Significantly increased AP regeneration rate when AP is below 20%."}], "dr": []}, "BPMountaineer": {"cc": [{"name": "Leather Frame", "desc": "Increases the wearer's overall carry capacity by +45. -1 Agility."}, {"name": "Sturdy Leather Frame", "desc": "Increases the wearer's overall carry capacity by +50."}, {"name": "Reinforced Leather Frame", "desc": "Increases the wearer's overall carry capacity by +55. +1 Endurance."}], "dr": []}, "BPWastelander": {"cc": [{"name": "Canvas Frame", "desc": "Increases the wearer's overall carry capacity by +50. -1 Agility."}, {"name": "Sturdy Canvas Frame", "desc": "Increases the wearer's overall carry capacity by +55. -1 Agility."}, {"name": "Water Bottle with Rad-X Pouch", "desc": "Increases the wearer's overall carry capacity by +60. Fresh drink and Rads restored periodically."}, {"name": "Strapped Water Bottle", "desc": "Increases the wearer's overall carry capacity by +60. Fresh water drink periodically."}, {"name": "Strengthened Canvas Frame", "desc": "Increases the wearer's overall carry capacity by +60."}], "dr": []}, "BPSquire": {"cc": [{"name": "Leather Frame", "desc": "Increases the wearer's overall carry capacity by +50. -2 Agility."}, {"name": "Sturdy Leather Frame", "desc": "Increases the wearer's overall carry capacity by +55. -1 Agility."}, {"name": "Supplementary Pocket", "desc": "Increases the wearer's overall carry capacity by +60."}, {"name": "Sturdy Pocketed Frame", "desc": "Increases the wearer's overall carry capacity by +60. +1 Endurance."}], "dr": [{"name": "Leather Shell", "desc": "Damage resistance +10."}, {"name": "Sturdy Leather Shell", "desc": "+20 Damage Resistance."}, {"name": "Reinforced Leather Shell", "desc": "+30 Damage Resistance."}]}, "BPMutant": {"cc": [{"name": "Wooden Trunk", "desc": "Increases the wearer's overall carry capacity by +50. -2 Agility."}, {"name": "Strapped Toolbox", "desc": "Increases the wearer's overall carry capacity by +55. -1 Agility. +1 Endurance. "}, {"name": "Extra Pouch", "desc": "Increases the wearer's overall carry capacity by +60. +1 Endurance. "}, {"name": "Lucky Teddy Bear", "desc": "Increases the wearer's overall carry capacity by +60. +1 Endurance. +1 Luck."}, {"name": "Super Mutant's Strength", "desc": "Increases the wearer's overall carry capacity by +65. +1 Endurance. +25% unarmed damage."}], "dr": [{"name": "Trunk Shell", "desc": "+30 damage resistance."}, {"name": "Reinforced Trunk Shell", "desc": "+40 damage resistance."}]}, "BPRadio": {"cc": [{"name": "SRC-3000", "desc": "Increases the wearer's overall carry capacity by +50. -2 Agility. +5% Accuracy in VATS."}, {"name": "SRC-3001", "desc": "Increases the wearer's overall carry capacity by +55. -1 Agility. +10% Accuracy in VATS."}, {"name": "SRC-3002", "desc": "Increases the wearer's overall carry capacity by +60. +15% accuracy in VATS."}, {"name": "SRC-3003", "desc": "Increases the wearer's overall carry capacity by +65. +20% accuracy in VATS."}], "dr": []}, "BPStealth": {"cc": [{"name": "Electron Charged Coil", "desc": "Increases the wearer's overall carry capacity by +55. -1 Agility."}, {"name": "Modulating Stealth Boy Mini-Field Generator", "desc": "Increases the wearer's overall carry capacity by +60. 10% harder to detect."}, {"name": "Third-Ion Plasma Reactor", "desc": "Increases the wearer's overall carry capacity by +65. +1 Endurance. +10 Rad Resist and +20 Energy Resist."}, {"name": "AutoDispense All-In-One Reactor", "desc": "Increases the wearer's overall carry capacity by +65. Water drink and rads removed periodically."}, {"name": "Anti-Radioisotope Micro Generator", "desc": "Increases the wearer's overall carry capacity by +65. Removes rads periodically."}], "dr": []}, "BPNuka": {"cc": [{"name": "Nuka-Cola", "desc": "Increases the wearer's overall carry capacity by +60."}, {"name": "Nuka-Cola Victory", "desc": "Increases the wearer's overall carry capacity by +70. +2 Strength."}, {"name": "Nuka-Cola Quartz", "desc": "Increases the wearer's overall carry capacity by +70. +2 Perception."}, {"name": "Nuka-Cola Grape", "desc": "Increases the wearer's overall carry capacity by +70. +2 Endurance."}, {"name": "Nuka-Cola Wild", "desc": "Increases the wearer's overall carry capacity by +70. +2 Luck."}, {"name": "Nuka-Cola Rush", "desc": "Increases the wearer's overall carry capacity by +70. +2 Agility."}, {"name": "Nuka-Cola Quantum", "desc": "Increases the wearer's overall carry capacity by +65. +2 Intelligence."}, {"name": "Nuka-Lixir", "desc": "Increases the wearer's overall carry capacity by +70. +20 additional damage resistance and rad resistance."}, {"name": "Nuka-Power", "desc": "Increases the wearer's overall carry capacity by +100."}, {"name": "Nuka-Gold", "desc": "Increases the wearer's overall carry capacity by +110."}, {"name": "Nuka-Cooler", "desc": "Increases the wearer's overall carry capacity by +70. +25 max HP and +10 max AP."}, {"name": "Nuka-Punch", "desc": "Increases the wearer's overall carry capacity by +70. Water drink regularly and rads removed periodically."}], "dr": []}, "BPChem": {"cc": [{"name": "User's Collection", "desc": "Increases the wearer's overall carry capacity by +55. -2 Agility. +5% damage resistance per withdrawal effect."}, {"name": "Gateway Chem", "desc": "Increases the wearer's overall carry capacity by +60. -1 Agility. +5% damage resistance and +5% weapon damage per withdrawal effect."}, {"name": "Hidden Stash", "desc": "Increases the wearer's overall carry capacity by +60. +10% damage resistance and +5% weapon damage per withdrawal effect."}, {"name": "Intervention", "desc": "Increases the wearer's overall carry capacity by +70. +10% weapon damage and +10% damage resistance per withdrawal effect."}], "dr": []}, "BPScribe": {"cc": [{"name": "Leather Pouches", "desc": "Increases the wearer's overall carry capacity by +60. -2 Agility."}, {"name": "Sturdy Leather Pouches", "desc": "Increases the wearer's overall carry capacity by +65. -1 Agility."}, {"name": "Additional Front Pockets", "desc": "Increases the wearer's overall carry capacity by +70."}, {"name": "Front Pockets with Harness", "desc": "Increases the wearer's overall carry capacity by +75. +1 Endurance."}], "dr": []}, "BPMilitary": {"cc": [{"name": "Military Canvas Shell", "desc": "Damage resistance +30."}, {"name": "Canvas Frame", "desc": "Increases the wearer's overall carry capacity by +70. -1 Agility."}, {"name": "Military Canvas Frame", "desc": "Increases the wearer's overall carry capacity by +75."}, {"name": "Military Ammo Harness", "desc": "Increases the wearer's overall carry capacity by +80. Weapon reload speed increased."}, {"name": "Military Ballistic Fiber Frame", "desc": "Increases the wearer's overall carry capacity by +80. +1 Endurance."}], "dr": [{"name": "Canvas Shell", "desc": "Damage resistance +10."}]}, "BPBattery": {"cc": [{"name": "High-Powered Battery", "desc": "Increases the wearer's overall carry capacity by +80. -1 Agility."}, {"name": "Anti-Gravity Electromagnetic Field Generator", "desc": "Increases the wearer's overall carry capacity by +85. Generates anti-gravity field after jumping."}, {"name": "Electromagnetic Close Proximity Field Projectile Accelerator", "desc": "Increases the wearer's overall carry capacity by +85. +15% damage with ballistic guns."}], "dr": []}, "BPWoodsman": {"cc": [{"name": "Leather Frame", "desc": "Increases the wearer's overall carry capacity by +75. -2 Agility."}, {"name": "Reinforced Leather Frame", "desc": "Increases the wearer's overall carry capacity by +80. -1 Agility."}, {"name": "Water Canteen with RadAway First Aid Kit", "desc": "Increases the wearer's overall carry capacity by +85. Water drink regularly and rads removed periodically."}, {"name": "Knife Sharpening Sheath", "desc": "Increases the wearer's overall carry capacity by +85. Melee weapon damage increased by +10%."}, {"name": "Reinforced Shadowed Frame", "desc": "Increases the wearer's overall carry capacity by +90. Ranged sneak attacks do 1.5x normal damage."}], "dr": []}, "BPMercenary": {"cc": [{"name": "Hardened Military Canvas Shell", "desc": "Damage resistance +20."}, {"name": "Leather Frame", "desc": "Increases the wearer's overall carry capacity by +80. -1 Agility."}, {"name": "Military Ammunition Belt", "desc": "Increases the wearer's overall carry capacity by +85. +1 Endurance. Weapon reload speed increased."}, {"name": "Military Leather Frame", "desc": "Increases the wearer's overall carry capacity by +85. +1 Endurance."}], "dr": [{"name": "Military Canvas Shell", "desc": "Damage resistance +10."}]}, "BPVault": {"cc": [{"name": "Vault-Tec Standard Edition", "desc": "Increases the wearer's overall carry capacity by +90. -2 Agility."}, {"name": "Vault-Tec Plenty-'O-Pockets\" Edition\"", "desc": "Increases the wearer's overall carry capacity by +95."}, {"name": "Vault-Tec Goo-On-My-Shoe\" Edition\"", "desc": "Increases the wearer's overall carry capacity by +100. +10% damage with energy weapons."}, {"name": "Vault-Tec Stealthy-Boy\" Edition\"", "desc": "Increases the wearer's overall carry capacity by +100. 10% harder to detect."}, {"name": "Vault-Tec Big-Boom\" Edition\"", "desc": "Increases the wearer's overall carry capacity by +100. +10% damage with ballistic guns."}, {"name": "Vault-Tec Smooth-Operator\" Edition\"", "desc": "Increases the wearer's overall carry capacity by +100. +1 Charisma."}], "dr": []}, "BPFusion": {"cc": [{"name": "Energy Cell Powered Coil", "desc": "Increases the wearer's overall carry capacity by +85. -2 Agility."}, {"name": "Wattz Fission Battery", "desc": "Increases the wearer's carry capacity by +90. -1 Agility."}, {"name": "Poseidon Energy Plasma Accelerator", "desc": "Increases the wearer's overall carry capacity by +95."}, {"name": "TX-28 Microfusion Reactor", "desc": "Increases the wearer's overall carry capacity by +100. +1 Endurance."}, {"name": "AutoDispense All-In-One Microfusion Reactor", "desc": "Increases the wearer's overall carry capacity by +100. Water drink regularly and rads removed periodically."}, {"name": "AutoDispense TX-30 Microfusion Reactor", "desc": "Increases the wearer's overall carry capacity by +100. +1 Endurance. Water drink regularly and rads removed periodically."}], "dr": [{"name": "Ballistic Fiber Plating", "desc": "+30 Damage Resist, +10 Energy Resist, +10 Rad Resist."}, {"name": "Ballistic Fiber and Titanium Carbide Plating", "desc": "+50 Damage Resist, +20 Energy Resist, +30 Rad Resist."}]}};
+
 // ── Image preview on hover ──────────────────────────────────────────────────
 const preview = document.createElement('div');
 preview.id = 'img-preview';
@@ -1212,7 +1271,7 @@ const modal = document.getElementById('modal');
 
 function buildTierRows(bp) {
   return bp.upgrades.map((u, i) => {
-    const segs = u.split('|').map(s => s.trim());
+    const segs = u.split('|').map(s => s.trim()).filter(s => !/^\+0\s*[A-Z]/.test(s));
     const cells = segs.map((seg, si) => {
       let cls = si === 0 ? 'cc'
         : /^[+-]?\d+\s*(AGI|STR|END|INT|PER|CHR|LCK)/.test(seg)
@@ -1226,13 +1285,77 @@ function buildTierRows(bp) {
   }).join('');
 }
 
+// Color name → CSS swatch color
+const COLOR_MAP = {
+  'default':           '#888888',
+  'brown leather':     '#7a4020',
+  'black leather':     '#2a2a2a',
+  'black':             '#2a2a2a',
+  'green':             '#4a7a3a',
+  'tan':               '#c8a87a',
+  'blue':              '#3a6aaa',
+  'rose':              '#cc7788',
+  'army green canvas': '#4b5320',
+  'u.s. army green':   '#4b5320',
+  'dark blood ruby':   '#8b0000',
+  'shadow black':      '#222222',
+  'rebel canvas':      '#6b6b5a',
+  'khaki':             '#c3a882',
+  'brown':             '#7a4020',
+  'orange rust':       '#c8601a',
+  'yellow':            '#d4b800',
+  'red':               '#cc3333',
+  'purple':            '#8833cc',
+  'orange':            '#d46a1a',
+  'many nuka variants':'#ff6699',
+  'many':              '#ff6699',
+};
+
+function buildColorTags(colors) {
+  return colors.map(c => {
+    const sw = COLOR_MAP[c.toLowerCase()] || '#888888';
+    const textCol = sw === '#888888' ? '#aaaaaa' : sw;
+    return `<span class="color-tag" style="--swatch:${sw};border-color:${sw}55;color:${textCol};">${c}</span>`;
+  }).join('');
+}
+
+function buildOmodList(mods, cls) {
+  if (!mods || mods.length === 0) return '';
+  return '<ul class="omod-list">' + mods.map((m, i) =>
+    `<li class="omod-item ${cls}">
+      <span class="omod-tier">T${i+1}</span>
+      <div class="omod-content">
+        <div class="omod-name">${m.name}</div>
+        <div class="omod-desc">${m.desc}</div>
+      </div>
+    </li>`
+  ).join('') + '</ul>';
+}
+
+function buildLocationHTML(loc) {
+  const parts = loc.split(' — ');
+  if (parts.length >= 2) {
+    const edid = parts[0].trim();
+    const name = parts.slice(1).join(' — ').trim();
+    return `<div class="location-box">
+      <div class="location-name">${name}</div>
+      <div class="location-edid">${edid}</div>
+    </div>`;
+  }
+  return `<div class="location-box"><div class="location-name">${loc}</div></div>`;
+}
+
 function openModal(idx) {
-  const bp  = BACKPACKS[idx];
-  const img = IMGS[idx];
-  const colors = bp.colors.map(c => `<span class="color-tag">${c}</span>`).join('');
+  const bp   = BACKPACKS[idx];
+  const img  = IMGS[idx];
+  const omod = OMODS[bp.id] || { cc: [], dr: [] };
+
   const imgHTML = img
     ? `<img src="${img}" alt="${bp.name}" referrerpolicy="no-referrer">`
     : `<div class="no-img">NO IMAGE<br>AVAILABLE</div>`;
+
+  const ccList = buildOmodList(omod.cc, '');
+  const drList = buildOmodList(omod.dr, 'omod-dr');
 
   modal.innerHTML = `
     <button class="modal-close" id="modal-close-btn">✕</button>
@@ -1263,20 +1386,22 @@ function openModal(idx) {
         </div>
       </div>
 
-      <div class="tt-section-label">▸ Upgrade Progression</div>
-      <table class="tier-table">${buildTierRows(bp)}</table>
+      ${ccList ? `<div class="tt-section-label">▸ Carry Capacity Upgrades</div>${ccList}` : ''}
+      ${drList ? `<div class="tt-section-label">▸ Resistance Upgrades</div>${drList}` : ''}
 
       <div class="tt-section-label">▸ Crafting Requirements</div>
-      <div class="location-box" style="font-size:14px;color:#88aa88;">${bp.crafting}</div>
+      <div class="location-box"><div class="location-name" style="font-size:15px;color:#88aa88;">${bp.crafting}</div></div>
 
       ${bp.colors.length > 0 ? `
       <div class="tt-section-label">▸ Available Colors</div>
-      <div class="colors-row">${colors}</div>` : ''}
+      <div class="colors-row">${buildColorTags(bp.colors)}</div>` : ''}
 
       <div class="tt-section-label">▸ World Location</div>
-      <div class="location-box">${bp.location}</div>
+      ${buildLocationHTML(bp.location)}
     </div>`;
 
+  const scrollbarW = window.innerWidth - document.documentElement.clientWidth;
+  document.body.style.paddingRight = scrollbarW + 'px';
   overlay.classList.add('visible');
   document.body.style.overflow = 'hidden';
 
@@ -1286,6 +1411,7 @@ function openModal(idx) {
 function closeModal() {
   overlay.classList.remove('visible');
   document.body.style.overflow = '';
+  document.body.style.paddingRight = '';
 }
 
 overlay.addEventListener('click', e => { if (e.target === overlay) closeModal(); });
