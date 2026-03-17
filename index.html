@@ -592,8 +592,8 @@
     line-height: 1.4;
     letter-spacing: 0.3px;
   }
-  .omod-dr .omod-name { color: #66aaff; }
-  .omod-dr .omod-tier { color: #335588; }
+  .omod-dr .omod-name { color: #4466aa; }
+  .omod-dr .omod-tier { color: #886633; }
 
   /* Tier progression table */
   .tier-table {
@@ -976,6 +976,56 @@
   .bp-table th.sortable:hover { background: #2a6a2a; }
   .sort-arrow { margin-left: 4px; opacity: 0.5; font-size: 10px; }
   .bp-table th.sorted .sort-arrow { opacity: 1; }
+
+
+  .crafting-list {
+    list-style: none;
+    margin: 0;
+    padding: 6px 10px;
+    background: rgba(57,255,20,0.04);
+    border-left: 2px solid var(--green-dim);
+    margin-top: 10px;
+  }
+  .crafting-item {
+    font-family: 'VT323', monospace;
+    font-size: 16px;
+    color: #88aa88;
+    padding: 3px 0;
+    border-bottom: 1px solid rgba(30,58,30,0.35);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .crafting-item:last-child { border-bottom: none; }
+  .crafting-item::before {
+    content: '·';
+    color: var(--green-dim);
+    flex-shrink: 0;
+  }
+  .crafting-perks {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    padding: 6px 10px 4px;
+  }
+
+  .omod-perks {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    margin-top: 4px;
+  }
+  .perk-tag {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 8px;
+    letter-spacing: 1px;
+    color: var(--amber);
+    border: 1px solid rgba(255,176,0,0.35);
+    background: rgba(255,176,0,0.07);
+    padding: 2px 7px;
+    text-transform: uppercase;
+  }
+
   /* ── Help button & popup ─────────────────────────────────── */
   #help-btn {
     position: fixed;
@@ -1154,7 +1204,7 @@ const BACKPACKS = [
     cc: "+10 / +15 / +20 CC",
     dr: "+2 DR",
     special: [],
-    crafting: "Cloth ×6 · Leather ×3 · Adhesive ×3 · Wonderglue ×1",
+    crafting: "Adhesive ×3 · Leather ×3 · Wonderglue ×1 · Cloth ×6",
     weight: "1 lbs",
     value: "59 caps",
     colors: ["Default"],
@@ -1164,12 +1214,12 @@ const BACKPACKS = [
     num: 2, level: 5,
     name: "Postman's Mailbag",
     id: "BPMailbag",
-    desc: "Increases the wearer's overall carry capacity by +15. Extra mail storage.",
+    desc: "Increases the wearer's overall carry capacity by +15. A pre-war U.S. Mail carrier bag repurposed for hauling supplies.",
     location: "USAFSatellite01 — USAF Satellite Station Olivia",
     cc: "+15 / +20 / +25 CC",
     dr: "+2 DR → +10 DR",
     special: [],
-    crafting: "Cloth ×7 · Leather ×4 · Adhesive ×4 · Duct Tape ×1",
+    crafting: "Adhesive ×4 · Leather ×4 · Duct Tape ×1 · Cloth ×7",
     weight: "2 lbs",
     value: "78 caps",
     colors: ["Default"],
@@ -1184,7 +1234,7 @@ const BACKPACKS = [
     cc: "+20 / +25 CC",
     dr: "+5 DR → +15 DR",
     special: [],
-    crafting: "Leather ×8 · Cloth ×4 · Adhesive ×4 · Wonderglue ×1",
+    crafting: "Adhesive ×4 · Leather ×8 · Wonderglue ×1 · Cloth ×4",
     weight: "2 lbs",
     value: "97 caps",
     colors: ["Brown Leather", "Black Leather"],
@@ -1194,12 +1244,12 @@ const BACKPACKS = [
     num: 4, level: 10,
     name: "Raider's Harnessed Metal Container",
     id: "BPRaider",
-    desc: "Increases the wearer's overall carry capacity by +30. -1 Agility. Jury-rigged with whatever wasn't nailed down.",
+    desc: "Increases the wearer's overall carry capacity by +30. -1 Agility. Jury-rigged from scrap metal and salvaged straps.",
     location: "FederalRationStockpile01 — Federal Ration Stockpile",
     cc: "+30 / +35 CC",
     dr: "+10 DR → +30 DR",
     special: ["-1 AGI", "→ +0 AGI"],
-    crafting: "Leather ×8 · Steel ×5 · Adhesive ×5 · Screws ×3 · Metal Bucket ×1 · [Armorer 1]",
+    crafting: "Adhesive ×5 · Leather ×8 · Steel ×5 · Screw ×3 · Metal Bucket ×1 · [Armorer I]",
     weight: "5 lbs",
     value: "135 caps",
     colors: ["Default"],
@@ -1209,12 +1259,12 @@ const BACKPACKS = [
     num: 5, level: 15,
     name: "Outcast's Travel Pouch",
     id: "BPOutcast",
-    desc: "Increases the wearer's overall carry capacity by +25. -2 Agility. Standard Brotherhood Outcast field pack.",
+    desc: "Increases the wearer's overall carry capacity by +25. -2 Agility. Standard field pack used by Brotherhood Outcasts.",
     location: "SuperDuperMart01 — Super Duper Mart",
     cc: "+25 / +30 / +35 / +40 CC",
     dr: "+5 DR → +20 DR",
     special: ["-2 AGI", "-1 AGI", "+0 AGI", "+1 END"],
-    crafting: "Cloth ×8 · Leather ×5 · Adhesive ×5 · Aluminum ×3 · Brahmin Hide ×1 · [Armorer 1]",
+    crafting: "Aluminum ×3 · Adhesive ×5 · Leather ×5 · Cloth ×8 · Brahmin Hide ×1 · [Armorer I]",
     weight: "3 lbs",
     value: "213 caps",
     colors: ["Green", "Tan"],
@@ -1224,12 +1274,12 @@ const BACKPACKS = [
     num: 6, level: 15,
     name: "Makeshift Backpack",
     id: "BPMakeshift",
-    desc: "Increases the wearer's overall carry capacity by +30. -1 Agility. Built from scratch with salvaged materials.",
+    desc: "Increases the wearer's overall carry capacity by +30. -1 Agility. Cobbled together from whatever was lying around.",
     location: "MaldenCenter01 — Malden Center",
     cc: "+30 / +35 / +40 CC",
     dr: "+10 DR → +20 DR",
     special: ["-1 AGI", "+0 AGI", "+1 LCK (Lucky)"],
-    crafting: "Cloth ×9 · Leather ×5 · Adhesive ×5 · Steel ×3 · Bag of Cement ×1 · Duct Tape ×1",
+    crafting: "Adhesive ×5 · Leather ×5 · Steel ×3 · Duct Tape ×1 · Bag of Cement ×1 · Cloth ×9",
     weight: "4 lbs",
     value: "232 caps",
     colors: ["Default"],
@@ -1239,12 +1289,12 @@ const BACKPACKS = [
     num: 7, level: 20,
     name: "Trapper's Back Pouch",
     id: "BPTrapper",
-    desc: "Increases the wearer's overall carry capacity by +35. -1 Agility. +10% damage against bugs.",
+    desc: "Increases the wearer's overall carry capacity by +35. -1 Agility. Stitched from animal hides. Bonus damage against animals and sea creatures.",
     location: "BADTFL01 — BADTFL Regional Office",
     cc: "+35 / +40 / +45 CC",
     dr: "+5 DR → +15 DR → +30 DR",
     special: ["-1 AGI", "+0 AGI", "Bug Dmg Bonus"],
-    crafting: "Leather ×8 · Cloth ×5 · Adhesive ×6 · Bone ×3 · Aluminum ×3 · Radstag Hide ×1",
+    crafting: "Aluminum ×3 · Bone ×3 · Adhesive ×5 · Leather ×8 · Cloth ×5 · Radstag Hide ×1 · [Armorer I]",
     weight: "3 lbs",
     value: "281 caps",
     colors: ["Default"],
@@ -1254,12 +1304,12 @@ const BACKPACKS = [
     num: 8, level: 20,
     name: "Bedroll Backpack",
     id: "BPBedroll",
-    desc: "Increases the wearer's overall carry capacity by +30. -1 Agility. Built-in bedroll for survival situations.",
+    desc: "Increases the wearer's overall carry capacity by +30. -1 Agility. Doubles as a bedroll for long hauls in the field.",
     location: "LynnWoodsExt02 — Lynn Woods",
     cc: "+30 / +35 / +40 / +45 CC",
     dr: "+8 DR",
     special: ["-1 AGI", "+0 AGI", "+1 CHR (Charisma)"],
-    crafting: "Cloth ×10 · Leather ×6 · Adhesive ×6 · Straw Pillow ×1 · Comfy Pillow ×1",
+    crafting: "Adhesive ×6 · Leather ×6 · Straw Pillow ×1 · Comfy Pillow ×1 · Cloth ×10",
     weight: "4 lbs",
     value: "339 caps",
     colors: ["Default"],
@@ -1269,12 +1319,12 @@ const BACKPACKS = [
     num: 9, level: 25,
     name: "Military Duffle Bag",
     id: "BPDuffle",
-    desc: "Increases the wearer's overall carry capacity by +40. -1 Agility. Weapon reload speed increased.",
+    desc: "Increases the wearer's overall carry capacity by +40. -1 Agility. Surplus military canvas bag. Designed for quick access in the field.",
     location: "NationalGuardTrainingYard03 — National Guard Training Yard",
     cc: "+40 / +45 / +50 CC",
     dr: "+10 DR → +20 DR",
     special: ["-1 AGI", "+0 AGI", "+Reload Speed"],
-    crafting: "Cloth ×10 · Leather ×7 · Adhesive ×7 · Aluminum ×4 · Military Ammo Bag ×1 · [Armorer 2]",
+    crafting: "Aluminum ×4 · Adhesive ×7 · Leather ×7 · Military Ammo Bag ×1 · Cloth ×10 · [Armorer II]",
     weight: "4 lbs",
     value: "377 caps",
     colors: ["Default", "Blue"],
@@ -1284,12 +1334,12 @@ const BACKPACKS = [
     num: 10, level: 25,
     name: "Tinker's Rucksack",
     id: "BPTinker",
-    desc: "Increases the wearer's overall carry capacity by +40. -2 Agility. Heavy-duty toolbag for serious work.",
+    desc: "Increases the wearer's overall carry capacity by +40. -2 Agility. Overbuilt and overloaded. Every pocket filled with something useful.",
     location: "BeantownBrewery01 — Beantown Brewery",
     cc: "+40 / +45 / +50 CC",
     dr: "+25 DR → +35 DR",
     special: ["-2 AGI", "-1 AGI", "+0 AGI"],
-    crafting: "Leather ×8 · Cloth ×6 · Adhesive ×7 · Gears ×4 · Screws ×3 · Adjustable Wrench ×1 · [Armorer 2]",
+    crafting: "Adhesive ×7 · Leather ×8 · Gear ×4 · Screw ×3 · Adjustable Wrench ×1 · Cloth ×6 · [Armorer II]",
     weight: "6 lbs",
     value: "412 caps",
     colors: ["Default"],
@@ -1299,12 +1349,12 @@ const BACKPACKS = [
     num: 11, level: 30,
     name: "Sling Pouch",
     id: "BPSling",
-    desc: "Increases the wearer's overall carry capacity by +40. -1 Agility. Increased AP regeneration.",
+    desc: "Increases the wearer's overall carry capacity by +40. -1 Agility. Improves AP regeneration when under pressure.",
     location: "HubrisComics01 — Hubris Comics",
     cc: "+40 / +45 / +50 / +55 CC",
     dr: "+5 DR",
     special: ["-1 AGI", "+0 AGI", "+10–20 AP Regen"],
-    crafting: "Leather ×8 · Cloth ×5 · Adhesive ×7 · Rubber ×3 · Tongs ×1 · Clipboard ×1 · [Armorer 2]",
+    crafting: "Battered Clipboard ×1 · Adhesive ×7 · Leather ×8 · Rubber ×3 · Cloth ×5 · Tongs ×1 · [Armorer II]",
     weight: "2 lbs",
     value: "349 caps",
     colors: ["Default"],
@@ -1314,12 +1364,12 @@ const BACKPACKS = [
     num: 12, level: 30,
     name: "Mountaineer's Backpack",
     id: "BPMountaineer",
-    desc: "Increases the wearer's overall carry capacity by +45. -1 Agility. Built for rough terrain.",
+    desc: "Increases the wearer's overall carry capacity by +45. -1 Agility. Reinforced frame built for long treks across rough terrain.",
     location: "WestEverettEstates01 — West Everett Estates",
     cc: "+45 / +50 / +55 CC",
     dr: "+15 DR",
     special: ["-1 AGI", "+0 AGI", "+1 END (Endurance)"],
-    crafting: "Cloth ×10 · Leather ×7 · Adhesive ×8 · Aluminum ×4 · Military Grade Duct Tape ×1 · [Armorer 2]",
+    crafting: "Aluminum ×4 · Adhesive ×8 · Leather ×7 · Military Grade Duct Tape ×1 · Cloth ×10 · [Armorer II]",
     weight: "4 lbs",
     value: "438 caps",
     colors: ["Green", "Blue", "Rose"],
@@ -1329,12 +1379,12 @@ const BACKPACKS = [
     num: 13, level: 30,
     name: "Wastelander's Backpack",
     id: "BPWastelander",
-    desc: "Increases the wearer's overall carry capacity by +50. -1 Agility. Water and radiation management features.",
+    desc: "Increases the wearer's overall carry capacity by +50. -1 Agility. A survivor's pack built for the long haul.",
     location: "BackBayFence01 — Trinity Tower area",
     cc: "+50 / +55 / +60 CC",
     dr: "+20 DR",
     special: ["-1 AGI", "+0 AGI", "+Water", "+Rad Scrub"],
-    crafting: "Cloth ×10 · Leather ×8 · Adhesive ×8 · Aluminum ×4 · Molerat Hide ×2",
+    crafting: "Aluminum ×4 · Adhesive ×8 · Leather ×8 · Cloth ×10 · Molerat Hide ×2 · [Armorer II]",
     weight: "3 lbs",
     value: "467 caps",
     colors: ["Green", "Blue"],
@@ -1344,12 +1394,12 @@ const BACKPACKS = [
     num: 14, level: 35,
     name: "Squire's Backpack",
     id: "BPSquire",
-    desc: "Increases the wearer's overall carry capacity by +50. -2 Agility. Brotherhood of Steel field pack.",
+    desc: "Increases the wearer's overall carry capacity by +50. -2 Agility. Standard issue for Brotherhood of Steel initiates.",
     location: "BostonAirportRuins01 — Boston Airport Ruins",
     cc: "+50 / +55 / +60 CC",
     dr: "+10 DR → +20 DR → +30 DR",
     special: ["-2 AGI", "-1 AGI", "+0 AGI", "+1 END"],
-    crafting: "Leather ×9 · Cloth ×7 · Adhesive ×8 · Ballistic Fiber ×2 · Basketball ×1 · Baseball ×1 · [Armorer 2]",
+    crafting: "Ballistic Fiber ×2 · Adhesive ×8 · Leather ×9 · Baseball ×1 · Basketball ×1 · Cloth ×7 · [Armorer II]",
     weight: "3 lbs",
     value: "528 caps",
     colors: ["Brown Leather", "Army Green Canvas", "Black Leather"],
@@ -1359,12 +1409,12 @@ const BACKPACKS = [
     num: 15, level: 35,
     name: "Super Mutant's Trunk",
     id: "BPMutant",
-    desc: "Increases the wearer's overall carry capacity by +50. -2 Agility. Salvaged from a super mutant camp. Guarded by a legendary super mutant.",
+    desc: "Increases the wearer's overall carry capacity by +50. -2 Agility. Ripped from a super mutant's camp and barely repurposed.",
     location: "BigJohnsSalvage01 — Big John's Salvage (shelter)",
     cc: "+50 / +55 / +60 / +65 CC",
     dr: "+30 DR → +40 DR",
     special: ["-2 AGI", "-1 AGI", "+0 AGI", "+1 END", "+1 LCK (Lucky)"],
-    crafting: "Leather ×11 · Steel ×7 · Adhesive ×8 · Ballistic Fiber ×3 · Shopping Basket ×1 · [Strong Bonus]",
+    crafting: "Ballistic Fiber ×3 · Adhesive ×8 · Leather ×11 · Steel ×7 · Shopping Basket ×1 · [Armorer II]",
     weight: "9 lbs",
     value: "489 caps",
     colors: ["Default"],
@@ -1374,12 +1424,12 @@ const BACKPACKS = [
     num: 16, level: 35,
     name: "Manpack Portable Radio Transceiver",
     id: "BPRadio",
-    desc: "Increases the wearer's overall carry capacity by +50. -2 Agility. +5% Accuracy in V.A.T.S.",
+    desc: "Increases the wearer's overall carry capacity by +50. -2 Agility. Repurposed military radio unit. Improves targeting accuracy in V.A.T.S.",
     location: "zPOIJoel06 — Electrical Hobbyist's Club",
     cc: "+50 / +55 / +60 / +65 CC",
     dr: "+30 DR | +5 ER",
     special: ["-2 AGI", "-1 AGI", "+0 AGI", "+VATS Accuracy"],
-    crafting: "Aluminum ×7 · Leather ×7 · Adhesive ×8 · Circuitry ×3 · Vacuum Tube ×1 · Sensor Module ×1",
+    crafting: "Aluminum ×7 · Circuitry ×3 · Adhesive ×4 · Leather ×7 · Vacuum Tube ×1 · Sensor Module ×1 · [Science! I]",
     weight: "7 lbs",
     value: "531 caps",
     colors: ["Default"],
@@ -1389,12 +1439,12 @@ const BACKPACKS = [
     num: 17, level: 40,
     name: "R.O.B.B. Personal Carrying Device Mk I",
     id: "BPStealth",
-    desc: "Increases the wearer's overall carry capacity by +55. -1 Agility. Advanced robotic carrying system.",
+    desc: "Increases the wearer's overall carry capacity by +55. -1 Agility. R.O.B.B.-series robotic carrying frame with integrated sensor array.",
     location: "InstituteAdvSystems — Institute Advanced Systems",
     cc: "+55 / +60 / +65 CC",
     dr: "+20 DR",
     special: ["-1 AGI", "+0 AGI", "+1 END", "+Sneak", "+Water/Rads"],
-    crafting: "Aluminum ×8 · Leather ×7 · Adhesive ×9 · Circuitry ×4 · Sensor Module ×1 · Biometric Scanner ×1",
+    crafting: "Aluminum ×8 · Circuitry ×4 · Adhesive ×9 · Leather ×7 · Biometric Scanner ×1 · Sensor Module ×1 · [Science! I]",
     weight: "6 lbs",
     value: "590 caps",
     colors: ["Default"],
@@ -1404,12 +1454,12 @@ const BACKPACKS = [
     num: 18, level: 40,
     name: "Limited Edition Nuka-Pack!",
     id: "BPNuka",
-    desc: "Increases the wearer's overall carry capacity by +60. Nuka-Cola branded collector's pack with extensive upgrades.",
+    desc: "Increases the wearer's overall carry capacity by +60. Nuka-Cola branded collector's pack. Compatible with a wide range of Nuka upgrades.",
     location: "DLC04BradbertonsOffice01 — Bradberton's Office (Nuka-World)",
     cc: "+60 / +65 / +70 / +100 / +110 CC",
     dr: "+20 DR | +10 ER",
     special: ["+2 INT", "+2 END", "+2 PER", "+2 AGI", "+2 STR", "+2 LCK"],
-    crafting: "Aluminum ×8 · Leather ×7 · Adhesive ×9 · Nuclear Material ×3 · Nuka-Cola ×6 · Military-Grade items",
+    crafting: "Aluminum ×8 · Adhesive ×9 · Nuclear Material ×3 · Nuka-Cola ×6 · Military-Grade Circuit Board ×1 · Assaultron Circuit Board ×1 · [Science! II]",
     weight: "6 lbs",
     value: "893 caps",
     colors: ["Many Nuka variants"],
@@ -1419,12 +1469,12 @@ const BACKPACKS = [
     num: 19, level: 45,
     name: "Junkie's Chem Stash",
     id: "BPChem",
-    desc: "Increases the wearer's overall carry capacity by +55. -2 Agility. +5% damage resistance per chem.",
+    desc: "Increases the wearer\'s overall carry capacity by +55. -2 Agility. The more wrecked you are, the better it works.",
     location: "FourLeafFishpacking02 — Four Leaf Fishpacking Plant",
     cc: "+55 / +60 / +65 / +70 CC",
     dr: "+10 DR",
     special: ["-2 AGI", "-1 AGI", "+0 AGI", "+5% Dmg Resist per Chem"],
-    crafting: "Cloth ×9 · Leather ×7 · Adhesive ×8 · Antiseptic ×4 · Mentats ×1 · Psycho ×1 · Table Spoon ×1",
+    crafting: "Adhesive ×8 · Leather ×7 · Mentats ×1 · Psycho ×1 · Table Spoon ×1 · Cloth ×9 · [Chemist I]",
     weight: "5 lbs",
     value: "569 caps",
     colors: ["Default"],
@@ -1434,12 +1484,12 @@ const BACKPACKS = [
     num: 20, level: 45,
     name: "Scribe's Backpack",
     id: "BPScribe",
-    desc: "Increases the wearer's overall carry capacity by +60. -2 Agility. Brotherhood Scribe issue field pack.",
+    desc: "Increases the wearer's overall carry capacity by +60. -2 Agility. Brotherhood Scribe-issue pack. Built for long research expeditions.",
     location: "VirgilsLab01 — Virgil's Laboratory (Glowing Sea)",
     cc: "+60 / +65 / +70 / +75 CC",
     dr: "+10 DR",
     special: ["-2 AGI", "-1 AGI", "+0 AGI", "+1 END"],
-    crafting: "Cloth ×10 · Leather ×8 · Adhesive ×9 · Ballistic Fiber ×4 · Military-Grade Duct Tape ×1",
+    crafting: "Ballistic Fiber ×4 · Adhesive ×9 · Leather ×8 · Military Grade Duct Tape ×1 · Cloth ×10 · Military-Grade Circuit Board ×1 · [Science! I, Armorer II]",
     weight: "4 lbs",
     value: "642 caps",
     colors: ["Default"],
@@ -1454,7 +1504,7 @@ const BACKPACKS = [
     cc: "+70 / +75 / +80 CC",
     dr: "+10 DR → +30 DR",
     special: ["-1 AGI", "+0 AGI", "+1 END", "+Reload Speed"],
-    crafting: "Cloth ×11 · Leather ×9 · Adhesive ×10 · Ballistic Fiber ×3 · Military Ammo Bag ×1",
+    crafting: "Ballistic Fiber ×3 · Adhesive ×10 · Leather ×9 · Military Ammo Bag ×1 · Military Grade Duct Tape ×1 · Cloth ×11 · [Armorer II]",
     weight: "3 lbs",
     value: "701 caps",
     colors: ["Rebel Canvas", "U.S. Army Green", "Dark Blood Ruby", "Shadow Black"],
@@ -1464,12 +1514,12 @@ const BACKPACKS = [
     num: 22, level: 50,
     name: "G.A.R.I. Personal Carrying Device Mk II",
     id: "BPBattery",
-    desc: "Increases the wearer's overall carry capacity by +80. -1 Agility. Powered by fusion cell. Jump height bonus.",
+    desc: "Increases the wearer's overall carry capacity by +80. -1 Agility. Experimental pre-war carrying unit powered by a fusion core.",
     location: "GlowingSeaPOIRJ03 — Decayed Reactor Site (Glowing Sea)",
     cc: "+80 / +85 CC",
     dr: "+10 DR | +20 ER",
     special: ["-1 AGI", "+0 AGI", "+Jump Height", "+Dmg Bonus"],
-    crafting: "Aluminum ×10 · Leather ×8 · Adhesive ×9 · Circuitry ×4 · Fiber Optics ×3 · Fusion Core ×1",
+    crafting: "Aluminum ×10 · Circuitry ×4 · Fiber Optics ×3 · Adhesive ×9 · Leather ×8 · Fusion Core ×1 · Military-Grade Circuit Board ×1 · [Armorer II, Science! II]",
     weight: "8 lbs",
     value: "843 caps",
     colors: ["Default"],
@@ -1479,12 +1529,12 @@ const BACKPACKS = [
     num: 23, level: 55,
     name: "Woodsman's Backpack",
     id: "BPWoodsman",
-    desc: "Increases the wearer's overall carry capacity by +75. -2 Agility. +10% melee damage. Knife sharpening sheath included.",
+    desc: "Increases the wearer's overall carry capacity by +75. -2 Agility. Built for wilderness survival. Includes a built-in knife sharpening sheath.",
     location: "MuseumOfWitchcraft01 — Museum of Witchcraft",
     cc: "+75 / +80 / +85 / +90 CC",
     dr: "+15 DR",
     special: ["-2 AGI", "-1 AGI", "+1 END", "+Melee Dmg", "+Sneak", "+Water"],
-    crafting: "Cloth ×11 · Leather ×11 · Adhesive ×9 · Oil ×3 · Comfy Pillow ×1 · Hack Saw ×1 · [Armorer 3]",
+    crafting: "Adhesive ×9 · Leather ×11 · Oil ×3 · Comfy Pillow ×1 · Cloth ×11 · Hack Saw ×1 · [Armorer III]",
     weight: "4 lbs",
     value: "853 caps",
     colors: ["Black", "Orange Rust"],
@@ -1494,12 +1544,12 @@ const BACKPACKS = [
     num: 24, level: 55,
     name: "Mercenary's Rucksack",
     id: "BPMercenary",
-    desc: "Increases the wearer's overall carry capacity by +80. -1 Agility. Mercenary grade field pack. World location: hand-placed.",
+    desc: "Increases the wearer's overall carry capacity by +80. -1 Agility. Heavy-duty military-grade rucksack favored by Gunners.",
     location: "GNN01 — Gunner's Plaza",
     cc: "+80 / +85 CC",
     dr: "+10 DR → +20 DR",
     special: ["-1 AGI", "+1 END", "+Reload Speed"],
-    crafting: "Leather ×11 · Cloth ×10 · Adhesive ×10 · Aluminum ×5 · Ballistic Fiber ×4 · Military Ammo Bag ×1",
+    crafting: "Aluminum ×5 · Ballistic Fiber ×4 · Adhesive ×10 · Leather ×11 · Military Ammo Bag ×2 · Cloth ×10 · [Armorer III]",
     weight: "4 lbs",
     value: "864 caps",
     colors: ["Khaki", "Green", "Brown"],
@@ -1509,12 +1559,12 @@ const BACKPACKS = [
     num: 25, level: 60,
     name: "Vault-Tec Utility Backpack",
     id: "BPVault",
-    desc: "Increases the wearer's overall carry capacity by +90. -2 Agility. Vault-Tec engineered. Features bobblehead keychain.",
+    desc: "Increases the wearer's overall carry capacity by +90. -2 Agility. Vault-Tec engineered utility pack. Features a bobblehead keychain attachment.",
     location: "Vault95 — Vault 95",
     cc: "+90 / +95 / +100 CC",
     dr: "+10 DR | +10 RR",
     special: ["-2 AGI", "+0 AGI", "+1 CHR", "+Charisma", "+Small Guns", "+Energy", "+Sneak"],
-    crafting: "Leather ×12 · Adhesive ×12 · Cloth ×12 · Circuitry ×5 · Nuclear Material ×4 · Vault-Tec Lunchbox ×1",
+    crafting: "Circuitry ×5 · Adhesive ×12 · Leather ×12 · Nuclear Material ×4 · Cloth ×12 · Biometric Scanner ×1 · Vault-Tec Lunchbox ×1 · [Armorer III]",
     weight: "5 lbs",
     value: "1,011 caps",
     colors: ["Default"],
@@ -1524,12 +1574,12 @@ const BACKPACKS = [
     num: 26, level: 60,
     name: "P.E.G.A. Fusion Powered P.C.D. Mk III",
     id: "BPFusion",
-    desc: "Increases the wearer's overall carry capacity by +85. -2 Agility. Fusion-powered pinnacle of backpack technology. Found in Boston Backpacks HQ.",
+    desc: "Increases the wearer's overall carry capacity by +85. -2 Agility. The pinnacle of pre-war personal carrying technology. Fusion-powered.",
     location: "BackpackRoom — Boston Backpacks HQ (discoverable location)",
     cc: "+85 / +90 / +95 / +100 CC",
     dr: "+30 DR | +10 ER | +10 RR → +50 DR | +20 ER | +30 RR",
     special: ["-2 AGI", "-1 AGI", "+0 AGI", "+1 END", "+Water/Rads"],
-    crafting: "Aluminum ×12 · Adhesive ×12 · Circuitry ×6 · Nuclear Material ×4 · Ballistic Fiber ×6 · Hi-Tech Components",
+    crafting: "Aluminum ×12 · Ballistic Fiber ×6 · Circuitry ×6 · Adhesive ×12 · Nuclear Material ×4 · Fusion Core ×2 · High-Powered Magnet ×1 · [Science! III, Armorer III]",
     weight: "7 lbs",
     value: "1,137 caps",
     colors: ["Yellow", "Green", "Red", "Purple", "Orange", "Blue"],
@@ -1612,7 +1662,23 @@ const IMGS = [
 
 document.getElementById('grid').innerHTML = BACKPACKS.map(renderCard).join('');
 
-const OMODS = {"BPShoulder": {"cc": [{"name": "Cloth Bag", "desc": "Increases the wearer's overall carry capacity by +10."}, {"name": "Additional Cloth Pouch", "desc": "Increases the wearer's overall carry capacity by +15."}, {"name": "Large Cloth Bag", "desc": "Increases the wearer's overall carry capacity by +20."}], "dr": []}, "BPMailbag": {"cc": [{"name": "Cloth Frame", "desc": "Increases the wearer's overall carry capacity by +15."}, {"name": "Flexible Cloth Frame", "desc": "Increases the wearer's overall carry capacity by +20."}, {"name": "Additional Pocket", "desc": "Increases the wearer's overall carry capacity by +25."}], "dr": [{"name": "Cloth Shell", "desc": "+2 Damage Resistance."}, {"name": "Hardened Cloth Shell", "desc": "+10 Damage Resistance."}]}, "BPLeather": {"cc": [{"name": "Leather Frame", "desc": "Increases the wearer's overall carry capacity by +20."}, {"name": "Sturdy Leather Frame", "desc": "Increases the wearer's overall carry capacity by +25."}], "dr": [{"name": "Leather Shell", "desc": "Damage resistance +5."}, {"name": "Treated Leather Shell", "desc": "Damage resistance +15."}]}, "BPRaider": {"cc": [{"name": "Aluminum Frame", "desc": "Increases the wearer's overall carry capacity by +30. -1 Agility."}, {"name": "Softened Metal Frame", "desc": "Increases the wearer's overall carry capacity by +35."}], "dr": [{"name": "Aluminum Plating", "desc": "Damage resistance +10."}, {"name": "Steel Plating", "desc": "+30 Damage Resistance."}]}, "BPOutcast": {"cc": [{"name": "Leather Frame", "desc": "Increases the wearer's overall carry capacity by +25. -2 Agility."}, {"name": "Sturdy Leather Frame", "desc": "Increases the wearer's overall carry capacity by +30. -1 Agility."}, {"name": "Reinforced Leather Frame", "desc": "Increases the wearer's overall carry capacity by +35."}, {"name": "Strengthened Leather Frame", "desc": "Increases the wearer's overall carry capacity by +40. +1 Endurance."}], "dr": [{"name": "Canvas Shell", "desc": "+5 damage resistance."}, {"name": "Hardened Canvas Shell", "desc": "+20 damage resistance."}]}, "BPMakeshift": {"cc": [{"name": "Leather Frame", "desc": "Increases the wearer's overall carry capacity by +30. -1 Agility."}, {"name": "Sturdy Leather Frame", "desc": "Increases the wearer's overall carry capacity by +35. -1 Agility."}, {"name": "Strengthened Leather Frame", "desc": "Increases the wearer's overall carry capacity by +40."}, {"name": "Strapped Water Canteen", "desc": "Increases the wearer's overall carry capacity by +40. Fresh water drink periodically."}, {"name": "Lucky Sloth", "desc": "Increases the wearer's overall carry capacity by +40. +1 Luck."}], "dr": [{"name": "Leather Shell", "desc": "Damage resistance +10."}, {"name": "Hardened Leather Shell", "desc": "Damage resistance +20."}]}, "BPTrapper": {"cc": [{"name": "Leather Frame", "desc": "Increases the wearer's overall carry capacity by +35. -1 Agility. +10% damage against animals and sea creatures."}, {"name": "Sturdy Leather Frame", "desc": "Increases the wearer's overall carry capacity by +40. +20% damage against animals and sea creatures."}, {"name": "Reinforced Leather Frame", "desc": "Increases the wearer's overall carry capacity by +40. +20% damage against animals and sea creatures."}], "dr": [{"name": "Brahmin Leather Shell", "desc": "Damage resistance +5."}, {"name": "Radstag Leather Shell", "desc": "Damage resistance +15."}, {"name": "Yao Guai Hide Shell", "desc": "Damage resistance +30."}]}, "BPBedroll": {"cc": [{"name": "Single Pouch", "desc": "Increases the wearer's overall carry capacity by +30. -1 Agility."}, {"name": "Additional Side Pouch", "desc": "Increases the wearer's overall carry capacity by +35."}, {"name": "Brahamin Leather Frame", "desc": "Increases the wearer's overall carry capacity by +40."}, {"name": "Souvenir Badges", "desc": "Increases the wearer's overall carry capacity by +45. +1 Charisma."}], "dr": []}, "BPDuffle": {"cc": [{"name": "Large Bag", "desc": "Increases the wearer's overall carry capacity by +40. -1 Agility. Weapon reload speed slightly increased."}, {"name": "Side Pouch", "desc": "Increases the wearer's overall carry capacity by +45. Weapon reload speed slightly increased."}, {"name": "Ammo Strap", "desc": "Increases the wearer's overall carry capacity by +50. Weapon reload speed slightly increased."}], "dr": [{"name": "Canvas Shell", "desc": "Damage resistance +10."}, {"name": "Reinforced Canvas Shell", "desc": "Damage resistance +20."}]}, "BPTinker": {"cc": [{"name": "Brahmin Leather Frame", "desc": "Increases the wearer's overall carry capacity by +40. -2 Agility."}, {"name": "Additional Canvas Bag", "desc": "Increases the wearer's overall carry capacity by +45. -2 Agility."}, {"name": "Stash Toolbox", "desc": "Increases the wearer's overall carry capacity by +50. -1 Agility."}, {"name": "Extra Leather Pouch", "desc": "Increases the wearer's overall carry capacity by +55."}, {"name": "Strapped Water Flask", "desc": "Increases the wearer's overall carry capacity by +55. Fresh water drink periodically."}], "dr": []}, "BPSling": {"cc": [{"name": "Small Pouch", "desc": "Increases the wearer's overall carry capacity by +40. -1 Agility. Increased AP regeneration rate when AP is below 10%."}, {"name": "Medium Pouch", "desc": "Increases the wearer's overall carry capacity by +45. Increased AP regeneration rate when AP is below 15%."}, {"name": "Large Pouch", "desc": "Increases the wearer's overall carry capacity by +50. Increased AP regeneration rate when AP is below 20%."}, {"name": "Large Pouch with Action Belt", "desc": "Increases the wearer's overall carry capacity by +55. Significantly increased AP regeneration rate when AP is below 20%."}], "dr": []}, "BPMountaineer": {"cc": [{"name": "Leather Frame", "desc": "Increases the wearer's overall carry capacity by +45. -1 Agility."}, {"name": "Sturdy Leather Frame", "desc": "Increases the wearer's overall carry capacity by +50."}, {"name": "Reinforced Leather Frame", "desc": "Increases the wearer's overall carry capacity by +55. +1 Endurance."}], "dr": []}, "BPWastelander": {"cc": [{"name": "Canvas Frame", "desc": "Increases the wearer's overall carry capacity by +50. -1 Agility."}, {"name": "Sturdy Canvas Frame", "desc": "Increases the wearer's overall carry capacity by +55. -1 Agility."}, {"name": "Strengthened Canvas Frame", "desc": "Increases the wearer's overall carry capacity by +60."}, {"name": "Water Bottle with Rad-X Pouch", "desc": "Increases the wearer's overall carry capacity by +60. Fresh drink and Rads restored periodically."}, {"name": "Strapped Water Bottle", "desc": "Increases the wearer's overall carry capacity by +60. Fresh water drink periodically."}], "dr": []}, "BPSquire": {"cc": [{"name": "Leather Frame", "desc": "Increases the wearer's overall carry capacity by +50. -2 Agility."}, {"name": "Sturdy Leather Frame", "desc": "Increases the wearer's overall carry capacity by +55. -1 Agility."}, {"name": "Supplementary Pocket", "desc": "Increases the wearer's overall carry capacity by +60."}, {"name": "Sturdy Pocketed Frame", "desc": "Increases the wearer's overall carry capacity by +60. +1 Endurance."}], "dr": [{"name": "Leather Shell", "desc": "Damage resistance +10."}, {"name": "Sturdy Leather Shell", "desc": "+20 Damage Resistance."}, {"name": "Reinforced Leather Shell", "desc": "+30 Damage Resistance."}]}, "BPMutant": {"cc": [{"name": "Wooden Trunk", "desc": "Increases the wearer's overall carry capacity by +50. -2 Agility."}, {"name": "Strapped Toolbox", "desc": "Increases the wearer's overall carry capacity by +55. -1 Agility. +1 Endurance. "}, {"name": "Extra Pouch", "desc": "Increases the wearer's overall carry capacity by +60. +1 Endurance. "}, {"name": "Lucky Teddy Bear", "desc": "Increases the wearer's overall carry capacity by +60. +1 Endurance. +1 Luck."}, {"name": "Super Mutant's Strength", "desc": "Increases the wearer's overall carry capacity by +65. +1 Endurance. +25% unarmed damage."}], "dr": [{"name": "Trunk Shell", "desc": "+30 damage resistance."}, {"name": "Reinforced Trunk Shell", "desc": "+40 damage resistance."}]}, "BPRadio": {"cc": [{"name": "SRC-3000", "desc": "Increases the wearer's overall carry capacity by +50. -2 Agility. +5% Accuracy in VATS."}, {"name": "SRC-3001", "desc": "Increases the wearer's overall carry capacity by +55. -1 Agility. +10% Accuracy in VATS."}, {"name": "SRC-3002", "desc": "Increases the wearer's overall carry capacity by +60. +15% accuracy in VATS."}, {"name": "SRC-3003", "desc": "Increases the wearer's overall carry capacity by +65. +20% accuracy in VATS."}], "dr": []}, "BPStealth": {"cc": [{"name": "Electron Charged Coil", "desc": "Increases the wearer's overall carry capacity by +55. -1 Agility."}, {"name": "Modulating Stealth Boy Mini-Field Generator", "desc": "Increases the wearer's overall carry capacity by +60. 10% harder to detect."}, {"name": "Third-Ion Plasma Reactor", "desc": "Increases the wearer's overall carry capacity by +65. +1 Endurance. +10 Rad Resist and +20 Energy Resist."}, {"name": "AutoDispense All-In-One Reactor", "desc": "Increases the wearer's overall carry capacity by +65. Water drink and rads removed periodically."}, {"name": "Anti-Radioisotope Micro Generator", "desc": "Increases the wearer's overall carry capacity by +65. Removes rads periodically."}], "dr": []}, "BPNuka": {"cc": [{"name": "Nuka-Cola", "desc": "Increases the wearer's overall carry capacity by +60."}, {"name": "Nuka-Cola Victory", "desc": "Increases the wearer's overall carry capacity by +70. +2 Strength."}, {"name": "Nuka-Cola Quartz", "desc": "Increases the wearer's overall carry capacity by +70. +2 Perception."}, {"name": "Nuka-Cola Grape", "desc": "Increases the wearer's overall carry capacity by +70. +2 Endurance."}, {"name": "Nuka-Cola Wild", "desc": "Increases the wearer's overall carry capacity by +70. +2 Luck."}, {"name": "Nuka-Cola Rush", "desc": "Increases the wearer's overall carry capacity by +70. +2 Agility."}, {"name": "Nuka-Cola Quantum", "desc": "Increases the wearer's overall carry capacity by +65. +2 Intelligence."}, {"name": "Nuka-Lixir", "desc": "Increases the wearer's overall carry capacity by +70. +20 additional damage resistance and rad resistance."}, {"name": "Nuka-Power", "desc": "Increases the wearer's overall carry capacity by +100."}, {"name": "Nuka-Gold", "desc": "Increases the wearer's overall carry capacity by +110."}, {"name": "Nuka-Cooler", "desc": "Increases the wearer's overall carry capacity by +70. +25 max HP and +10 max AP."}, {"name": "Nuka-Punch", "desc": "Increases the wearer's overall carry capacity by +70. Water drink regularly and rads removed periodically."}], "dr": []}, "BPChem": {"cc": [{"name": "User's Collection", "desc": "Increases the wearer's overall carry capacity by +55. -2 Agility. +5% damage resistance per withdrawal effect."}, {"name": "Gateway Chem", "desc": "Increases the wearer's overall carry capacity by +60. -1 Agility. +5% damage resistance and +5% weapon damage per withdrawal effect."}, {"name": "Hidden Stash", "desc": "Increases the wearer's overall carry capacity by +60. +10% damage resistance and +5% weapon damage per withdrawal effect."}, {"name": "Intervention", "desc": "Increases the wearer's overall carry capacity by +70. +10% weapon damage and +10% damage resistance per withdrawal effect."}], "dr": []}, "BPScribe": {"cc": [{"name": "Leather Pouches", "desc": "Increases the wearer's overall carry capacity by +60. -2 Agility."}, {"name": "Sturdy Leather Pouches", "desc": "Increases the wearer's overall carry capacity by +65. -1 Agility."}, {"name": "Additional Front Pockets", "desc": "Increases the wearer's overall carry capacity by +70."}, {"name": "Front Pockets with Harness", "desc": "Increases the wearer's overall carry capacity by +75. +1 Endurance."}], "dr": []}, "BPMilitary": {"cc": [{"name": "Canvas Frame", "desc": "Increases the wearer's overall carry capacity by +70. -1 Agility."}, {"name": "Military Canvas Frame", "desc": "Increases the wearer's overall carry capacity by +75."}, {"name": "Military Ammo Harness", "desc": "Increases the wearer's overall carry capacity by +80. Weapon reload speed increased."}, {"name": "Military Ballistic Fiber Frame", "desc": "Increases the wearer's overall carry capacity by +80. +1 Endurance."}], "dr": [{"name": "Canvas Shell", "desc": "Damage resistance +10."}, {"name": "Military Canvas Shell", "desc": "Damage resistance +30."}]}, "BPBattery": {"cc": [{"name": "High-Powered Battery", "desc": "Increases the wearer's overall carry capacity by +80. -1 Agility."}, {"name": "Anti-Gravity Electromagnetic Field Generator", "desc": "Increases the wearer's overall carry capacity by +85. Generates anti-gravity field after jumping."}, {"name": "Electromagnetic Close Proximity Field Projectile Accelerator", "desc": "Increases the wearer's overall carry capacity by +85. +15% damage with ballistic guns."}], "dr": []}, "BPWoodsman": {"cc": [{"name": "Leather Frame", "desc": "Increases the wearer's overall carry capacity by +75. -2 Agility."}, {"name": "Reinforced Leather Frame", "desc": "Increases the wearer's overall carry capacity by +80. -1 Agility."}, {"name": "Water Canteen with RadAway First Aid Kit", "desc": "Increases the wearer's overall carry capacity by +85. Water drink regularly and rads removed periodically."}, {"name": "Knife Sharpening Sheath", "desc": "Increases the wearer's overall carry capacity by +85. Melee weapon damage increased by +10%."}, {"name": "Reinforced Shadowed Frame", "desc": "Increases the wearer's overall carry capacity by +90. Ranged sneak attacks do 1.5x normal damage."}], "dr": []}, "BPMercenary": {"cc": [{"name": "Leather Frame", "desc": "Increases the wearer's overall carry capacity by +80. -1 Agility."}, {"name": "Military Leather Frame", "desc": "Increases the wearer's overall carry capacity by +85. +1 Endurance."}, {"name": "Military Ammunition Belt", "desc": "Increases the wearer's overall carry capacity by +85. +1 Endurance. Weapon reload speed increased."}], "dr": [{"name": "Military Canvas Shell", "desc": "Damage resistance +10."}, {"name": "Hardened Military Canvas Shell", "desc": "Damage resistance +20."}]}, "BPVault": {"cc": [{"name": "Vault-Tec Standard Edition", "desc": "Increases the wearer's overall carry capacity by +90. -2 Agility."}, {"name": "Vault-Tec “Plenty-'O-Pockets” Edition", "desc": "Increases the wearer's overall carry capacity by +95."}, {"name": "Vault-Tec “Goo-On-My-Shoe” Edition", "desc": "Increases the wearer's overall carry capacity by +100. +10% damage with energy weapons."}, {"name": "Vault-Tec “Stealthy-Boy” Edition", "desc": "Increases the wearer's overall carry capacity by +100. 10% harder to detect."}, {"name": "Vault-Tec “Big-Boom” Edition", "desc": "Increases the wearer's overall carry capacity by +100. +10% damage with ballistic guns."}, {"name": "Vault-Tec “Smooth-Operator” Edition", "desc": "Increases the wearer's overall carry capacity by +100. +1 Charisma."}], "dr": []}, "BPFusion": {"cc": [{"name": "Energy Cell Powered Coil", "desc": "Increases the wearer's overall carry capacity by +85. -2 Agility."}, {"name": "Wattz Fission Battery", "desc": "Increases the wearer's carry capacity by +90. -1 Agility."}, {"name": "Poseidon Energy Plasma Accelerator", "desc": "Increases the wearer's overall carry capacity by +95."}, {"name": "TX-28 Microfusion Reactor", "desc": "Increases the wearer's overall carry capacity by +100. +1 Endurance."}, {"name": "AutoDispense All-In-One Microfusion Reactor", "desc": "Increases the wearer's overall carry capacity by +100. Water drink regularly and rads removed periodically."}, {"name": "AutoDispense TX-30 Microfusion Reactor", "desc": "Increases the wearer's overall carry capacity by +100. +1 Endurance. Water drink regularly and rads removed periodically."}], "dr": [{"name": "Ballistic Fiber Plating", "desc": "+30 Damage Resist, +10 Energy Resist, +10 Rad Resist."}, {"name": "Ballistic Fiber and Titanium Carbide Plating", "desc": "+50 Damage Resist, +20 Energy Resist, +30 Rad Resist."}]}};
+const OMODS = {"BPShoulder": {"cc": [{"name": "Cloth Bag", "desc": "Increases the wearer's overall carry capacity by +10.", "perks": []}, {"name": "Additional Cloth Pouch", "desc": "Increases the wearer's overall carry capacity by +15.", "perks": ["Armorer I"]}, {"name": "Large Cloth Bag", "desc": "Increases the wearer's overall carry capacity by +20.", "perks": ["Armorer I"]}], "dr": []}, "BPMailbag": {"cc": [{"name": "Cloth Frame", "desc": "Increases the wearer's overall carry capacity by +15.", "perks": []}, {"name": "Flexible Cloth Frame", "desc": "Increases the wearer's overall carry capacity by +20.", "perks": ["Armorer I"]}, {"name": "Additional Pocket", "desc": "Increases the wearer's overall carry capacity by +25.", "perks": ["Armorer I"]}], "dr": [{"name": "Cloth Shell", "desc": "Damage resistance +2.", "perks": []}, {"name": "Hardened Cloth Shell", "desc": "Damage resistance +10.", "perks": ["Armorer I"]}]}, "BPLeather": {"cc": [{"name": "Leather Frame", "desc": "Increases the wearer's overall carry capacity by +20.", "perks": []}, {"name": "Sturdy Leather Frame", "desc": "Increases the wearer's overall carry capacity by +25.", "perks": ["Armorer I"]}], "dr": [{"name": "Leather Shell", "desc": "Damage resistance +5.", "perks": []}, {"name": "Treated Leather Shell", "desc": "Damage resistance +15.", "perks": ["Armorer I"]}]}, "BPRaider": {"cc": [{"name": "Aluminum Frame", "desc": "Increases the wearer's overall carry capacity by +30. -1 Agility.", "perks": []}, {"name": "Softened Metal Frame", "desc": "Increases the wearer's overall carry capacity by +35.", "perks": ["Armorer I", "Strong Back I"]}], "dr": [{"name": "Aluminum Plating", "desc": "Damage resistance +10.", "perks": []}, {"name": "Steel Plating", "desc": "Damage resistance +30.", "perks": ["Armorer I"]}]}, "BPOutcast": {"cc": [{"name": "Leather Frame", "desc": "Increases the wearer's overall carry capacity by +25. -2 Agility.", "perks": []}, {"name": "Sturdy Leather Frame", "desc": "Increases the wearer's overall carry capacity by +30. -1 Agility.", "perks": ["Armorer I", "Strong Back I"]}, {"name": "Reinforced Leather Frame", "desc": "Increases the wearer's overall carry capacity by +35.", "perks": ["Armorer II", "Strong Back I"]}, {"name": "Strengthened Leather Frame", "desc": "Increases the wearer's overall carry capacity by +40. +1 Endurance.", "perks": ["Armorer II", "Strong Back II"]}], "dr": [{"name": "Canvas Shell", "desc": "Damage resistance +5.", "perks": ["Armorer I"]}, {"name": "Hardened Canvas Shell", "desc": "Damage resistance +20.", "perks": ["Armorer II"]}]}, "BPMakeshift": {"cc": [{"name": "Leather Frame", "desc": "Increases the wearer's overall carry capacity by +30. -1 Agility.", "perks": []}, {"name": "Sturdy Leather Frame", "desc": "Increases the wearer's overall carry capacity by +35. -1 Agility.", "perks": ["Armorer I", "Strong Back I"]}, {"name": "Strengthened Leather Frame", "desc": "Increases the wearer's overall carry capacity by +40.", "perks": ["Armorer II", "Local Leader I"]}, {"name": "Strapped Water Canteen", "desc": "Increases the wearer's overall carry capacity by +40. Fresh water drink periodically.", "perks": ["Armorer II", "Lead Belly I"]}, {"name": "Lucky Sloth", "desc": "Increases the wearer's overall carry capacity by +40. +1 Luck.", "perks": ["Armorer II", "Strong Back I"]}], "dr": [{"name": "Leather Shell", "desc": "Damage resistance +10.", "perks": []}, {"name": "Hardened Leather Shell", "desc": "Damage resistance +20.", "perks": ["Armorer II"]}]}, "BPTrapper": {"cc": [{"name": "Leather Frame", "desc": "Increases the wearer's overall carry capacity by +35. -1 Agility. +10% damage against animals and sea creatures.", "perks": []}, {"name": "Sturdy Leather Frame", "desc": "Increases the wearer's overall carry capacity by +40. +20% damage against animals and sea creatures.", "perks": ["Armorer II", "Strong Back I"]}, {"name": "Reinforced Leather Frame", "desc": "Increases the wearer's overall carry capacity by +40. +20% damage against animals and sea creatures.", "perks": ["Armorer III", "Toughness I"]}], "dr": [{"name": "Brahmin Leather Shell", "desc": "Damage resistance +5.", "perks": []}, {"name": "Radstag Leather Shell", "desc": "Damage resistance +15.", "perks": ["Armorer I", "Strong Back I"]}, {"name": "Yao Guai Hide Shell", "desc": "Damage resistance +30.", "perks": ["Armorer II", "Strong Back I"]}]}, "BPBedroll": {"cc": [{"name": "Single Pouch", "desc": "Increases the wearer's overall carry capacity by +30. -1 Agility.", "perks": []}, {"name": "Additional Side Pouch", "desc": "Increases the wearer's overall carry capacity by +35.", "perks": ["Armorer I"]}, {"name": "Brahamin Leather Frame", "desc": "Increases the wearer's overall carry capacity by +40.", "perks": ["Armorer II"]}, {"name": "Souvenir Badges", "desc": "Increases the wearer's overall carry capacity by +45. +1 Charisma.", "perks": ["Armorer II", "Local Leader II"]}], "dr": []}, "BPDuffle": {"cc": [{"name": "Large Bag", "desc": "Increases the wearer's overall carry capacity by +40. -1 Agility. Weapon reload speed slightly increased.", "perks": []}, {"name": "Side Pouch", "desc": "Increases the wearer's overall carry capacity by +45. Weapon reload speed slightly increased.", "perks": ["Armorer I", "Strong Back I"]}, {"name": "Ammo Strap", "desc": "Increases the wearer's overall carry capacity by +50. Weapon reload speed slightly increased.", "perks": ["Armorer II", "Commando I"]}], "dr": [{"name": "Canvas Shell", "desc": "Damage resistance +10.", "perks": []}, {"name": "Reinforced Canvas Shell", "desc": "Damage resistance +20.", "perks": ["Armorer II"]}]}, "BPTinker": {"cc": [{"name": "Brahmin Leather Frame", "desc": "Increases the wearer's overall carry capacity by +40. -2 Agility.", "perks": []}, {"name": "Additional Canvas Bag", "desc": "Increases the wearer's overall carry capacity by +45. -2 Agility.", "perks": ["Armorer I", "Strong Back I"]}, {"name": "Stash Toolbox", "desc": "Increases the wearer's overall carry capacity by +50. -1 Agility.", "perks": ["Armorer I", "Strong Back I"]}, {"name": "Extra Leather Pouch", "desc": "Increases the wearer's overall carry capacity by +55.", "perks": ["Armorer II", "Lead Belly I"]}, {"name": "Strapped Water Flask", "desc": "Increases the wearer's overall carry capacity by +55. Fresh water drink periodically.", "perks": ["Armorer II", "Strong Back I"]}], "dr": []}, "BPSling": {"cc": [{"name": "Small Pouch", "desc": "Increases the wearer's overall carry capacity by +40. -1 Agility. Increased AP regeneration rate when AP is below 10%.", "perks": []}, {"name": "Medium Pouch", "desc": "Increases the wearer's overall carry capacity by +45. Increased AP regeneration rate when AP is below 15%.", "perks": ["Armorer II"]}, {"name": "Large Pouch", "desc": "Increases the wearer's overall carry capacity by +50. Increased AP regeneration rate when AP is below 20%.", "perks": ["Armorer III", "Chemist I"]}, {"name": "Large Pouch with Action Belt", "desc": "Increases the wearer's overall carry capacity by +55. Significantly increased AP regeneration rate when AP is below 20%.", "perks": ["Armorer IV", "Chemist II"]}], "dr": []}, "BPMountaineer": {"cc": [{"name": "Leather Frame", "desc": "Increases the wearer's overall carry capacity by +45. -1 Agility.", "perks": []}, {"name": "Sturdy Leather Frame", "desc": "Increases the wearer's overall carry capacity by +50.", "perks": ["Armorer II", "Strong Back II"]}, {"name": "Reinforced Leather Frame", "desc": "Increases the wearer's overall carry capacity by +55. +1 Endurance.", "perks": ["Armorer III", "Toughness I"]}], "dr": []}, "BPWastelander": {"cc": [{"name": "Canvas Frame", "desc": "Increases the wearer's overall carry capacity by +50. -1 Agility.", "perks": []}, {"name": "Sturdy Canvas Frame", "desc": "Increases the wearer's overall carry capacity by +55. -1 Agility.", "perks": ["Armorer II", "Strong Back I"]}, {"name": "Strengthened Canvas Frame", "desc": "Increases the wearer's overall carry capacity by +60.", "perks": ["Armorer III", "Chemist I"]}, {"name": "Water Bottle with Rad-X Pouch", "desc": "Increases the wearer's overall carry capacity by +60. Fresh drink and Rads restored periodically.", "perks": ["Armorer III", "Lead Belly I"]}, {"name": "Strapped Water Bottle", "desc": "Increases the wearer's overall carry capacity by +60. Fresh water drink periodically.", "perks": ["Armorer III", "Strong Back I"]}], "dr": []}, "BPSquire": {"cc": [{"name": "Leather Frame", "desc": "Increases the wearer's overall carry capacity by +50. -2 Agility.", "perks": []}, {"name": "Sturdy Leather Frame", "desc": "Increases the wearer's overall carry capacity by +55. -1 Agility.", "perks": ["Armorer II", "Strong Back I"]}, {"name": "Supplementary Pocket", "desc": "Increases the wearer's overall carry capacity by +60.", "perks": ["Armorer III", "Strong Back II"]}, {"name": "Sturdy Pocketed Frame", "desc": "Increases the wearer's overall carry capacity by +60. +1 Endurance.", "perks": ["Armorer II", "Strong Back II"]}], "dr": [{"name": "Leather Shell", "desc": "Damage resistance +10.", "perks": []}, {"name": "Sturdy Leather Shell", "desc": "Damage resistance +20.", "perks": ["Armorer II"]}, {"name": "Reinforced Leather Shell", "desc": "Damage resistance +30.", "perks": ["Armorer III"]}]}, "BPMutant": {"cc": [{"name": "Wooden Trunk", "desc": "Increases the wearer's overall carry capacity by +50. -2 Agility.", "perks": []}, {"name": "Strapped Toolbox", "desc": "Increases the wearer's overall carry capacity by +55. -1 Agility. +1 Endurance. ", "perks": ["Armorer II", "Strong Back I"]}, {"name": "Extra Pouch", "desc": "Increases the wearer's overall carry capacity by +60. +1 Endurance. ", "perks": ["Armorer II", "Strong Back I"]}, {"name": "Lucky Teddy Bear", "desc": "Increases the wearer's overall carry capacity by +60. +1 Endurance. +1 Luck.", "perks": ["Armorer II", "Strong Back II"]}, {"name": "Super Mutant's Strength", "desc": "Increases the wearer's overall carry capacity by +65. +1 Endurance. +25% unarmed damage.", "perks": ["Armorer II", "Strong Back II"]}], "dr": [{"name": "Trunk Shell", "desc": "Damage resistance +30.", "perks": []}, {"name": "Reinforced Trunk Shell", "desc": "Damage resistance +40.", "perks": ["Armorer II"]}]}, "BPRadio": {"cc": [{"name": "SRC-3000", "desc": "Increases the wearer's overall carry capacity by +50. -2 Agility. +5% Accuracy in VATS.", "perks": []}, {"name": "SRC-3001", "desc": "Increases the wearer's overall carry capacity by +55. -1 Agility. +10% Accuracy in VATS.", "perks": ["Armorer I"]}, {"name": "SRC-3002", "desc": "Increases the wearer's overall carry capacity by +60. +15% accuracy in VATS.", "perks": ["Armorer II", "Local Leader I"]}, {"name": "SRC-3003", "desc": "Increases the wearer's overall carry capacity by +65. +20% accuracy in VATS.", "perks": ["Armorer III", "Local Leader II"]}], "dr": []}, "BPStealth": {"cc": [{"name": "Electron Charged Coil", "desc": "Increases the wearer's overall carry capacity by +55. -1 Agility.", "perks": []}, {"name": "Modulating Stealth Boy Mini-Field Generator", "desc": "Increases the wearer's overall carry capacity by +60. 10% harder to detect.", "perks": ["Armorer II", "Sneak I"]}, {"name": "Third-Ion Plasma Reactor", "desc": "Increases the wearer's overall carry capacity by +65. +1 Endurance. +10 Rad Resist and +20 Energy Resist.", "perks": ["Armorer III", "Science! III"]}, {"name": "AutoDispense All-In-One Reactor", "desc": "Increases the wearer's overall carry capacity by +65. Water drink and rads removed periodically.", "perks": ["Armorer III", "Science! II"]}, {"name": "Anti-Radioisotope Micro Generator", "desc": "Increases the wearer's overall carry capacity by +65. Removes rads periodically.", "perks": ["Armorer III", "Science! II"]}], "dr": []}, "BPNuka": {"cc": [{"name": "Nuka-Cola", "desc": "Increases the wearer's overall carry capacity by +60.", "perks": []}, {"name": "Nuka-Cola Victory", "desc": "Increases the wearer's overall carry capacity by +70. +2 Strength.", "perks": ["Chemist I"]}, {"name": "Nuka-Cola Quartz", "desc": "Increases the wearer's overall carry capacity by +70. +2 Perception.", "perks": ["Chemist I"]}, {"name": "Nuka-Cola Grape", "desc": "Increases the wearer's overall carry capacity by +70. +2 Endurance.", "perks": ["Chemist I"]}, {"name": "Nuka-Cola Wild", "desc": "Increases the wearer's overall carry capacity by +70. +2 Luck.", "perks": ["Chemist I"]}, {"name": "Nuka-Cola Rush", "desc": "Increases the wearer's overall carry capacity by +70. +2 Agility.", "perks": ["Chemist I"]}, {"name": "Nuka-Cola Quantum", "desc": "Increases the wearer's overall carry capacity by +65. +2 Intelligence.", "perks": ["Chemist I"]}, {"name": "Nuka-Lixir", "desc": "Increases the wearer's overall carry capacity by +70. +20 additional damage resistance and rad resistance.", "perks": ["Armorer III", "Chemist II"]}, {"name": "Nuka-Power", "desc": "Increases the wearer's overall carry capacity by +100.", "perks": ["Armorer I", "Chemist II"]}, {"name": "Nuka-Gold", "desc": "Increases the wearer's overall carry capacity by +110.", "perks": ["Chemist II", "Armorer I"]}, {"name": "Nuka-Cooler", "desc": "Increases the wearer's overall carry capacity by +70. +25 max HP and +10 max AP.", "perks": ["Armorer II", "Chemist II"]}, {"name": "Nuka-Punch", "desc": "Increases the wearer's overall carry capacity by +70. Water drink regularly and rads removed periodically.", "perks": ["Armorer II", "Chemist II"]}], "dr": []}, "BPChem": {"cc": [{"name": "User's Collection", "desc": "Increases the wearer's overall carry capacity by +55. -2 Agility. +5% damage resistance per withdrawal effect.", "perks": []}, {"name": "Gateway Chem", "desc": "Increases the wearer's overall carry capacity by +60. -1 Agility. +5% damage resistance and +5% weapon damage per withdrawal effect.", "perks": ["Chemist II"]}, {"name": "Hidden Stash", "desc": "Increases the wearer's overall carry capacity by +60. +10% damage resistance and +5% weapon damage per withdrawal effect.", "perks": ["Chemist III"]}, {"name": "Intervention", "desc": "Increases the wearer's overall carry capacity by +70. +10% weapon damage and +10% damage resistance per withdrawal effect.", "perks": ["Chemist IV"]}], "dr": []}, "BPScribe": {"cc": [{"name": "Leather Pouches", "desc": "Increases the wearer's overall carry capacity by +60. -2 Agility.", "perks": []}, {"name": "Sturdy Leather Pouches", "desc": "Increases the wearer's overall carry capacity by +65. -1 Agility.", "perks": ["Armorer II", "Strong Back I"]}, {"name": "Additional Front Pockets", "desc": "Increases the wearer's overall carry capacity by +70.", "perks": ["Armorer II", "Strong Back II"]}, {"name": "Front Pockets with Harness", "desc": "Increases the wearer's overall carry capacity by +75. +1 Endurance.", "perks": ["Armorer III", "Strong Back II"]}], "dr": []}, "BPMilitary": {"cc": [{"name": "Canvas Frame", "desc": "Increases the wearer's overall carry capacity by +70. -1 Agility.", "perks": []}, {"name": "Military Canvas Frame", "desc": "Increases the wearer's overall carry capacity by +75.", "perks": ["Armorer III", "Strong Back II"]}, {"name": "Military Ammo Harness", "desc": "Increases the wearer's overall carry capacity by +80. Weapon reload speed increased.", "perks": ["Armorer III", "Gun Nut III"]}, {"name": "Military Ballistic Fiber Frame", "desc": "Increases the wearer's overall carry capacity by +80. +1 Endurance.", "perks": ["Armorer III", "Strong Back III"]}], "dr": [{"name": "Canvas Shell", "desc": "Damage resistance +10.", "perks": []}, {"name": "Military Canvas Shell", "desc": "Damage resistance +30.", "perks": ["Armorer III"]}]}, "BPBattery": {"cc": [{"name": "High-Powered Battery", "desc": "Increases the wearer's overall carry capacity by +80. -1 Agility.", "perks": []}, {"name": "Anti-Gravity Electromagnetic Field Generator", "desc": "Increases the wearer's overall carry capacity by +85. Generates anti-gravity field after jumping.", "perks": ["Rifleman II", "Science! III"]}, {"name": "Electromagnetic Close Proximity Field Projectile Accelerator", "desc": "Increases the wearer's overall carry capacity by +85. +15% damage with ballistic guns.", "perks": ["Armorer II", "Science! IV"]}], "dr": []}, "BPWoodsman": {"cc": [{"name": "Leather Frame", "desc": "Increases the wearer's overall carry capacity by +75. -2 Agility.", "perks": []}, {"name": "Reinforced Leather Frame", "desc": "Increases the wearer's overall carry capacity by +80. -1 Agility.", "perks": ["Armorer II"]}, {"name": "Water Canteen with RadAway First Aid Kit", "desc": "Increases the wearer's overall carry capacity by +85. Water drink regularly and rads removed periodically.", "perks": ["Armorer III", "Big Leagues II"]}, {"name": "Knife Sharpening Sheath", "desc": "Increases the wearer's overall carry capacity by +85. Melee weapon damage increased by +10%.", "perks": ["Medic II", "Lead Belly I"]}, {"name": "Reinforced Shadowed Frame", "desc": "Increases the wearer's overall carry capacity by +90. Ranged sneak attacks do 1.5x normal damage.", "perks": ["Armorer III", "Ninja II"]}], "dr": []}, "BPMercenary": {"cc": [{"name": "Leather Frame", "desc": "Increases the wearer's overall carry capacity by +80. -1 Agility.", "perks": []}, {"name": "Military Leather Frame", "desc": "Increases the wearer's overall carry capacity by +85. +1 Endurance.", "perks": ["Armorer IV", "Strong Back III"]}, {"name": "Military Ammunition Belt", "desc": "Increases the wearer's overall carry capacity by +85. +1 Endurance. Weapon reload speed increased.", "perks": ["Armorer IV", "Strong Back III"]}], "dr": [{"name": "Military Canvas Shell", "desc": "Damage resistance +10.", "perks": []}, {"name": "Hardened Military Canvas Shell", "desc": "Damage resistance +20.", "perks": ["Armorer IV"]}]}, "BPVault": {"cc": [{"name": "Vault-Tec Standard Edition", "desc": "Increases the wearer's overall carry capacity by +90. -2 Agility.", "perks": []}, {"name": "Vault-Tec “Plenty-'O-Pockets” Edition", "desc": "Increases the wearer's overall carry capacity by +95.", "perks": ["Armorer II", "Science! II"]}, {"name": "Vault-Tec “Goo-On-My-Shoe” Edition", "desc": "Increases the wearer's overall carry capacity by +100. +10% damage with energy weapons.", "perks": ["Armorer III", "Local Leader II"]}, {"name": "Vault-Tec “Stealthy-Boy” Edition", "desc": "Increases the wearer's overall carry capacity by +100. 10% harder to detect.", "perks": ["Armorer III", "Gun Nut III"]}, {"name": "Vault-Tec “Big-Boom” Edition", "desc": "Increases the wearer's overall carry capacity by +100. +10% damage with ballistic guns.", "perks": ["Armorer III", "Sneak III"]}, {"name": "Vault-Tec “Smooth-Operator” Edition", "desc": "Increases the wearer's overall carry capacity by +100. +1 Charisma.", "perks": ["Armorer III", "Science! III"]}], "dr": []}, "BPFusion": {"cc": [{"name": "Energy Cell Powered Coil", "desc": "Increases the wearer's overall carry capacity by +85. -2 Agility.", "perks": []}, {"name": "Wattz Fission Battery", "desc": "Increases the wearer's carry capacity by +90. -1 Agility.", "perks": ["Armorer II", "Science! II"]}, {"name": "Poseidon Energy Plasma Accelerator", "desc": "Increases the wearer's overall carry capacity by +95.", "perks": ["Armorer III", "Science! III"]}, {"name": "TX-28 Microfusion Reactor", "desc": "Increases the wearer's overall carry capacity by +100. +1 Endurance.", "perks": ["Science! IV", "Strong Back II"]}, {"name": "AutoDispense All-In-One Microfusion Reactor", "desc": "Increases the wearer's overall carry capacity by +100. Water drink regularly and rads removed periodically.", "perks": ["Strong Back II", "Science! IV"]}, {"name": "AutoDispense TX-30 Microfusion Reactor", "desc": "Increases the wearer's overall carry capacity by +100. +1 Endurance. Water drink regularly and rads removed periodically.", "perks": ["Armorer III", "Science! IV"]}], "dr": [{"name": "Ballistic Fiber Plating", "desc": "Damage resistance +30. Energy resistance +10. Rad resistance +10.", "perks": []}, {"name": "Ballistic Fiber and Titanium Carbide Plating", "desc": "Damage resistance +50. Energy resistance +20. Rad resistance +30.", "perks": ["Armorer IV", "Strong Back II"]}]}};
+
+
+function highlightDesc(desc) {
+  let s = desc;
+  // 1. Red: just the negative number before Agility
+  s = s.replace(/(-[12])(?=\s+Agility)/g, '<span style="color:#dd4444">$1</span>');
+  // 2. Teal bold: carry capacity value only
+  s = s.replace(/carry capacity by (\+\d+)/g, 'carry capacity by <span style="color:#00e5ff;font-weight:bold;text-shadow:0 0 6px rgba(0,229,255,0.3)">$1</span>');
+  // 3. Off-white: all other numeric values and percentages
+  s = s.replace(/(?<![\w<])(\+[\d.]+x?%?)(?![\d])/g, function(match, p1, offset, str) {
+    const before = str.substring(0, offset);
+    if ((before.match(/<span/g)||[]).length > (before.match(/<\/span>/g)||[]).length) return match;
+    return '<span style="color:#ccccaa">' + p1 + '</span>';
+  });
+  return s;
+}
 
 // ── Image preview on hover ──────────────────────────────────────────────────
 const preview = document.createElement('div');
@@ -1684,15 +1750,19 @@ function buildColorTags(colors) {
 
 function buildOmodList(mods, cls) {
   if (!mods || mods.length === 0) return '';
-  return '<ul class="omod-list">' + mods.map((m, i) =>
-    `<li class="omod-item ${cls}">
+  return '<ul class="omod-list">' + mods.map((m, i) => {
+    const perksHTML = (m.perks && m.perks.length)
+      ? '<div class="omod-perks">' + m.perks.map(p => `<span class="perk-tag">${p}</span>`).join('') + '</div>'
+      : '';
+    return `<li class="omod-item ${cls}">
       <span class="omod-tier">T${i+1}</span>
       <div class="omod-content">
         <div class="omod-name">${m.name}</div>
-        <div class="omod-desc">${m.desc.replace(/(\+\d+(?:\.\d+)?(?:\s*CC)?)/g, '<span class="cc-val">$1</span>')}</div>
+        <div class="omod-desc">${highlightDesc(m.desc)}</div>
+        ${perksHTML}
       </div>
-    </li>`
-  ).join('') + '</ul>';
+    </li>`;
+  }).join('') + '</ul>';
 }
 
 function buildLocationHTML(loc) {
@@ -1752,12 +1822,38 @@ function openModal(idx) {
         <span class="omod-tier">T1</span>
         <div class="omod-content">
           <div class="omod-name">Base Resistance</div>
-          <div class="omod-desc">${bp.dr}</div>
+          <div class="omod-desc">${(function(){
+            const OW = '<span style="color:#ccccaa">';
+            const C = '</span>';
+            return bp.dr
+              .replace(/\+(\d+)\s*DR/g, 'Damage resistance ' + OW + '+$1' + C + '.')
+              .replace(/\+(\d+)\s*ER/g, ' Energy resistance ' + OW + '+$1' + C + '.')
+              .replace(/\+(\d+)\s*RR/g, ' Rad resistance ' + OW + '+$1' + C + '.')
+              .replace(/→.*$/, '')
+              .replace(/\s*\|\s*/g, ' ')
+              .trim()
+              .replace(/\.\s*\./g, '.')
+              .replace(/\s+/g, ' ');
+          })()}</div>
         </div>
       </li></ul>`}
 
       <div class="tt-section-label">▸ Crafting Requirements</div>
-      <div class="location-box"><div class="location-name" style="font-size:15px;color:#88aa88;">${bp.crafting}</div></div>
+      <div class="location-box" style="padding:0;">
+        ${(function() {
+          const parts = bp.crafting.split(' · ');
+          const perkMatch = bp.crafting.match(/\[([^\]]+)\]/);
+          const junk = parts.filter(p => !p.startsWith('['));
+          const perks = perkMatch ? perkMatch[1].split(',').map(p => p.trim()) : [];
+          const junkHTML = '<ul class="crafting-list">' +
+            junk.map(j => `<li class="crafting-item">${j}</li>`).join('') +
+            '</ul>';
+          const perksHTML = perks.length
+            ? '<div class="crafting-perks">' + perks.map(p => `<span class="perk-tag">${p}</span>`).join('') + '</div>'
+            : '';
+          return junkHTML + perksHTML;
+        })()}
+      </div>
 
       ${bp.colors.length > 0 ? `
       <div class="tt-section-label">▸ Available Colors</div>
