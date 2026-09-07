@@ -1353,8 +1353,7 @@
     transform: translateY(6px);
     transition: opacity 0.18s ease, transform 0.18s ease;
   }
-  #help-btn:hover + #help-popup,
-  #help-popup:hover {
+  #help-popup.is-open {
     opacity: 1;
     pointer-events: all;
     transform: translateY(0);
@@ -1409,12 +1408,14 @@
   ::-webkit-scrollbar-thumb:hover { background: var(--green); box-shadow: 0 0 6px var(--green-glow); }
   * { scrollbar-width: thin; scrollbar-color: var(--green-dim) var(--bg); }
 </style>
+<link rel="stylesheet" href="collectibles.css">
+<link rel="stylesheet" href="analytics.css">
 </head>
 <body>
 <div id="boot-screen">
   <div class="boot-line" id="bl0">PIP-BOY OS v2.0 .............. OK</div>
   <div class="boot-line" id="bl1">LOADING FIELD DATABASE ........ OK</div>
-  <div class="boot-line" id="bl2">26 BACKPACKS INDEXED .......... OK</div>
+  <div class="boot-line" id="bl2">35 CATALOG ENTRIES INDEXED .... OK</div>
   <div class="boot-line" id="bl3">INITIALIZING INTERFACE ........ OK</div>
   <div class="boot-bar-wrap"><div class="boot-bar" id="boot-bar"></div></div>
 </div>
@@ -1422,8 +1423,8 @@
 <header>
   <div class="pip-logo">◈ Pip-Boy Database v2.0 ◈</div>
   <div class="main-title">Backpacks of the<br>Commonwealth</div>
-  <div class="subtitle">Field Equipment Catalog</div>
-  <div class="version-badge">v2.0.0 · 26 ITEMS INDEXED</div>
+  <div class="subtitle">Field Equipment & Collectibles Catalog</div>
+  <div class="version-badge">v2.0.0 · 35 ITEMS INDEXED</div>
   <div class="divider"></div>
   <div class="stats-bar">
     <div class="stat-item">
@@ -1435,16 +1436,21 @@
       <span class="stat-label">Workbench Mods</span>
     </div>
     <div class="stat-item">
-      <span class="stat-num" data-target="50" data-suffix="+">0</span>
-      <span class="stat-label">Skins & Colors</span>
+      <span class="stat-num" data-target="4" data-suffix="">0</span>
+      <span class="stat-label">Bobbleheads</span>
     </div>
     <div class="stat-item">
       <span class="stat-num" data-target="5" data-suffix="">0</span>
-      <span class="stat-label">New Magazines</span>
+      <span class="stat-label">Magazines</span>
     </div>
   </div>
 </header>
 
+<nav class="catalog-nav" aria-label="Catalog categories">
+  <button class="catalog-tab" data-category="backpacks" aria-pressed="true">BACKPACKS <span>26</span></button>
+  <button class="catalog-tab" data-category="bobbleheads" aria-pressed="false">BOBBLEHEADS <span>4</span></button>
+  <button class="catalog-tab" data-category="magazines" aria-pressed="false">MAGAZINES <span>5</span></button>
+</nav>
 <div class="view-toggle">
   <button class="toggle-btn active" id="btn-grid" onclick="setView('grid')">⊞ &nbsp;CARD VIEW</button>
   <button class="toggle-btn" id="btn-table" onclick="setView('table')">☰ &nbsp;TABLE VIEW</button>
@@ -1453,8 +1459,17 @@
 <div class="search-wrap">
   <input class="search-box" id="search-input" type="text" placeholder="◈  SEARCH BACKPACKS..." autocomplete="off" spellcheck="false">
 </div>
-<div style="text-align:center;font-size:9px;letter-spacing:3px;color:var(--text-dim);margin-bottom:24px;margin-top:-16px;">CLICK ANY ENTRY TO VIEW FULL FIELD SPECIFICATIONS</div>
+<div style="text-align:center;font-size:9px;letter-spacing:3px;color:var(--text-dim);margin-bottom:24px;margin-top:-16px;">SELECT AN ENTRY FOR DETAILS</div>
+<div class="catalog-summary"><span id="catalog-count" role="status" aria-live="polite"></span><p id="catalog-description"></p></div>
+<div id="catalog-empty" hidden>No matching entries. Try another name, location, or effect, or choose a different category.</div>
 <div class="grid" id="grid"></div>
+<div class="grid" id="collectible-grid" hidden></div>
+<div id="collectible-table-view" hidden><table class="collectible-table" aria-label="Collectible effects and locations"><thead><tr>
+<th scope="col" aria-sort="none"><button class="collectible-sort" data-sort="name">Name <span aria-hidden="true">↕</span></button></th>
+<th scope="col">Effects</th>
+<th scope="col" aria-sort="none"><button class="collectible-sort" data-sort="location">Location <span aria-hidden="true">↕</span></button></th>
+</tr></thead><tbody id="collectible-table-body"></tbody></table></div>
+<dialog id="collectible-dialog" class="collectible-dialog" aria-labelledby="collectible-dialog-title"></dialog>
 
 <div id="map-view">
   <div class="map-container" id="map-container">
@@ -1468,23 +1483,40 @@
 
 <!-- Help button -->
 <div id="copy-flash" class="copy-flash">COPIED</div>
-<div id="help-btn">?</div>
-<div id="help-popup">
-  <div class="help-header">◈ ABOUT THIS SITE</div>
+<button id="help-btn" aria-label="About this catalog and site traffic" aria-expanded="false" aria-controls="help-popup">?</button>
+<aside id="help-popup" aria-label="About this catalog and site traffic" hidden>
+  <div class="help-header">◈ FIELD CATALOG <button id="help-close" aria-label="Close about panel">×</button></div>
+  <section class="traffic" aria-labelledby="traffic-title">
+    <div class="traffic-heading"><h2 id="traffic-title">SITE TRAFFIC</h2><div class="traffic-ranges" role="group" aria-label="Traffic date range">
+      <button data-traffic-range="1m" aria-pressed="true" aria-label="Past month">1M</button>
+      <button data-traffic-range="1y" aria-pressed="false" aria-label="Past year">1Y</button>
+      <button data-traffic-range="all" aria-pressed="false" aria-label="All recorded history">ALL</button>
+    </div></div>
+    <div id="traffic-total" class="traffic-total" hidden><strong id="traffic-count"></strong> visits<p id="traffic-period"></p></div>
+    <p id="traffic-status" role="status" aria-live="polite">Open the panel to load traffic.</p>
+    <div id="traffic-chart" hidden></div>
+    <button id="traffic-retry" hidden>Try again</button>
+    <details id="traffic-data" hidden><summary>View counts by date</summary><table><thead><tr><th scope="col">Period (UTC)</th><th scope="col">Visits</th></tr></thead><tbody id="traffic-data-body"></tbody></table></details>
+    <p class="traffic-note"><span id="traffic-since"></span> Counts may take up to 4 hours to refresh. Return visits can count again; this is not a count of distinct people.</p>
+    <p class="traffic-note">Analytics by <a href="https://www.goatcounter.com" target="_blank" rel="noopener">GoatCounter</a>.</p>
+  </section>
+  <details><summary>About this catalog</summary>
   <ul class="help-list">
     <li>26 unique backpacks with full stats and descriptions</li>
+    <li>4 backpack upgrade bobbleheads and 5 magazines with effects and locations</li>
     <li>Upgrade tiers sourced directly from the Creation Kit</li>
     <li>Carry capacity, resistance, and crafting data for every mod</li>
     <li>Hand-placed world locations for each backpack</li>
     <li>Card view and sortable table view</li>
-    <li>Live search by name, ID, or location</li>
+    <li>Search each category by name or location; search collectible effects too</li>
     <li>Click any entry to view full field specifications</li>
     <li>Hover over cards to preview backpack image</li>
-    <li>All images embedded — no external dependencies</li>
+    <li>Backpack images embedded in the catalog</li>
     <li>Color-coded upgrade tiers with ease-out animations</li>
   </ul>
+  </details>
   <div class="help-footer">Website created by bmanzzs</div>
-</div>
+</aside>
 
 <script>
 const BACKPACKS = [
@@ -2343,14 +2375,7 @@ function buildMap() {
 }
 
 function setView(v) {
-  document.getElementById('grid').style.display       = v==='grid'  ? '' : 'none';
-  document.getElementById('table-view').style.display = v==='table' ? 'block' : 'none';
-  document.getElementById('map-view').style.display   = v==='map'   ? 'block' : 'none';
-  document.getElementById('btn-grid').classList.toggle('active',  v==='grid');
-  document.getElementById('btn-table').classList.toggle('active', v==='table');
-  document.getElementById('btn-map').classList.toggle('active',   v==='map');
-  if (v==='table' && !document.getElementById('table-body').children.length) buildTable();
-  if (v==='map') buildMap();
+  showCatalogView(v);
 }
 
 function buildTable() {
@@ -2432,25 +2457,7 @@ function buildTable() {
 })();
 
 
-// ── Search filter ──────────────────────────────────────────────
-document.getElementById('search-input').addEventListener('input', function() {
-  const q = this.value.toLowerCase().trim();
-  document.querySelectorAll('.card').forEach(card => {
-    const bp  = BACKPACKS[parseInt(card.dataset.idx)];
-    const hit = !q || bp.name.toLowerCase().includes(q)
-                   || bp.id.toLowerCase().includes(q)
-                   || bp.location.toLowerCase().includes(q);
-    card.style.display = hit ? '' : 'none';
-  });
-  document.querySelectorAll('#table-body tr').forEach(row => {
-    const bp  = BACKPACKS[parseInt(row.dataset.idx)];
-    if (!bp) return;
-    const hit = !q || bp.name.toLowerCase().includes(q)
-                   || bp.id.toLowerCase().includes(q)
-                   || bp.location.toLowerCase().includes(q);
-    row.style.display = hit ? '' : 'none';
-  });
-});
+// Category search is handled in collectibles.js.
 
 // ── Table sort ─────────────────────────────────────────────────
 let sortCol = null, sortDir = 1;
@@ -2538,5 +2545,9 @@ document.addEventListener('click', function(e) {
 });
 
 </script>
+<script src="collectibles-data.js"></script>
+<script src="collectibles.js"></script>
+<script src="analytics-config.js"></script>
+<script src="analytics.js"></script>
 </body>
 </html>
