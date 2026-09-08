@@ -47,6 +47,7 @@ function setCatalogCategory(category) {
 }
 
 function showCatalogView(view) {
+  hideCollectiblePreview();
   catalogView = view === 'map' && catalogCategory !== 'backpacks' ? 'grid' : view;
   const backpacks = catalogCategory === 'backpacks';
   document.getElementById('grid').style.display = backpacks && catalogView === 'grid' ? '' : 'none';
@@ -86,6 +87,7 @@ function applyCatalogSearch() {
 }
 
 function renderCollectibles() {
+  hideCollectiblePreview();
   const items = categoryItems().filter(item => collectibleMatches(item, catalogQuery())).sort((a,b) => {
     if (collectibleSort.key === 'sourceRow') return a.sourceRow - b.sourceRow;
     const left = collectibleSort.key === 'name' ? a.name : collectibleLocation(a);
@@ -96,14 +98,14 @@ function renderCollectibles() {
   document.getElementById('collectible-grid').innerHTML = items.map(item => `
     <button class="collectible-card" data-collectible-row="${item.sourceRow}" aria-label="View details for ${escapeCatalog(item.name)}">
       <div class="collectible-kicker">${kind}</div>
-      <h2>${escapeCatalog(item.name)}</h2>
+      <div class="collectible-card-heading">${item.thumbnail ? `<img class="collectible-thumbnail" src="${escapeCatalog(item.thumbnail)}" alt="" width="64" height="76" loading="lazy">` : ''}<h2>${escapeCatalog(item.name)}</h2></div>
       <div class="collectible-effects">${collectibleEffects(item).map(effect => `<span class="collectible-effect">${escapeCatalog(effect)}</span>`).join('')}</div>
       <div class="collectible-place">${escapeCatalog(collectibleLocation(item))}</div>
       <div class="collectible-id">${escapeCatalog(item.locationId)}</div>
       <span class="collectible-hint">◉ VIEW EFFECTS & LOCATION</span>
     </button>`).join('');
   document.getElementById('collectible-table-body').innerHTML = items.map(item => `
-    <tr><td><button class="collectible-details" data-collectible-row="${item.sourceRow}">${escapeCatalog(item.name)}</button></td>
+    <tr><td><button class="collectible-details collectible-table-name" data-collectible-row="${item.sourceRow}">${item.thumbnail ? `<img class="collectible-thumbnail" src="${escapeCatalog(item.thumbnail)}" alt="" width="44" height="52" loading="lazy">` : ''}<span>${escapeCatalog(item.name)}</span></button></td>
       <td>${collectibleEffects(item).map(escapeCatalog).join('<br>')}</td>
       <td>${escapeCatalog(collectibleLocation(item))}<div class="collectible-id">${escapeCatalog(item.locationId)}</div></td></tr>`).join('');
   return items.length;
@@ -113,6 +115,7 @@ const collectibleDialog = document.getElementById('collectible-dialog');
 function openCollectible(row) {
   const item = COLLECTIBLES.find(entry => entry.sourceRow === row);
   if (!item) return;
+  hideCollectiblePreview();
   const isBobblehead = item.type === 'bobbleheads';
   const unexpanded = item.effects.some(effect => !COLLECTIBLE_EFFECT_LABELS[effect]);
   collectibleDialog.innerHTML = `
@@ -125,11 +128,13 @@ function openCollectible(row) {
     ${unexpanded ? '<p class="source-effects">Some effects are listed using the source sheet’s shorthand; exact bonuses have not been expanded.</p>' : ''}
     <h3>▸ ${item.locationId === 'GameStart' ? 'ACQUISITION' : 'WORLD LOCATION'}</h3>
     <p>${escapeCatalog(collectibleLocation(item))}</p>
-    <p class="source-effects">${item.locationId === 'GameStart' ? 'The sheet lists this entry at game start rather than at a world location.' : 'Location ID: ' + escapeCatalog(item.locationId) + '. The sheet does not specify an exact room or pickup position.'}</p>
+    <p class="source-effects">${item.locationId === 'GameStart' ? 'Available at game start.' : 'Location ID: ' + escapeCatalog(item.locationId)}</p>
+    ${item.locationImage ? `<figure class="collectible-location-photo"><figcaption>${escapeCatalog(item.locationHint)}</figcaption><a href="${escapeCatalog(item.locationImage)}" target="_blank" rel="noopener" aria-label="Open full-size location screenshot for ${escapeCatalog(item.name)}"><img src="${escapeCatalog(item.locationImage)}" alt="${escapeCatalog(item.name + ' ' + item.locationHint + ' at ' + collectibleLocation(item))}" width="640" height="640"></a></figure>` : ''}
     `;
   collectibleDialog.querySelector('.collectible-close').addEventListener('click', () => collectibleDialog.close());
   document.body.classList.add('modal-open');
   collectibleDialog.showModal();
+  collectibleDialog.scrollTop = 0;
 }
 collectibleDialog.addEventListener('close', () => document.body.classList.remove('modal-open'));
 collectibleDialog.addEventListener('click', event => {
@@ -151,4 +156,45 @@ document.querySelectorAll('.collectible-sort').forEach(button => button.addEvent
   renderCollectibles();
 }));
 document.getElementById('search-input').addEventListener('input', applyCatalogSearch);
+
+// A separate preview keeps collectible hover state independent of backpack previews.
+const collectiblePreview = document.createElement('div');
+collectiblePreview.id = 'collectible-preview';
+collectiblePreview.setAttribute('aria-hidden','true');
+collectiblePreview.innerHTML = '<img alt="" width="180" height="214"><div class="collectible-preview-label"></div>';
+document.body.appendChild(collectiblePreview);
+function hideCollectiblePreview() { collectiblePreview.classList.remove('visible'); }
+function showCollectiblePreview(button) {
+  const item = COLLECTIBLES.find(entry => entry.sourceRow === Number(button.dataset.collectibleRow));
+  if (!item?.thumbnail || collectibleDialog.open) return;
+  collectiblePreview.querySelector('img').src = item.thumbnail;
+  collectiblePreview.querySelector('.collectible-preview-label').textContent = item.name;
+  const rect = button.getBoundingClientRect();
+  const width = collectiblePreview.offsetWidth, height = collectiblePreview.offsetHeight;
+  let left = rect.right + 14;
+  if (left + width > innerWidth - 8) left = rect.left - width - 14;
+  collectiblePreview.style.left = Math.max(8,Math.min(left,innerWidth-width-8))+'px';
+  collectiblePreview.style.top = Math.max(8,Math.min(rect.top,innerHeight-height-8))+'px';
+  collectiblePreview.classList.add('visible');
+}
+for (const container of document.querySelectorAll('#collectible-grid, #collectible-table-body')) {
+  container.addEventListener('pointerover',event => {
+    if (event.pointerType !== 'mouse' || !matchMedia('(hover: hover) and (pointer: fine)').matches) return;
+    const button = event.target.closest('[data-collectible-row]');
+    if (button && !button.contains(event.relatedTarget)) showCollectiblePreview(button);
+  });
+  container.addEventListener('pointerout',event => {
+    const button = event.target.closest('[data-collectible-row]');
+    if (button && !button.contains(event.relatedTarget)) hideCollectiblePreview();
+  });
+  container.addEventListener('focusin',event => {
+    if (!matchMedia('(hover: hover) and (pointer: fine)').matches) return;
+    const button = event.target.closest('[data-collectible-row]');
+    if (button) showCollectiblePreview(button);
+  });
+  container.addEventListener('focusout',hideCollectiblePreview);
+}
+document.addEventListener('scroll',hideCollectiblePreview,true);
+window.addEventListener('resize',hideCollectiblePreview);
+document.addEventListener('keydown',event => {if(event.key==='Escape')hideCollectiblePreview();});
 setCatalogCategory('backpacks');

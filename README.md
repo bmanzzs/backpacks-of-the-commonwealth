@@ -24,6 +24,8 @@ The mod author clarified the magazine shorthand:
 
 Bobbleheads are upgrade items for the Vault-Tec Utility Backpack. Original effect strings and location IDs are retained in the data. Collectible map pins are unavailable because the sheet supplies location IDs, not map coordinates or precise pickup positions. `GameStart` is shown as an acquisition method.
 
+The mod author supplied four bobblehead close-ups and eight location screenshots on September 8, 2026, stored unchanged in `assets/collectibles/`. Bobblehead thumbnails and desktop hover/focus previews use the close-ups. Detail dialogs show the location screenshots with the author's short hints, and screenshots can open full-size. The introductory game-start magazine has no world-location photo. Image paths and hints live in `collectibles-data.js`.
+
 ## Traffic panel
 
 The `?` button opens a small public traffic chart with 1M (past 30 days), 1Y (past 12 calendar months), and ALL ranges. It counts visits to the main catalog, not category switches or detail views. Counts can include returning visitors and are not an all-time count of distinct people.

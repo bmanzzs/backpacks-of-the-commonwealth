@@ -1,4 +1,5 @@
 // Source: Main!G34:L43, read 2026-09-07. Keep source effects verbatim for traceability.
+// Photos and location hints supplied by the mod author on 2026-09-08.
 const COLLECTIBLES = [
   {
     "type": "magazines",
@@ -18,7 +19,9 @@ const COLLECTIBLES = [
     "effects": [
       "+20PACC",
       "+PACC"
-    ]
+    ],
+    "locationImage": "assets/collectibles/magazinelocationInfantry.jpg",
+    "locationHint": "on a desk"
   },
   {
     "type": "magazines",
@@ -28,7 +31,9 @@ const COLLECTIBLES = [
     "effects": [
       "+20PACC",
       "+5RR"
-    ]
+    ],
+    "locationImage": "assets/collectibles/magazinelocationFuture.jpg",
+    "locationHint": "on a desk"
   },
   {
     "type": "magazines",
@@ -38,7 +43,9 @@ const COLLECTIBLES = [
     "effects": [
       "+20PACC",
       "+5DR"
-    ]
+    ],
+    "locationImage": "assets/collectibles/magazinelocationMilitary.jpg",
+    "locationHint": "on a desk"
   },
   {
     "type": "magazines",
@@ -48,7 +55,9 @@ const COLLECTIBLES = [
     "effects": [
       "+20PACC",
       "+SpawnRate"
-    ]
+    ],
+    "locationImage": "assets/collectibles/magazinelocationWilderness.jpg",
+    "locationHint": "on a nightstand"
   },
   {
     "type": "bobbleheads",
@@ -57,7 +66,10 @@ const COLLECTIBLES = [
     "locationId": "VaultTecOffice01",
     "effects": [
       "+1 CHR"
-    ]
+    ],
+    "thumbnail": "assets/collectibles/bobbleheadcharisma.png",
+    "locationImage": "assets/collectibles/bobblelocationCharisma.jpg",
+    "locationHint": "on a desk next to a fan"
   },
   {
     "type": "bobbleheads",
@@ -66,7 +78,10 @@ const COLLECTIBLES = [
     "locationId": "BackpackRoom",
     "effects": [
       "+10% Energy"
-    ]
+    ],
+    "thumbnail": "assets/collectibles/bobbleheadenergy.png",
+    "locationImage": "assets/collectibles/bobblelocationEnergy.jpg",
+    "locationHint": "on a desk inside a cage"
   },
   {
     "type": "bobbleheads",
@@ -75,7 +90,10 @@ const COLLECTIBLES = [
     "locationId": "Vault81",
     "effects": [
       "+10% Guns"
-    ]
+    ],
+    "thumbnail": "assets/collectibles/bobbleheadguns.png",
+    "locationImage": "assets/collectibles/bobblelocationGuns.jpg",
+    "locationHint": "on top of a dresser"
   },
   {
     "type": "bobbleheads",
@@ -84,6 +102,9 @@ const COLLECTIBLES = [
     "locationId": "DLC03Vault118",
     "effects": [
       "+10% Sneak"
-    ]
+    ],
+    "thumbnail": "assets/collectibles/bobbleheadsneak.png",
+    "locationImage": "assets/collectibles/bobblelocationSneak.jpg",
+    "locationHint": "on a nightstand"
   }
 ];
