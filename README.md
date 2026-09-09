@@ -11,6 +11,12 @@ Open `index.html` in a browser. This is a static GitHub Pages site; no install o
 - `collectibles.css`: collectible styles extending the original Pip-Boy theme.
 - `backpacks.html`: separate legacy page; the main catalog is `index.html`.
 
+## Browser icons
+
+`favicon.ico` and `assets/icons/` provide browser-tab, Chrome shortcut, and Apple touch icons. `site.webmanifest` uses relative paths for GitHub Pages. The unchanged generated source is `assets/icons/backpack-source.png`; the smaller files are Lanczos downscaled exports, with 16/32/48px frames in the ICO.
+
+Created using built-in image generation from the author's backpack screenshot on September 8, 2026. Prompt direction: isolate and simplify the olive military backpack, twin brown buckle straps, two front pockets, and horizontal brown bedroll; bold readable silhouette on a dark forest-green background, no text or incidental equipment, recognizable at small favicon sizes.
+
 ## Collectible source
 
 Read from the [reference spreadsheet](https://docs.google.com/spreadsheets/d/1obmNsElEoexa8rE5gitiuBC1Tgo1RS1RehSQfYrNvGc/edit?gid=0#gid=0) on September 7, 2026: `Main!G34:L38` (magazines) and `Main!G40:L43` (bobbleheads). These are static records, not a live Sheets connection. Source row numbers are retained in the data for maintenance.
