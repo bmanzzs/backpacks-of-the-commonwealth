@@ -9,7 +9,8 @@ const COLLECTIBLES = [
     "effects": [
       "+BP",
       "+BP"
-    ]
+    ],
+    "thumbnail": "assets/collectibles/magazineCommonwealth.jpg"
   },
   {
     "type": "magazines",
@@ -20,6 +21,7 @@ const COLLECTIBLES = [
       "+20PACC",
       "+PACC"
     ],
+    "thumbnail": "assets/collectibles/magazineInfantry.jpg",
     "locationImage": "assets/collectibles/magazinelocationInfantry.jpg",
     "locationHint": "on a desk"
   },
@@ -32,6 +34,7 @@ const COLLECTIBLES = [
       "+20PACC",
       "+5RR"
     ],
+    "thumbnail": "assets/collectibles/magazineFuture.jpg",
     "locationImage": "assets/collectibles/magazinelocationFuture.jpg",
     "locationHint": "on a desk"
   },
@@ -44,6 +47,7 @@ const COLLECTIBLES = [
       "+20PACC",
       "+5DR"
     ],
+    "thumbnail": "assets/collectibles/magazineMilitary.jpg",
     "locationImage": "assets/collectibles/magazinelocationMilitary.jpg",
     "locationHint": "on a desk"
   },
@@ -56,6 +60,7 @@ const COLLECTIBLES = [
       "+20PACC",
       "+SpawnRate"
     ],
+    "thumbnail": "assets/collectibles/magazineWilderness.jpg",
     "locationImage": "assets/collectibles/magazinelocationWilderness.jpg",
     "locationHint": "on a nightstand"
   },
