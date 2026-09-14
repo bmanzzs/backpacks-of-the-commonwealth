@@ -13,9 +13,7 @@ Open `index.html` in a browser. This is a static GitHub Pages site; no install o
 
 ## Browser icons
 
-`favicon.ico` and `assets/icons/` provide browser-tab, Chrome shortcut, and Apple touch icons. `site.webmanifest` uses relative paths for GitHub Pages. The unchanged generated source is `assets/icons/backpack-source.png`; the smaller files are Lanczos downscaled exports, with 16/32/48px frames in the ICO.
-
-Created using built-in image generation from the author's backpack screenshot on September 8, 2026. Prompt direction: isolate and simplify the olive military backpack, twin brown buckle straps, two front pockets, and horizontal brown bedroll; bold readable silhouette on a dark forest-green background, no text or incidental equipment, recognizable at small favicon sizes.
+`favicon.ico` and `assets/icons/` provide browser-tab, Chrome shortcut, and Apple touch icons. `site.webmanifest` uses relative paths for GitHub Pages. The square source crop in `assets/icons/backpack-source.png` comes directly from the author's P.E.G.A. backpack screenshot supplied on September 13, 2026; the smaller files are Lanczos downscaled exports, with 16/32/48px frames in the ICO.
 
 ## Collectible source
 
