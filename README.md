@@ -43,3 +43,16 @@ The data service is [GoatCounter](https://www.goatcounter.com/). In the site's s
 GoatCounter counters can be cached for up to four hours. The chart uses UTC dates and differences between cumulative counts at successive boundaries to avoid overlapping time buckets. Failed requests display an unavailable state, not zero visits. Local previews never send visit events. History starts when tracking is enabled; earlier traffic cannot be recovered from this integration.
 
 GitHub Pages serves the main catalog from `index.html`. Include the collectible and analytics JS/CSS files alongside it when publishing updates.
+
+## ARC-Tesla interactive preview
+
+The separate **Field Lab** tile previews Arc-tesla P.C.D. Mk IV without adding unverified stats or locations to the 26-entry catalog. Hover or focus the tile to open the viewer; click or tap to keep it open. Drag to orbit through 360°, scroll/pinch to zoom, or focus the canvas and use arrow keys and +/−. Reset, turntable, animation, and close controls are available. Moving between the tile and popout keeps it open; Escape closes it.
+
+- `arc-preview.js` / `arc-preview.css`: accessible popout, catalog filtering, video fallback, and visibility lifecycle.
+- `arc-viewer.js`: lighting, orbit controls, bloom, fan rotation, alternating lightning, fluid and CRT scrolling, signal bars, and reactor glow. Effects use presentation timings rather than the game’s combat state.
+- `assets/previews/arc-tesla/`: compressed GLB, still poster, and eight-second 768 × 768 / 30 fps WebM and MP4 renders.
+- `assets/vendor/three/`: locally hosted Three.js 0.180.0 and only required modules, with its MIT license. No external viewer service or account is required.
+
+Only the poster loads initially. The 3D library and model load on first interaction, and video loads only when selected or when 3D fails. Rendering stops while the popout is closed or the document is hidden. Reduced-motion preference disables initial animation and auto-rotation; manual camera controls remain available. Touch devices open the popout by tapping. The preview is hidden in other categories and table/map views.
+
+Source: `C:\Users\Admin\Documents\Fallout4_Mod_Projects\ARC_Tesla_PCD_MkIV\Source\ARC_PCD_MkIV.blend`. Separate authoring scene, render frames, export scripts, and logs: `Website_Preview_20260927` in that ARC project. Canonical Blender source and game assets are unchanged. Web effects and materials are adapted from the source; this preview is not evidence of in-game appearance or behavior.

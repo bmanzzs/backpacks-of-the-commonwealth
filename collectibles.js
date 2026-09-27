@@ -84,6 +84,7 @@ function applyCatalogSearch() {
       ? 'Upgrade items for the Vault-Tec Utility Backpack. Locations are listed below; collectible map pins are not yet available.'
       : 'Magazine effects and acquisition locations. Locations are listed below; collectible map pins are not yet available.';
   document.getElementById('catalog-empty').hidden = count > 0;
+  window.updateArcPreview?.();
 }
 
 function renderCollectibles() {

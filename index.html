@@ -1416,6 +1416,7 @@
 </style>
 <link rel="stylesheet" href="collectibles.css">
 <link rel="stylesheet" href="analytics.css">
+<link rel="stylesheet" href="arc-preview.css">
 </head>
 <body>
 <div id="boot-screen">
@@ -1468,6 +1469,20 @@
 <div style="text-align:center;font-size:9px;letter-spacing:3px;color:var(--text-dim);margin-bottom:24px;margin-top:-16px;">SELECT AN ENTRY FOR DETAILS</div>
 <div class="catalog-summary"><span id="catalog-count" role="status" aria-live="polite"></span><p id="catalog-description"></p></div>
 <div id="catalog-empty" hidden>No matching entries. Try another name, location, or effect, or choose a different category.</div>
+<section id="arc-showcase" aria-label="Featured animated backpack preview">
+  <button type="button" class="arc-tile" id="arc-tile" aria-haspopup="dialog" aria-controls="arc-preview" aria-expanded="false">
+    <img src="assets/previews/arc-tesla/poster.webp" alt="" width="116" height="116" loading="lazy">
+    <span class="arc-tile-copy"><span class="arc-kicker">FIELD LAB · 3D PREVIEW</span><span class="arc-name">Arc-tesla P.C.D. Mk IV</span><span class="arc-description">Live coils. Spinning reactor. Every angle.<br>Open to explore the backpack in 360°.</span></span>
+    <span class="arc-invite">◈ EXPLORE 3D</span>
+  </button>
+</section>
+<div id="arc-preview" role="dialog" aria-labelledby="arc-preview-title" hidden>
+  <div class="arc-preview-head"><div><span class="arc-kicker">ATOMIC RESONANCE CARRIER</span><h2 id="arc-preview-title">Arc-tesla P.C.D. Mk IV</h2></div><button type="button" class="arc-close" aria-label="Close ARC preview">×</button></div>
+  <div class="arc-stage"><img class="arc-poster" src="assets/previews/arc-tesla/poster.webp" alt="ARC-Tesla backpack with glowing coils and a front reactor fan"><video hidden controls loop muted playsinline preload="none" poster="assets/previews/arc-tesla/poster.webp" aria-label="Rendered ARC-Tesla turntable"></video></div>
+  <p class="arc-status" role="status">Drag to orbit · scroll or pinch to zoom</p>
+  <div class="arc-controls"><button type="button" data-arc="animation" aria-pressed="true">Pause animation</button><button type="button" data-arc="orbit" aria-pressed="true">Turntable</button><button type="button" data-arc="reset">Reset view</button><button type="button" data-arc="mode">Watch render</button><a href="assets/previews/arc-tesla/turntable.mp4" target="_blank" rel="noopener">Open MP4 ↗</a></div>
+  <p class="arc-preview-note">Presentation preview · lighting and effect timing adapted for the web.</p>
+</div>
 <div class="grid" id="grid"></div>
 <div class="grid" id="collectible-grid" hidden></div>
 <div id="collectible-table-view" hidden><table class="collectible-table" aria-label="Collectible effects and locations"><thead><tr>
@@ -2551,8 +2566,10 @@ document.addEventListener('click', function(e) {
 });
 
 </script>
+<script type="importmap">{"imports":{"three":"./assets/vendor/three/three.module.min.js","three/addons/":"./assets/vendor/three/addons/"}}</script>
 <script src="collectibles-data.js"></script>
 <script src="collectibles.js"></script>
+<script src="arc-preview.js"></script>
 <script src="analytics-config.js"></script>
 <script src="analytics.js"></script>
 </body>
