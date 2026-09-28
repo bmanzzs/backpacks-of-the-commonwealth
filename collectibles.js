@@ -61,7 +61,7 @@ function showCatalogView(view) {
     button.setAttribute('aria-pressed', String(catalogView === mode));
   });
   if (backpacks && catalogView === 'table' && !document.getElementById('table-body').children.length) buildTable();
-  if (backpacks && catalogView === 'map') buildMap();
+  if (backpacks && catalogView === 'map') window.catalogMap?.show(); else window.catalogMap?.hide();
   applyCatalogSearch();
 }
 
@@ -71,10 +71,7 @@ function applyCatalogSearch() {
   document.querySelectorAll('#grid .card, #table-body tr').forEach(entry => {
     entry.style.display = backpackMatches(BACKPACKS[Number(entry.dataset.idx)]) ? '' : 'none';
   });
-  document.querySelectorAll('.map-pin').forEach(pin => {
-    const bp = BACKPACKS.find(item => item.num === Number(pin.dataset.num));
-    pin.style.display = bp && backpackMatches(bp) ? '' : 'none';
-  });
+  window.catalogMap?.filter(backpackMatches);
   const total = catalogCategory === 'backpacks' ? BACKPACKS.length : categoryItems().length;
   const count = catalogCategory === 'backpacks' ? BACKPACKS.filter(backpackMatches).length : renderCollectibles();
   document.getElementById('catalog-count').textContent = `${count} of ${total} ${catalogCategory}`;

@@ -5,11 +5,28 @@ Field catalog for Backpacks of the Commonwealth: 26 backpacks, 4 backpack upgrad
 
 Open `index.html` in a browser. This is a static GitHub Pages site; no install or build step is required.
 
-- `index.html`: backpack records, embedded images, backpack card/table/map views, and shared catalog controls.
+- `index.html`: backpack records, embedded images, backpack card/table views, the map panel markup, and shared catalog controls.
+- `map-view.js` / `map-view.css`: the interactive backpack map (see **Map view**).
 - `collectibles-data.js`: magazine and bobblehead source records.
 - `collectibles.js`: collectible effects, readable location labels, category switching, search, sorting, and detail dialogs.
 - `collectibles.css`: collectible styles extending the original Pip-Boy theme.
 - `backpacks.html`: separate legacy page; the main catalog is `index.html`.
+
+## Map view
+
+The map panel is sized to fit the browser window, so the whole Commonwealth is visible without scrolling the page. Scrolling over the map always scrolls the page; the map never captures the scroll wheel.
+
+- Zoom: Ctrl/⌘ + scroll, trackpad pinch, double-click (Shift + double-click zooms out), the − / + buttons, or + / − keys. **Fit** shows the whole map.
+- Pan: drag with the mouse (it glides after release), or use the arrow keys when the map has focus.
+- Phones and tablets: one finger scrolls the page; two fingers pinch or move the map; double-tap zooms in.
+- **Expand** opens the map full screen. There, plain scrolling zooms and one finger pans. Escape closes it.
+- Hovering a pin shows its name and location. Clicking a pin or a **Locations** entry selects it: the map glides to the pin and a card shows its level, carry capacity, damage resistance, weight, previous/next buttons, and **View full stats**. Escape closes the card.
+- The catalog search filters the pins, the list, and the location count.
+- Overlapping pins are nudged apart at low zoom and settle onto their exact spots as you zoom in; zoomed in, pins show backpack thumbnails.
+- The footer legend explains the map's colours (expected threat level, sampled from the map's own legend).
+- Reduced-motion preference turns glides and animations into instant moves.
+
+Pin positions live in `MAP_PINS` at the top of `map-view.js`, as percentages of the map's width and height. The map image is no longer embedded in `index.html`. It loads only when the map opens: `assets/map/commonwealth-2k.webp` (half size, WebP quality 85) first, then `commonwealth-4k.webp` (full 4158 × 4155, quality 90) once you zoom past what the smaller image can show sharply or open full screen. Both were exported from the previously embedded JPEG. If the map is replaced, export both sizes and update `W`, `H`, and `IMAGE.baseWidth` in `map-view.js` and the `.map-img` size in `map-view.css`.
 
 ## Browser icons
 
@@ -42,7 +59,7 @@ The data service is [GoatCounter](https://www.goatcounter.com/). In the site's s
 
 GoatCounter counters can be cached for up to four hours. The chart uses UTC dates and differences between cumulative counts at successive boundaries to avoid overlapping time buckets. Failed requests display an unavailable state, not zero visits. Local previews never send visit events. History starts when tracking is enabled; earlier traffic cannot be recovered from this integration.
 
-GitHub Pages serves the main catalog from `index.html`. Include the collectible and analytics JS/CSS files alongside it when publishing updates.
+GitHub Pages serves the main catalog from `index.html`. Include the collectible, analytics, and map JS/CSS files and `assets/map/` alongside it when publishing updates.
 
 ## ARC-Tesla interactive preview
 
