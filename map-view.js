@@ -564,7 +564,7 @@
   });
   callout.addEventListener('click', e => {
     const action = e.target.closest('[data-callout]')?.dataset.callout;
-    if (action === 'stats' && selected) openModal(selected.idx);
+    if (action === 'stats' && selected) window.openBackpack?.(selected.num);
     else if (action === 'prev') step(-1);
     else if (action === 'next') step(1);
     else if (action === 'close') select(null);
@@ -593,19 +593,14 @@
   list.addEventListener('focusout', () => setHot(null));
   coarse.addEventListener('change', updateHelp);
 
-  // Start fetching the map when someone reaches for the Map View button, and
-  // bring the whole panel on screen after they open it.
-  const mapButton = document.getElementById('btn-map');
-  let preloaded = false;
-  const preload = () => { if (!preloaded && !built) { preloaded = true; new Image().src = IMAGE.base; } };
-  for (const type of ['pointerenter', 'focus', 'touchstart']) mapButton.addEventListener(type, preload, { passive: true });
-  mapButton.addEventListener('click', () => requestAnimationFrame(() => {
-    if (section.style.display === 'none') return;
-    const r = shell.getBoundingClientRect(), gap = 12;
-    if (r.top >= gap && r.bottom <= innerHeight - gap) return;
-    const top = r.height + gap * 2 <= innerHeight ? r.top - (innerHeight - r.height) / 2 : r.top - gap;
-    window.scrollBy({ top, behavior: motion.matches ? 'auto' : 'smooth' });
-  }));
+  // Fly to one backpack's pin, e.g. from the inventory's "Show on field map".
+  function focus(num) {
+    build();
+    const p = pins.find(q => q.num === num);
+    if (!p) return;
+    if (!p.shown) filter(null);
+    select(p, 'fly');
+  }
 
-  window.catalogMap = { show, hide, filter };
+  window.catalogMap = { show, hide, filter, focus, pins: MAP_PINS };
 })();

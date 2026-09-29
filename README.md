@@ -5,12 +5,26 @@ Field catalog for Backpacks of the Commonwealth: 26 backpacks, 4 backpack upgrad
 
 Open `index.html` in a browser. This is a static GitHub Pages site; no install or build step is required.
 
-- `index.html`: backpack records, embedded images, backpack card/table views, the map panel markup, and shared catalog controls.
+- `index.html`: page markup only: top bar, hero, inventory, field map, collectibles, prototype, footer, about panel.
+- `site.css`: design tokens (colors, type, spacing) and all page styles.
+- `backpacks-data.js`: the backpack records (`BACKPACKS`), their workbench mods (`OMODS`), and thumbnail paths (`IMGS`). Edit backpack data here.
+- `assets/backpacks/`: one WebP thumbnail per backpack (208 × 247, quality 90), exported from the images that used to be embedded in `index.html`. A new backpack needs a record in `BACKPACKS`, an `OMODS` entry, a thumbnail and a matching `IMGS` path, and a pin in `MAP_PINS` (see **Map view**).
+- `catalog.js`: the carry-capacity chart, inventory (inspect and compare), collectibles shelves and dialog, section navigation and deep links.
 - `map-view.js` / `map-view.css`: the interactive backpack map (see **Map view**).
 - `collectibles-data.js`: magazine and bobblehead source records.
-- `collectibles.js`: collectible effects, readable location labels, category switching, search, sorting, and detail dialogs.
-- `collectibles.css`: collectible styles extending the original Pip-Boy theme.
+- `prototype.js`: the Arc-tesla prototype teaser (see **Arc-tesla prototype teaser**).
 - `backpacks.html`: separate legacy page; the main catalog is `index.html`.
+
+## Page layout
+
+The page reads like a Pip-Boy terminal: a sticky top bar (a bottom tab bar on phones) with **INV**, **MAP**, **DATA** and **LAB** sections that highlight as you scroll.
+
+- **Hero:** title, counts (backpacks, workbench mods, bobbleheads, magazines, computed from the data), and a carry-capacity-by-level chart. Each backpack is a line from its base carry capacity to its best workbench mod; hover or focus shows it, selecting opens it in the inventory. Arrow keys move through the chart when it has focus.
+- **Inventory, Inspect view:** the backpack list on the left scrolls with the page; the spec sheet on the right stays pinned. It shows stats, every carry-capacity and resistance mod as a bar on one scale shared by all backpacks, each mod's side effects, perks and components, the base recipe, a mini-map of the location, and colors. With the list focused, ↑/↓/Home/End move through backpacks.
+- **Inventory, Compare view:** a sortable table of every backpack. Selecting a row opens it in Inspect.
+- **Search, sort, your level:** search covers names, places, mods and perks. **Your level** (remembered in the browser) dims backpacks above it in the list, table and chart.
+- **Links:** **Copy link** copies a direct link to a backpack (`#bp-07`). **Show on field map** flies the map to its pin; the map card's **Open in inventory** goes the other way.
+- **Phones:** tapping a backpack slides its spec sheet over the list, with previous/next buttons; the back gesture closes it.
 
 ## Map view
 
@@ -20,8 +34,8 @@ The map panel is sized to fit the browser window, so the whole Commonwealth is v
 - Pan: drag with the mouse (it glides after release), or use the arrow keys when the map has focus.
 - Phones and tablets: one finger scrolls the page; two fingers pinch or move the map; double-tap zooms in.
 - **Expand** opens the map full screen. There, plain scrolling zooms and one finger pans. Escape closes it.
-- Hovering a pin shows its name and location. Clicking a pin or a **Locations** entry selects it: the map glides to the pin and a card shows its level, carry capacity, damage resistance, weight, previous/next buttons, and **View full stats**. Escape closes the card.
-- The catalog search filters the pins, the list, and the location count.
+- Hovering a pin shows its name and location. Clicking a pin or a **Locations** entry selects it: the map glides to the pin and a card shows its level, carry capacity, damage resistance, weight, previous/next buttons, and **Open in inventory**. Escape closes the card.
+- The map loads when you scroll near it; the inventory's **Show on field map** flies straight to a pin.
 - Overlapping pins are nudged apart at low zoom and settle onto their exact spots as you zoom in; zoomed in, pins show backpack thumbnails.
 - The footer legend explains the map's colours (expected threat level, sampled from the map's own legend).
 - Reduced-motion preference turns glides and animations into instant moves.
@@ -49,7 +63,7 @@ The mod author supplied four bobblehead close-ups and eight location screenshots
 
 ## Traffic panel
 
-The `?` button opens a small public traffic chart with 1M (past 30 days), 1Y (past 12 calendar months), and ALL ranges. It counts visits to the main catalog, not category switches or detail views. Counts can include returning visitors and are not an all-time count of distinct people.
+The `?` button opens a small public traffic chart with 1M (past 30 days), 1Y (past 12 calendar months), and ALL ranges. It counts visits to the main catalog, not selections or detail views. Counts can include returning visitors and are not an all-time count of distinct people.
 
 The data service is [GoatCounter](https://www.goatcounter.com/). In the site's settings, enable **Allow adding visitor counts on your website**. The full GoatCounter dashboard can remain private. Set the public site URL and the actual tracking start date in `analytics-config.js`; do not add a password or API token. An empty URL disables tracking and displays an honest unconnected state.
 
@@ -59,17 +73,17 @@ The data service is [GoatCounter](https://www.goatcounter.com/). In the site's s
 
 GoatCounter counters can be cached for up to four hours. The chart uses UTC dates and differences between cumulative counts at successive boundaries to avoid overlapping time buckets. Failed requests display an unavailable state, not zero visits. Local previews never send visit events. History starts when tracking is enabled; earlier traffic cannot be recovered from this integration.
 
-GitHub Pages serves the main catalog from `index.html`. Include the collectible, analytics, and map JS/CSS files and `assets/map/` alongside it when publishing updates.
+GitHub Pages serves the main catalog from `index.html`. Include `site.css`, the JS files, and the `assets/` folders alongside it when publishing updates.
 
-## ARC-Tesla interactive preview
+## Arc-tesla prototype teaser
 
-The separate **Field Lab** tile previews Arc-tesla P.C.D. Mk IV without adding unverified stats or locations to the 26-entry catalog. Hover or focus the tile to open the viewer; click or tap to keep it open. Drag to orbit through 360°, scroll/pinch to zoom, or focus the canvas and use arrow keys and +/−. Reset, turntable, animation, and close controls are available. Moving between the tile and popout keeps it open; Escape closes it.
+The **LAB** section previews the upcoming Arc-tesla P.C.D. Mk IV without adding unverified stats or locations to the 26-entry catalog; its stats are shown as classified. **Power on 3D preview** loads the viewer. Drag to orbit through 360°, scroll/pinch to zoom, or focus the canvas and use arrow keys and +/−. Pause, turntable, reset and render/3D controls are available.
 
-- `arc-preview.js` / `arc-preview.css`: accessible popout, catalog filtering, video fallback, and visibility lifecycle.
+- `prototype.js`: the teaser stage, controls, video fallback, and visibility lifecycle.
 - `arc-viewer.js`: lighting, orbit controls, bloom, fan rotation, alternating lightning, fluid and CRT scrolling, signal bars, and reactor glow. Effects use presentation timings rather than the game’s combat state.
 - `assets/previews/arc-tesla/`: compressed GLB, still poster, and eight-second 768 × 768 / 30 fps WebM and MP4 renders.
 - `assets/vendor/three/`: locally hosted Three.js 0.180.0 and only required modules, with its MIT license. No external viewer service or account is required.
 
-Only the poster loads initially. The 3D library and model load on first interaction, and video loads only when selected or when 3D fails. Rendering stops while the popout is closed or the document is hidden. Reduced-motion preference disables initial animation and auto-rotation; manual camera controls remain available. Touch devices open the popout by tapping. The preview is hidden in other categories and table/map views.
+Only the poster loads initially. The 3D library and model load when someone powers the preview on, and video loads only when selected or when 3D fails. Rendering stops while the stage is off screen or the document is hidden. Reduced-motion preference disables initial animation and auto-rotation; manual camera controls remain available.
 
 Source: `C:\Users\Admin\Documents\Fallout4_Mod_Projects\ARC_Tesla_PCD_MkIV\Source\ARC_PCD_MkIV.blend`. Separate authoring scene, render frames, export scripts, and logs: `Website_Preview_20260927` in that ARC project. Canonical Blender source and game assets are unchanged. Web effects and materials are adapted from the source; this preview is not evidence of in-game appearance or behavior.
