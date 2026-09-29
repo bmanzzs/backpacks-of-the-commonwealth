@@ -19,9 +19,11 @@
 }
 .pb-launch__led { grid-row: span 2; width: 7px; height: 7px; border-radius: 50%; background: var(--amber); box-shadow: 0 0 6px var(--amber); animation: pb-led 1.6s steps(1) infinite; }
 .pb-launch__sub { grid-column: 2; font: 13px/1 'VT323', monospace; letter-spacing: 1px; color: var(--amber); }
-.pb-launch__peek { position: absolute; top: -8px; right: calc(100% - 4px); width: 70px; height: 100px; overflow: hidden; pointer-events: none; }
-.pb-launch__bobble { position: absolute; right: 6px; bottom: 0; width: 37px; height: 88px; transform-origin: 50% 100%; transform: translateX(64px) rotate(24deg); transition: transform .5s cubic-bezier(.3, 1.6, .55, 1); }
+/* The peek box ends at the button's bottom edge, so the figure never hangs over the header. */
+.pb-launch__peek { position: absolute; bottom: 0; right: calc(100% - 4px); width: 64px; height: calc(100% + 16px); overflow: hidden; pointer-events: none; }
+.pb-launch__bobble { position: absolute; right: 8px; bottom: -4px; height: 100%; aspect-ratio: 81 / 193; transform-origin: 50% 100%; transform: translateX(60px) rotate(24deg); transition: transform .5s cubic-bezier(.3, 1.6, .55, 1); }
 .pb-launch__bobble img { position: absolute; inset: 0; width: 100%; height: 100%; }
+.pb-launch__body { -webkit-mask-image: linear-gradient(#000 80%, transparent); mask-image: linear-gradient(#000 80%, transparent); }
 .pb-launch__head { transform-origin: 55% 39%; }
 .pb-launch:is(:hover, :focus-visible, .is-teasing) .pb-launch__bobble { transform: translateX(0) rotate(-7deg); }
 .pb-launch:is(:hover, :focus-visible, .is-teasing) .pb-launch__head { animation: pb-bobble 1.6s .3s ease-in-out infinite; }

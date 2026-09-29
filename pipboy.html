@@ -24,10 +24,10 @@
   <filter id="pip-tint" color-interpolation-filters="sRGB">
     <feColorMatrix id="pip-tint-matrix" type="matrix" values="0.02 0.07 0.01 0 0  0.25 0.84 0.08 0 0  0.02 0.08 0.01 0 0  0 0 0 1 0"/>
   </filter>
-  <symbol id="i-weight" viewBox="0 0 24 24"><path d="M8 7a4 4 0 1 1 8 0" fill="none" stroke="currentColor" stroke-width="2.2"/><path d="M5 9h14l2 12H3z"/></symbol>
+  <symbol id="i-weight" viewBox="0 0 24 24"><circle cx="12" cy="5" r="2.6" fill="none" stroke="currentColor" stroke-width="2"/><path d="M6.5 9h11l3.5 12H3z"/></symbol>
   <symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 2 20 5v6c0 5.2-3.4 9.3-8 11-4.6-1.7-8-5.8-8-11V5z"/></symbol>
   <symbol id="i-bolt" viewBox="0 0 24 24"><path d="M14 1 4 14h7l-2 9 11-14h-7z"/></symbol>
-  <symbol id="i-rad" viewBox="0 0 24 24"><circle cx="12" cy="12" r="2.4"/><path d="M12 2a10 10 0 0 1 8.66 5L15 10.3A3.5 3.5 0 0 0 12 8.5zM3.34 7A10 10 0 0 1 12 2v6.5a3.5 3.5 0 0 0-3 1.8zM3.34 17 9 13.7a3.5 3.5 0 0 0 3 1.8V22a10 10 0 0 1-8.66-5zM20.66 17A10 10 0 0 1 12 22v-6.5a3.5 3.5 0 0 0 3-1.8z" transform="rotate(30 12 12)"/></symbol>
+  <symbol id="i-rad" viewBox="0 0 24 24"><circle cx="12" cy="12" r="2.4"/><path d="M12 2a10 10 0 0 1 8.66 5L15 10.3A3.5 3.5 0 0 0 12 8.5zM3.34 7A10 10 0 0 0 3.34 17L8.97 13.75A3.5 3.5 0 0 1 8.97 10.25zM20.66 17A10 10 0 0 1 12 22v-6.5a3.5 3.5 0 0 0 3-1.8z" transform="rotate(30 12 12)"/></symbol>
   <symbol id="i-cap" viewBox="0 0 24 24"><path d="M12 1.5l1.9 1.6 2.4-.6 1 2.3 2.4.8-.2 2.5 1.8 1.7-1.3 2.2 1.3 2.2-1.8 1.7.2 2.5-2.4.8-1 2.3-2.4-.6L12 22.5l-1.9-1.6-2.4.6-1-2.3-2.4-.8.2-2.5L2.7 14.2 4 12 2.7 9.8l1.8-1.7-.2-2.5 2.4-.8 1-2.3 2.4.6z"/><circle cx="12" cy="12" r="5" fill="none" stroke="var(--knock, #031104)" stroke-width="1.6"/></symbol>
   <symbol id="i-cross" viewBox="0 0 24 24"><circle cx="12" cy="12" r="7" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 1v6M12 17v6M1 12h6M17 12h6" stroke="currentColor" stroke-width="2"/></symbol>
   <symbol id="i-lock" viewBox="0 0 24 24"><rect x="4" y="10" width="16" height="12"/><path d="M8 10V7a4 4 0 0 1 8 0v3" fill="none" stroke="currentColor" stroke-width="2.4"/></symbol>
@@ -52,7 +52,7 @@
           <div class="subtabs" id="subtabs"><div class="subtabs-strip" id="subtabs-strip" role="tablist" aria-label="Sub-sections"></div></div>
         </header>
 
-        <main class="body" id="pip-body" tabindex="-1" aria-live="off">
+        <main class="body" id="pip-body" role="tabpanel" aria-labelledby="tab-stat" tabindex="-1">
           <div class="view" id="view"></div>
           <section class="view-map" id="view-map" hidden>
             <div id="map-view" data-immersive aria-label="Backpack world locations">
@@ -118,7 +118,7 @@
         </main>
 
         <footer class="bar" id="bar" aria-label="Status"></footer>
-        <div class="hints" id="hints" role="toolbar" aria-label="Actions"></div>
+        <div class="hints" id="hints" role="group" aria-label="Actions"></div>
         <div class="toasts" id="toasts" role="status" aria-live="polite"></div>
         <div class="modal" id="modal" hidden></div>
       </div>

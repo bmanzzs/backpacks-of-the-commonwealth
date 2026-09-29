@@ -394,7 +394,7 @@
     schedule();
   }
   function show() { build(); schedule(); }
-  function hide() { if (!built) return; setExpanded(false); stop(); hideTip(); hideHint(); setHot(null); }
+  function hide() { if (!built) return; setExpanded(false); stop(); hideTip(); hideHint(); setHot(null); if (immersive) select(null); }
 
   // ── Input: mouse and pen ───────────────────────────────────────────────
   let drag = null, suppressClick = false, lastDoubleTap = -1e9;
@@ -549,8 +549,8 @@
   });
   // Escape closes the innermost layer first: details modal, then callout, then expanded view.
   window.addEventListener('keydown', e => {
-    if (e.key !== 'Escape' || !built || section.style.display === 'none') return;
-    if (document.getElementById('modal-overlay')?.classList.contains('visible')) return;
+    if (e.key !== 'Escape' || !built || section.style.display === 'none' || !stage.getClientRects().length) return;
+    if (document.getElementById('modal-overlay')?.classList.contains('visible') || document.querySelector('[aria-modal="true"]')) return;
     if (selected) select(null);
     else if (expanded) setExpanded(false);
     else return;

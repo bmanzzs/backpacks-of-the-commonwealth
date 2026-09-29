@@ -13,13 +13,21 @@
   const motion = matchMedia('(prefers-reduced-motion: reduce)');
   const narrow = matchMedia('(max-width: 699px), (max-aspect-ratio: 4/5)');
   const hoverPointer = matchMedia('(hover: hover) and (pointer: fine)');
-  const ico = (id, cls = '') => `<svg class="ico ${cls}" aria-hidden="true"><use href="#i-${id}"/></svg>`;
+  // Icons are decorative; `label` adds the words a screen reader needs in their place.
+  const ico = (id, cls = '', label = '') => `<svg class="ico ${cls}" aria-hidden="true"><use href="#i-${id}"/></svg>${label ? `<span class="sr-only">${label} </span>` : ''}`;
 
   // ── Saved state ───────────────────────────────────────────────────────
   const KEY = 'pipboy.v1';
-  const S = { equip: null, mods: {}, found: [], level: null, special: null, perks: {}, tags: [], track: 'main', color: 'green', fx: true, sound: false, light: false, sort: 'num' };
-  try { Object.assign(S, JSON.parse(localStorage.getItem(KEY)) || {}); } catch { /* storage unavailable */ }
-  if (S.level == null) { try { const l = Number(localStorage.getItem('botc-level')); if (l >= 1 && l <= 99) S.level = l; } catch { /* ignore */ } }
+  const S = { equip: null, mods: {}, found: [], level: null, special: null, perks: {}, tags: [], track: 'main', color: 'green', fx: true, sound: false, light: false, sort: 'num', letters: true };
+  try { const saved = JSON.parse(localStorage.getItem(KEY)); if (saved && typeof saved === 'object') Object.assign(S, saved); } catch { /* storage unavailable or corrupt */ }
+  // Anything hand-edited or left by an older version falls back to the defaults.
+  const isObj = v => v && typeof v === 'object' && !Array.isArray(v);
+  if (!Array.isArray(S.found)) S.found = [];
+  if (!Array.isArray(S.tags)) S.tags = [];
+  if (!isObj(S.mods)) S.mods = {};
+  if (!isObj(S.perks)) S.perks = {};
+  if (!isObj(S.special)) S.special = null;
+  if (!(Number(S.level) >= 1 && Number(S.level) <= 99)) S.level = null; else S.level = Math.round(Number(S.level));
   const save = () => { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch { /* storage unavailable */ } };
   const found = new Set(S.found);
   const isFound = key => found.has(key);
@@ -69,7 +77,7 @@
     const pack = {
       num: bp.num, idx, bp, id: bp.id, name: bp.name, level: bp.level, img: IMGS[idx],
       place: rest.length ? rest.join(' — ').trim() : bp.location, edid: rest.length ? edid.trim() : '',
-      weight: parseFloat(bp.weight) || 0, value: parseInt(bp.value, 10) || 0, colors: bp.colors,
+      weight: parseFloat(bp.weight) || 0, value: Number(String(bp.value).replace(/[^\d.]/g, '')) || 0, colors: bp.colors,
       ccBase: ccList[0], fixed: { dr: values(bp.dr, 'DR')[0] || 0, er: values(bp.dr, 'ER')[0] || 0, rr: values(bp.dr, 'RR')[0] || 0 },
       basePerks: ((bp.crafting.match(/\[([^\]]+)\]/) || [, ''])[1]).split(',').map(s => s.trim()).filter(Boolean).map(perkOf),
       parts: recipe.filter(p => !p.startsWith('[')).map(part),
@@ -80,8 +88,10 @@
     pack.drMods = (om.dr || []).map((m, i) => mk(m, 'dr', i));
     pack.mods = [...pack.ccMods, ...pack.drMods];
     MODS.push(...pack.mods);
-    pack.ccMax = Math.max(pack.ccBase, ...ccList, ...pack.ccMods.map(m => m.fx.cc));
-    pack.drMax = Math.max(pack.fixed.dr, ...values(bp.dr, 'DR'), ...pack.drMods.map(m => m.fx.dr));
+    // Best values you can actually reach with the workbench mods (a few headline strings in the
+    // data promise an upgrade that no mod provides).
+    pack.ccMax = pack.ccMods.length ? Math.max(...pack.ccMods.map(m => m.fx.cc)) : Math.max(...ccList);
+    pack.drMax = pack.drMods.length ? Math.max(...pack.drMods.map(m => m.fx.dr)) : pack.fixed.dr;
     return pack;
   });
   const byNum = new Map(PACKS.map(p => [p.num, p]));
@@ -100,7 +110,7 @@
   const itemByKey = new Map(ITEMS.map(i => [i.key, i]));
 
   // Ingredients across base recipes and mods.
-  const AID = /^(Nuka-|Purified Water|Psycho|Jet|Med-X|Mentats|Stimpak|RadAway|Rad-X|Buffout)/;
+  const AID = /^(Nuka-|Purified Water|Psycho|Jet|Med-X|Mentats|Stimpak|RadAway|Rad-X|Buffout|Stealth Boy)/;
   const AMMO = /^Fusion (Cell|Core)$/;
   const PARTS = new Map();
   const usePart = (pt, source) => {
@@ -148,7 +158,8 @@
     const mags = ITEMS.filter(i => i.mag && isFound(i.key));
     const extra = { dr: mags.filter(i => i.raw.includes('+5DR')).length * 5, rr: mags.filter(i => i.raw.includes('+5RR')).length * 5, pa: mags.filter(i => i.raw.includes('+20PACC')).length * 20 };
     const sp = Object.fromEntries(SPECIALS.map(([k]) => [k, clamp(Number(S.special[k]) || 1, 1, 10) + (st.sp[k] || 0)]));
-    return { p, st, dr: st.dr + extra.dr, er: st.er, rr: st.rr + extra.rr, pa: extra.pa, sp, carry: 200 + 10 * sp.STR + st.cc };
+    const strongBack = rankOf('Strong Back') >= 2 ? 50 : rankOf('Strong Back') >= 1 ? 25 : 0;
+    return { p, st, dr: st.dr + extra.dr, er: st.er, rr: st.rr + extra.rr, pa: extra.pa, sp, strongBack, carry: 200 + 10 * sp.STR + strongBack + st.cc };
   }
   const LEVELS = [...new Set(PACKS.map(p => p.level))].sort((a, b) => a - b);
   const locked = p => S.level != null && p.level > S.level;
@@ -156,7 +167,9 @@
   // ── Sound (synthesised, off until asked for) ──────────────────────────
   let ac = null;
   function audio() {
-    if (!S.sound) return null;
+    // Only after the visitor has interacted: a context made earlier starts suspended and
+    // would play every queued tick at once when it wakes.
+    if (!S.sound || navigator.userActivation?.hasBeenActive === false) return null;
     try { ac = ac || new (window.AudioContext || window.webkitAudioContext)(); if (ac.state === 'suspended') ac.resume(); } catch { return null; }
     return ac;
   }
@@ -198,13 +211,12 @@
   const ui = $('#ui'), view = $('#view'), mapSection = $('#view-map'), tabsEl = $('#tabs'), strip = $('#subtabs-strip');
   const barEl = $('#bar'), hintsEl = $('#hints'), toastsEl = $('#toasts'), modal = $('#modal');
   let modFilter = null;          // { label, test(mod) } for INV › MODS
-  let sheetOpen = false;
+  let sheetOpen = false, renderedView = null, hashTimer = 0, skipHash = false;
 
   function go(tab, sub, key, opts = {}) {
     if (!TABS.includes(tab)) tab = 'stat';
     if (!SUBS[tab].includes(sub)) sub = lastSub[tab];
     const changedTab = tab !== route.tab, changedSub = changedTab || sub !== route.sub;
-    if (route.tab === 'map' && route.sub === 'world' && !(tab === 'map' && sub === 'world')) window.catalogMap?.hide();
     route.tab = tab; route.sub = sub; lastSub[tab] = sub;
     if (key != null) selected[viewId()] = String(key);
     closeSheet(false);
@@ -213,9 +225,16 @@
     render(changedTab ? 'tab' : changedSub ? 'sub' : 'item');
     if (key != null && opts.open && narrow.matches) openSheet();
   }
-  function syncHash() {
+  function currentHash() {
     const key = selected[viewId()];
-    const hash = `#${route.tab}${route.sub ? `/${route.sub}` : ''}${key != null && route.sub !== 'status' ? `/${encodeURIComponent(key)}` : ''}`;
+    return `#${route.tab}${route.sub ? `/${route.sub}` : ''}${key != null && route.sub !== 'status' ? `/${encodeURIComponent(key)}` : ''}`;
+  }
+  // Selection changes arrive in bursts (hover, held arrows), and Safari throttles replaceState,
+  // so those are written once things settle.
+  function syncHash(soon = false) {
+    clearTimeout(hashTimer);
+    if (soon) { hashTimer = setTimeout(syncHash, 250); return; }
+    const hash = currentHash();
     if (location.hash !== hash) { try { history.replaceState(history.state, '', hash); } catch { /* sandboxed */ } }
   }
   function readHash() {
@@ -230,6 +249,7 @@
 
   function renderTabs() {
     $$('.tab', tabsEl).forEach(b => { const on = b.dataset.tab === route.tab; b.setAttribute('aria-selected', String(on)); b.tabIndex = on ? 0 : -1; });
+    $('#pip-body').setAttribute('aria-labelledby', `tab-${route.tab}`);
     placeNotch();
     const subs = SUBS[route.tab].filter(Boolean);
     strip.innerHTML = subs.map(s => `<button type="button" class="subtab" role="tab" data-sub="${s}" aria-selected="${s === route.sub}" tabindex="${s === route.sub ? 0 : -1}">${SUB_LABEL[s] || s.toUpperCase()}</button>`).join('');
@@ -249,23 +269,48 @@
     if (i < 0) { strip.style.transform = ''; return; }
     const sel = buttons[i], box = strip.parentElement.getBoundingClientRect(), tabs = tabsEl.getBoundingClientRect();
     const anchor = tabs.left - box.left + (parseFloat(tabsEl.style.getPropertyValue('--nc')) || box.width / 2);
-    let x = anchor - (sel.offsetLeft + sel.offsetWidth / 2);
-    // Keep the whole strip on screen when it fits; otherwise keep the selected sub-tab clear of the edge fade.
+    // Neighbours may slide off either edge (the mask fades them); the selected one never does.
     const lo = box.width * 0.03, hi = box.width * 0.97;
-    if (strip.scrollWidth <= hi - lo) x = clamp(x, lo, hi - strip.scrollWidth);
-    else x = clamp(x, lo - sel.offsetLeft, hi - sel.offsetLeft - sel.offsetWidth);
+    const x = clamp(anchor - (sel.offsetLeft + sel.offsetWidth / 2), lo - sel.offsetLeft, hi - sel.offsetLeft - sel.offsetWidth);
     strip.classList.toggle('no-anim', !animate || motion.matches);
     strip.style.transform = `translateX(${Math.round(x)}px)`;
-    buttons.forEach((b, j) => { b.style.setProperty('--fade', [1, 0.5, 0.3][Math.abs(j - i)] ?? 0.15); });
+    buttons.forEach((b, j) => { b.style.setProperty('--fade', [1, 0.62, 0.5][Math.abs(j - i)] ?? 0.4); });
   }
 
   // ── Generic list + detail view ────────────────────────────────────────
   let current = null;            // the view config being shown
   let items = [];
+  // Re-rendering replaces the focused element, so remember what had focus and put it back.
+  function focusMark() {
+    const f = document.activeElement;
+    if (!f || f === document.body || !ui.contains(f)) return null;
+    if (f.id === 'list') return '#list';
+    if (f.closest('#tabs')) return '.tab[aria-selected="true"]';
+    if (f.closest('#subtabs-strip')) return '.subtab[aria-selected="true"]';
+    if (f.classList.contains('hint')) return `.hint[data-i="${f.dataset.i}"]`;
+    if (f.dataset.rank) return `[data-rank="${f.dataset.rank}"]`;
+    if (f.dataset.obj) return `[data-obj="${CSS.escape(f.dataset.obj)}"]`;
+    if (f.dataset.act) return `[data-act="${CSS.escape(f.dataset.act)}"]`;
+    if (f.classList.contains('sheet-back')) return '.sheet-back';
+    return '#list';
+  }
+  function restoreFocus(mark) {
+    if (!mark) return;
+    const a = document.activeElement;
+    if (a && a !== document.body && a.isConnected) return;
+    for (const el of [$(mark, ui), $('#list'), $('.subtab[aria-selected="true"]')]) {
+      el?.focus({ preventScroll: true });
+      if (el && document.activeElement === el) return;
+    }
+  }
   function render(kind = 'item') {
+    const mark = focusMark();
     if (route.tab !== 'radio') leaveRadio();
-    renderTabs();
     const id = viewId();
+    if (renderedView === 'map/world' && id !== 'map/world') window.catalogMap?.hide();
+    if (kind !== 'item' && sheetOpen) hideSheet();
+    renderedView = id;
+    renderTabs();
     const cfg = VIEWS[id];
     current = cfg;
     ui.dataset.tab = route.tab; ui.dataset.view = id.replace('/', '-');
@@ -285,18 +330,20 @@
           <div class="list-scroll"><ul class="list" id="list" role="listbox" tabindex="0" aria-label="${esc(cfg.label || route.sub)}">${items.map(rowHTML).join('')}</ul>${items.length ? '' : `<p class="list-empty">${esc(cfg.empty || 'Nothing here.')}</p>`}</div>
           <span class="more more-up" aria-hidden="true">▲</span><span class="more more-down" aria-hidden="true">▼</span>
         </div>
-        <div class="detail" id="detail" aria-live="polite"></div>
+        <div class="detail" id="detail"></div>
       </div>`;
       bindList();
       renderDetail(false);
     }
     renderBar(); renderHints();
     syncHash();
+    restoreFocus(mark);
   }
   function rowHTML(it) {
     if (it.group) return `<li class="row-group" role="presentation">${esc(it.group)}</li>`;
     const mark = it.mark === 'on' ? '<span class="mark is-on"></span>' : it.mark === 'off' ? '<span class="mark is-off"></span>' : it.mark === 'diamond' ? '<span class="mark is-diamond"></span>' : '<span class="mark"></span>';
-    return `<li class="row${it.dim ? ' is-dim' : ''}" role="option" id="row-${cssId(it.key)}" data-key="${esc(it.key)}" aria-selected="false">${mark}<span class="row-label">${esc(it.label)}${it.count > 1 ? ` <span class="row-count">(${it.count})</span>` : ''}${it.tag ? ` <span class="row-tag">${it.tag}</span>` : ''}</span>${it.right != null ? `<span class="row-right">${esc(it.right)}</span>` : ''}</li>`;
+    const state = it.state ? `<span class="sr-only">, ${esc(it.state)}</span>` : '';
+    return `<li class="row${it.dim ? ' is-dim' : ''}" role="option" id="row-${cssId(it.key)}" data-key="${esc(it.key)}" aria-selected="false">${mark}<span class="row-label">${esc(it.label)}${it.count > 1 ? ` <span class="row-count">(${it.count})</span>` : ''}${it.tag ? ` <span class="row-tag">${it.tag}</span>` : ''}${state}</span>${it.right != null ? `<span class="row-right">${esc(it.right)}</span>` : ''}</li>`;
   }
   const cssId = key => String(key).replace(/[^a-zA-Z0-9_-]/g, '_');
   function bindList() {
@@ -319,6 +366,7 @@
     });
     list.addEventListener('dblclick', e => { if (e.target.closest('.row') && !narrow.matches) primary(); });
     scroller.addEventListener('scroll', updateMore, { passive: true });
+    $('#detail').addEventListener('scroll', updateDetailMore, { passive: true });
     updateMore();
   }
   function updateMore() {
@@ -329,10 +377,12 @@
   }
   function choose(key, { scroll = true } = {}) {
     if (key == null) return;
+    const mark = focusMark();
     selected[viewId()] = String(key);
     sfx.tick();
     renderDetail(scroll);
-    renderHints(); renderBar(); syncHash();
+    renderHints(); renderBar(); syncHash(true);
+    restoreFocus(mark);
   }
   function markRows(scroll) {
     const key = selected[viewId()], list = $('#list');
@@ -353,6 +403,13 @@
     const it = currentItem();
     detail.innerHTML = `${narrow.matches ? '<button type="button" class="sheet-back" data-act="back">◂ BACK</button>' : ''}${it ? current.detail(it) : `<p class="empty-detail">${esc(current.empty || '')}</p>`}`;
     current.afterDetail?.(it, detail);
+    detail.scrollTop = 0;
+    updateDetailMore();
+  }
+  // The detail panel has no scrollbar either; a fade at the bottom says there is more.
+  function updateDetailMore() {
+    const d = $('#detail'); if (!d) return;
+    d.classList.toggle('can-down', d.scrollTop + d.clientHeight < d.scrollHeight - 2);
   }
   const currentItem = () => items.find(i => !i.group && i.key === selected[viewId()]) || null;
   function step(d) {
@@ -367,22 +424,39 @@
     const s = $('.list-scroll'), top = s?.scrollTop || 0, detailTop = $('#detail')?.scrollTop || 0;
     const wasOpen = sheetOpen;
     render('item');
-    if ($('.list-scroll')) $('.list-scroll').scrollTop = top;
-    if ($('#detail')) $('#detail').scrollTop = detailTop;
-    if (wasOpen && narrow.matches) openSheet(false);
+    if ($('.list-scroll')) { $('.list-scroll').scrollTop = top; updateMore(); }
+    if ($('#detail')) { $('#detail').scrollTop = detailTop; updateDetailMore(); }
+    if (wasOpen && narrow.matches) openSheet(false, false);
   }
-  function openSheet(push = true) {
+  // Phones: the detail slides over the list as a sheet. Back (gesture, button or Escape) closes it.
+  function openSheet(push = true, focus = true) {
     const d = $('#detail'); if (!d || !narrow.matches) return;
     d.classList.add('is-open'); sheetOpen = true; ui.classList.add('has-sheet');
+    $('.list-col', view)?.setAttribute('inert', '');
     if (push) { try { history.pushState({ sheet: true }, '', location.href); } catch { /* ignore */ } }
-    $('.sheet-back', d)?.focus({ preventScroll: true });
+    if (focus) $('.sheet-back', d)?.focus({ preventScroll: true });
+    if (route.tab === 'radio') radioAfter(currentItem());
+    updateDetailMore();
   }
+  function hideSheet() {
+    $('#detail')?.classList.remove('is-open'); sheetOpen = false; ui.classList.remove('has-sheet');
+    $('.list-col', view)?.removeAttribute('inert');
+    if (route.tab === 'radio') leaveRadio();
+  }
+  let sheetBack = false;
   function closeSheet(viaBack = true) {
     if (!sheetOpen) return;
-    $('#detail')?.classList.remove('is-open'); sheetOpen = false; ui.classList.remove('has-sheet');
-    if (viaBack && history.state?.sheet) history.back();
+    hideSheet();
+    if (viaBack) $('#list')?.focus({ preventScroll: true });
+    if (viaBack && history.state?.sheet) { sheetBack = true; history.back(); }
   }
-  addEventListener('popstate', () => { if (sheetOpen) { $('#detail')?.classList.remove('is-open'); sheetOpen = false; ui.classList.remove('has-sheet'); $('#list')?.focus({ preventScroll: true }); } });
+  addEventListener('popstate', () => {
+    const wasSheet = sheetOpen || sheetBack;
+    sheetBack = false;
+    if (sheetOpen) { hideSheet(); $('#list')?.focus({ preventScroll: true }); }
+    // Stepping back out of the sheet keeps what was picked inside it, instead of the older hash.
+    if (wasSheet && location.hash !== currentHash()) { skipHash = true; try { history.replaceState(history.state, '', currentHash()); } catch { skipHash = false; } }
+  });
 
   function blink() {
     if (motion.matches) return;
@@ -392,13 +466,17 @@
   // ── Hints and the status bar ──────────────────────────────────────────
   let hintList = [];
   function renderHints() {
+    const mark = focusMark();
     const it = currentItem();
     hintList = (current?.hints?.(it) || []).filter(Boolean);
-    hintsEl.innerHTML = hintList.map((h, i) => `<button type="button" class="hint" data-i="${i}"${h.disabled ? ' aria-disabled="true"' : ''}><span class="hint-key">${esc(h.k)})</span> ${esc(h.label)}</button>`).join('');
+    // The primary action is keyed Enter internally and labelled E), as in the game (both keys work).
+    hintsEl.innerHTML = hintList.map((h, i) => `<button type="button" class="hint" data-i="${i}"${h.disabled ? ' aria-disabled="true"' : ''}><span class="hint-key">${esc(h.k === 'Enter' ? 'E' : h.k)})</span> ${esc(h.label)}</button>`).join('');
+    restoreFocus(mark);
   }
   hintsEl.addEventListener('click', e => { const b = e.target.closest('.hint'); if (b) runHint(hintList[Number(b.dataset.i)]); });
   function runHint(h) { if (!h) return; if (h.disabled) { sfx.bad(); if (h.why) toast(h.why); return; } h.run(); }
-  function primary() { runHint(hintList[0]); }
+  const primaryHint = () => hintList.find(h => h.k === 'Enter') || hintList.find(h => h.k === 'E');
+  function primary() { runHint(primaryHint()); }
 
   function now2287() {
     const d = new Date();
@@ -424,13 +502,15 @@
       html = box(`CC ${pl.st.cc}/${CC_TOP}`) + levelBox() + box(`FOUND ${foundCount}/${PACKS.length + ITEMS.length}`);
     } else if (route.tab === 'inv') {
       const value = sum(PACKS.filter(p => isFound(`bp-${p.num}`)), p => p.value);
-      html = box(`${ico('weight')} ${pl.st.weight}/${pl.carry}`, 'is-wide') + box(`${ico('cap')} ${value.toLocaleString('en-US')}`) + box(`${ico('shield')} ${pl.dr} ${ico('bolt')} ${pl.er} ${ico('rad')} ${pl.rr}`, 'is-wide');
+      const stat = (id, label, v) => `<span class="bar-stat">${ico(id, '', label)}${v}</span>`;
+      html = box(stat('weight', 'Weight', `${pl.st.weight}/${pl.carry}`), 'is-wide') + box(stat('cap', 'Caps found', value.toLocaleString('en-US'))) + box(stat('shield', 'Damage resistance', pl.dr) + stat('bolt', 'Energy resistance', pl.er) + stat('rad', 'Radiation resistance', pl.rr), 'is-wide');
     } else {
       let where = '';
-      if (route.tab === 'map') where = mapPlace || 'The Commonwealth';
+      if (route.tab === 'map' && route.sub === 'local') { const k = selected['map/local']; where = byNum.get(Number(k))?.place || itemByKey.get(k)?.place || 'The Commonwealth'; }
+      else if (route.tab === 'map') where = mapPlace || 'The Commonwealth';
       else if (route.tab === 'radio') where = playing ? STATIONS.find(s => s.id === playing)?.name || '' : 'No station playing';
       else { const q = QUESTS.find(q => q.id === S.track); const o = q?.objectives().find(o => !o.done()); where = o?.place || q?.name || ''; }
-      html = box(t.date) + box(t.time) + box(esc(where), 'is-grow');
+      html = box(t.date) + box(t.time) + box(`<span class="bar-text">${esc(where)}</span>`, 'is-grow');
     }
     barEl.innerHTML = html;
   }
@@ -442,7 +522,7 @@
     const el = document.createElement('div');
     el.className = `toast ${kind}`; el.textContent = text;
     toastsEl.append(el);
-    while (toastsEl.children.length > 3) toastsEl.firstElementChild.remove();
+    while (toastsEl.children.length > 2) toastsEl.firstElementChild.remove();
     setTimeout(() => el.classList.add('is-out'), 2600);
     setTimeout(() => el.remove(), 3100);
   }
@@ -451,27 +531,37 @@
     el.className = 'banner'; el.innerHTML = `<strong>${esc(title)}</strong>${sub ? `<span>${esc(sub)}</span>` : ''}`;
     ui.append(el); sfx.quest();
     setTimeout(() => el.remove(), 3200);
+    toast(`${title}: ${sub || ''}`, 'is-quest sr-only');
   }
+  // Everything outside an open dialog is inert, so Tab and clicks stay inside it.
   let modalReturn = null, modalClose = null;
+  const outside = () => [$('.skip-link'), $('.head'), $('#pip-body'), barEl, hintsEl, $('#controls')].filter(Boolean);
   function openModal(html, { onClose, label = 'Dialog' } = {}) {
-    modalReturn = document.activeElement;
+    modalReturn = focusMark() || (document.activeElement?.closest?.('#controls') ? document.activeElement : null);
     modal.innerHTML = `<div class="modal-box" role="dialog" aria-modal="true" aria-label="${esc(label)}">${html}</div>`;
     modal.hidden = false; modalClose = onClose || null;
+    outside().forEach(el => { el.inert = true; });
+    if (route.tab === 'radio') leaveRadio();
     ($('[autofocus]', modal) || $('button, input, a', modal))?.focus();
   }
   function closeModal() {
     if (modal.hidden) return;
-    modal.hidden = true; modal.innerHTML = ''; modalClose?.(); modalClose = null;
-    modalReturn?.focus?.({ preventScroll: true });
+    modal.hidden = true; modal.innerHTML = '';
+    outside().forEach(el => { el.inert = false; });
+    if (route.tab === 'radio') radioAfter(currentItem());
+    modalClose?.(); modalClose = null;
+    const back = typeof modalReturn === 'string' ? $(modalReturn, ui) : modalReturn;
+    (back?.isConnected ? back : $('#list') || $('.tab[aria-selected="true"]'))?.focus({ preventScroll: true });
+    modalReturn = null;
   }
   modal.addEventListener('click', e => { if (e.target === modal || e.target.closest('[data-act="close"]')) closeModal(); });
   function levelDialog() {
     openModal(`<h2>SET LEVEL</h2>
       <p>Backpacks above your level are dimmed. The XP bar counts up to the next unlock.</p>
-      <form class="level-form"><button type="button" data-d="-1" aria-label="Lower">−</button><input id="level-input" type="number" inputmode="numeric" min="1" max="99" value="${S.level ?? ''}" placeholder="--" aria-label="Your level" autofocus><button type="button" data-d="1" aria-label="Raise">+</button></form>
+      <form class="level-form" novalidate><button type="button" data-d="-1" aria-label="Lower">−</button><input id="level-input" type="number" inputmode="numeric" min="1" max="99" value="${S.level ?? ''}" placeholder="--" aria-label="Your level" autofocus><button type="button" data-d="1" aria-label="Raise">+</button></form>
       <div class="modal-actions"><button type="button" data-act="clear">Clear</button><button type="button" data-act="close">Cancel</button><button type="button" data-act="ok" class="is-primary">Accept</button></div>`, { label: 'Set level' });
     const input = $('#level-input', modal);
-    const accept = () => { const v = Number(input.value); S.level = input.value === '' ? null : clamp(Math.round(v) || 1, 1, 99); try { S.level == null ? localStorage.removeItem('botc-level') : localStorage.setItem('botc-level', S.level); } catch { /* ignore */ } save(); closeModal(); sfx.ok(); refresh(); refreshMapPins(); };
+    const accept = () => { const v = Number(input.value); S.level = input.value === '' ? null : clamp(Math.round(v) || 1, 1, 99); save(); sfx.ok(); modalReturn = '[data-act="level"]'; refresh(); refreshMapPins(); closeModal(); };
     $('.level-form', modal).addEventListener('submit', e => { e.preventDefault(); accept(); });
     $('.level-form', modal).addEventListener('click', e => { const d = Number(e.target.closest('[data-d]')?.dataset.d); if (d) { input.value = clamp((Number(input.value) || S.level || 1) + d, 1, 99); sfx.tick(); } });
     $('[data-act="ok"]', modal).addEventListener('click', accept);
@@ -486,14 +576,26 @@
         <dt>1–5 · Shift+←/→</dt><dd>STAT, INV, DATA, MAP, RADIO</dd>
         <dt>←/→ · A/D</dt><dd>Sub-sections</dd>
         <dt>↑/↓ · W/S · Home/End</dt><dd>Move through a list (the mouse wheel scrolls it)</dd>
-        <dt>Enter · E</dt><dd>The first action at the bottom of the screen</dd>
+        <dt>E · Enter</dt><dd>The <b>E)</b> action at the bottom of the screen</dd>
         <dt>Letters</dt><dd>Every other action shows its key, like <b>M) Show on Map</b></dd>
         <dt>Esc</dt><dd>Close a dialog, a filter, or the detail sheet</dd>
         <dt>\`</dt><dd>CRT effects on or off</dd>
         <dt>Map</dt><dd>Drag to pan, scroll or pinch to zoom, T for the threat scan</dd>
       </dl>
       <p>Progress, level, perks and your equipped pack are saved in this browser only.</p>
+      <div class="modal-toggles">
+        <button type="button" data-set="sound" aria-pressed="${!!S.sound}">Sound: ${S.sound ? 'On' : 'Off'}</button>
+        <button type="button" data-set="letters" aria-pressed="${S.letters !== false}">Letter shortcuts: ${S.letters !== false ? 'On' : 'Off'}</button>
+      </div>
       <div class="modal-actions"><a href="./">Exit to catalog</a><button type="button" data-act="close" class="is-primary" autofocus>Close</button></div>`, { label: 'Controls' });
+    $('.modal-toggles', modal).addEventListener('click', e => {
+      const b = e.target.closest('[data-set]'); if (!b) return;
+      if (b.dataset.set === 'sound') setSound(!S.sound);
+      else { S.letters = S.letters === false; save(); }
+      const on = b.dataset.set === 'sound' ? !!S.sound : S.letters !== false;
+      b.setAttribute('aria-pressed', String(on));
+      b.textContent = `${b.dataset.set === 'sound' ? 'Sound' : 'Letter shortcuts'}: ${on ? 'On' : 'Off'}`;
+    });
   }
 
   // ── Shared detail pieces ──────────────────────────────────────────────
@@ -528,11 +630,11 @@
         <button type="button" class="aid-btn aid-l" data-act="stimpak">Stimpak (${stimpak.length})</button>
         <button type="button" class="aid-btn aid-r" data-act="radaway">RadAway (${radaway.length})</button>
       </div>
-      <div class="status-name">${p ? `<span class="mark is-on"></span>${esc(p.name)}` : 'NO BACKPACK EQUIPPED'}</div>
+      <div class="status-name">${p ? `<span class="mark is-on"></span><span class="sr-only">Equipped: </span>${esc(p.name)}` : 'NO BACKPACK EQUIPPED'}</div>
       <div class="status-icons">
-        <span class="sbox">${ico('weight')} ${signed(st.cc)}</span>
-        <span class="sbox">${ico('shield')} ${pl.dr}</span><span class="sbox">${ico('bolt')} ${pl.er}</span><span class="sbox">${ico('rad')} ${pl.rr}</span>
-        ${pl.pa ? `<span class="sbox">${ico('pa')} +${pl.pa}</span>` : ''}
+        <span class="sbox">${ico('weight', '', 'Carry capacity')} ${signed(st.cc)}</span>
+        <span class="sbox">${ico('shield', '', 'Damage resistance')} ${pl.dr}</span><span class="sbox">${ico('bolt', '', 'Energy resistance')} ${pl.er}</span><span class="sbox">${ico('rad', '', 'Radiation resistance')} ${pl.rr}</span>
+        ${pl.pa ? `<span class="sbox">${ico('pa', '', 'Power Armor carry capacity')} +${pl.pa}</span>` : ''}
         ${st.hp ? `<span class="sbox">HP +${st.hp} · AP +${st.ap}</span>` : ''}
       </div>
     </div>`;
@@ -554,7 +656,7 @@
 
   // ── STAT › SPECIAL ────────────────────────────────────────────────────
   const SP_TEXT = {
-    STR: 'Raw strength. Carry weight is 200 + 10 × Strength before any backpack, so each point is worth a small pack. Armorer, Big Leagues and Strong Back all start here.',
+    STR: 'Raw strength. Carry weight is 200 + 10 × Strength before any backpack (Strong Back adds 25, then 50), so each point is worth a small pack. Armorer, Big Leagues and Strong Back all start here.',
     PER: 'Awareness of the world around you. Only one backpack mod touches it, but Rifleman needs it.',
     END: 'Stamina and toughness. The most common bonus in the catalog: Endurance mods show up on ten different backpacks.',
     CHA: 'Charm and wits. Local Leader, which gates the lucky-souvenir and settlement-built packs, needs Charisma 6.',
@@ -578,7 +680,7 @@
       <div class="stat-rows">
         ${statRow('Base', `${base}`, ` <span class="dim">of 10</span>`)}
         ${statRow('Equipped backpack', signed(bonus))}
-        ${k === 'STR' ? statRow(`${ico('weight')} Carry weight`, `${pl.carry} lb`) : ''}
+        ${k === 'STR' ? statRow(`${ico('weight')} Carry weight`, `${pl.carry} lb`, pl.strongBack ? ` <span class="dim">incl. Strong Back +${pl.strongBack}</span>` : '') : ''}
         ${statRow('Mods that raise it', up.length ? up.map(m => `${esc(m.name)} ${signed(m.fx.sp[k])}`).join(', ') : 'None')}
         ${down.length ? statRow('Mods that lower it', `${down.length} mods on ${packsDown.size} packs`) : ''}
         ${statRow('Perks it gates', gated.length ? gated.map(p => `${esc(p.name)} (${p.req})`).join(', ') : 'None in this catalog')}
@@ -594,7 +696,7 @@
   // ── STAT › PERKS ──────────────────────────────────────────────────────
   const pips = (have, max) => Array.from({ length: max }, (_, i) => `<span class="rank-pip${i < have ? ' is-on' : ''}"></span>`).join('');
   function perkItems() {
-    return PERK_LIST.map(p => ({ key: p.name, label: p.name, right: '', tag: `<span class="pips" aria-label="Rank ${rankOf(p.name)} of ${p.max}">${pips(rankOf(p.name), p.max)}</span>`, dim: rankOf(p.name) === 0 }));
+    return PERK_LIST.map(p => ({ key: p.name, label: p.name, right: '', tag: `<span class="pips" aria-hidden="true">${pips(rankOf(p.name), p.max)}</span>`, state: `rank ${rankOf(p.name)} of ${p.max}`, dim: rankOf(p.name) === 0 }));
   }
   function perkDetail(it) {
     const p = perkByName.get(it.key), have = rankOf(p.name), sp = clamp(Number(S.special[p.special]) || 1, 1, 10);
@@ -604,7 +706,7 @@
       <div class="perk-pips" role="group" aria-label="Set rank">${Array.from({ length: p.max }, (_, i) => `<button type="button" class="pip-btn${i < have ? ' is-on' : ''}" data-rank="${i + 1}" aria-label="Rank ${i + 1}" aria-pressed="${i < have}"></button>`).join('')}<span class="perk-rank">RANK ${have}/${p.max}</span></div>
       ${p.special ? para(`Requires ${SP_NAME[p.special]} ${p.req}.${sp < p.req ? ` Your ${SP_NAME[p.special]} is ${sp}.` : ''}`) : ''}
       <div class="stat-rows">
-        ${ranks.map(r => statRow(`Rank ${ROMAN[r]}`, `${p.ranks[r]} mod${p.ranks[r] === 1 ? '' : 's'}`, have >= r ? ' <span class="dim">✓</span>' : '')).join('')}
+        ${ranks.map(r => statRow(`Rank ${ROMAN[r]}`, p.ranks[r] ? `${p.ranks[r]} mod${p.ranks[r] === 1 ? '' : 's'}` : 'Base recipes only', have >= r ? ' <span class="dim">✓<span class="sr-only"> you have it</span></span>' : '')).join('')}
         ${p.packs.size ? statRow('Base recipes', [...p.packs].map(q => esc(q.name)).join(', ')) : ''}
         ${statRow('Craftable with your perks', `${total}/${MODS.length}`)}
       </div>`;
@@ -621,17 +723,17 @@
   function apparelItems() {
     const [k, , d] = SORTS.find(s => s[0] === S.sort) || SORTS[0];
     const list = PACKS.slice().sort((a, b) => (k === 'name' ? a.name.localeCompare(b.name) : (sortVal(a, k) - sortVal(b, k))) * d || a.num - b.num);
-    const right = p => k === 'cc' ? `+${p.ccMax}` : k === 'dr' ? String(p.drMax) : k === 'weight' ? `${p.weight}` : k === 'value' ? String(p.value) : k === 'ccw' ? (p.ccMax / (p.weight || 1)).toFixed(1) : locked(p) ? `LVL ${p.level}` : '';
-    return list.map(p => ({ key: String(p.num), label: p.name, mark: S.equip === p.num ? 'on' : null, dim: locked(p), right: right(p), tag: isFound(`bp-${p.num}`) ? '<span class="found-tag">FOUND</span>' : '' }));
+    const right = p => k === 'cc' ? `+${p.ccMax}` : k === 'dr' ? String(p.drMax) : k === 'weight' ? `${p.weight}` : k === 'value' ? p.value.toLocaleString('en-US') : k === 'ccw' ? (p.ccMax / (p.weight || 1)).toFixed(1) : locked(p) ? `LVL ${p.level}` : '';
+    return list.map(p => ({ key: String(p.num), label: p.name, mark: S.equip === p.num ? 'on' : null, dim: locked(p), right: right(p), tag: isFound(`bp-${p.num}`) ? '<span class="found-tag">FOUND</span>' : '', state: [S.equip === p.num && 'equipped', locked(p) && 'above your level'].filter(Boolean).join(', ') }));
   }
   function apparelDetail(it) {
     const p = byNum.get(Number(it.key)), st = packStats(p), eq = equipped(), es = eq && eq !== p ? packStats(eq) : null;
     return `${figure(p.img, p.name, 'is-pack')}
       <div class="stat-rows">
         ${statRow(`${ico('weight')} Carry capacity`, signed(st.cc), (es ? delta(st.cc, es.cc) : '') + (p.ccMax > st.cc ? ` <span class="dim">max +${p.ccMax}</span>` : ''))}
-        <div class="srow srow-icons">${ico('shield')}<span>${st.dr}${es ? delta(st.dr, es.dr) : ''}</span>${ico('bolt')}<span>${st.er}${es ? delta(st.er, es.er) : ''}</span>${ico('rad')}<span>${st.rr}${es ? delta(st.rr, es.rr) : ''}</span></div>
-        ${split(['Weight', `${p.weight}${es ? delta(p.weight, eq.weight, true) : ''}`], ['Value', `${p.value}`])}
-        ${split(['Level', `${p.level}${locked(p) ? ` ${ico('lock', 'is-inline')}` : ''}`], ['Mods', `${p.mods.length}`])}
+        <div class="srow srow-icons">${ico('shield', '', 'Damage resistance')}<span>${st.dr}${es ? delta(st.dr, es.dr) : ''}</span>${ico('bolt', '', 'Energy resistance')}<span>${st.er}${es ? delta(st.er, es.er) : ''}</span>${ico('rad', '', 'Radiation resistance')}<span>${st.rr}${es ? delta(st.rr, es.rr) : ''}</span></div>
+        ${split(['Weight', `${p.weight}${es ? delta(p.weight, eq.weight, true) : ''}`], ['Value', p.value.toLocaleString('en-US')])}
+        ${split(['Level', `${p.level}${locked(p) ? ` ${ico('lock', 'is-inline', 'above your level')}` : ''}`], ['Mods', `${p.mods.length}`])}
         ${spLine(st.sp) ? statRow('S.P.E.C.I.A.L.', spLine(st.sp)) : ''}
         ${st.cm ? statRow('Carry mod', esc(st.cm.name)) : ''}
         ${st.dm ? statRow('Armor mod', esc(st.dm.name)) : ''}
@@ -655,12 +757,16 @@
     refresh(); refreshMapPins();
   }
   function showOnMap(num) {
+    // A map filter that hides the pin is dropped first, so the F) hint stays truthful.
+    const f = MAP_FILTERS[mapFilter][1], bp = byNum.get(num)?.bp;
+    if (f && bp && !f(bp)) { mapFilter = 0; window.catalogMap?.filter(null); }
     go('map', 'world');
     requestAnimationFrame(() => window.catalogMap?.focus(num));
   }
 
   // ── INV › MODS and WEAPONS ────────────────────────────────────────────
   const COMBAT = /damage|reload|VATS|sneak attack|detect|accuracy/i;
+  const isCombat = m => m.fx.notes.some(n => COMBAT.test(n.replace(/damage resistance/gi, '')));
   const modRight = m => m.slot === 'cc' ? `+${m.fx.cc}` : `DR ${m.fx.dr}`;
   function modItems(filter) {
     const out = [];
@@ -670,7 +776,7 @@
       if (m.pack !== last) { out.push({ group: m.pack.name }); last = m.pack; }
       const cfg = cfgOf(m.pack), installed = cfg[m.slot] === m.i;
       const tagged = m.parts.some(pt => S.tags.includes(pt.name));
-      out.push({ key: m.key, label: m.name, mark: installed ? 'on' : null, dim: !craftable(m), right: modRight(m), tag: tagged ? '<span class="tag-mark" title="Uses a tagged component">⌕</span>' : '' });
+      out.push({ key: m.key, label: m.name, mark: installed ? 'on' : null, dim: !craftable(m), right: modRight(m), tag: tagged ? '<span class="tag-mark" title="Uses a tagged component">⌕</span>' : '', state: [installed && 'installed', !craftable(m) && 'needs perks', tagged && 'uses a tagged component'].filter(Boolean).join(', ') });
     }
     return out;
   }
@@ -681,7 +787,7 @@
       <h2 class="detail-title">${esc(m.name)}</h2>
       <div class="stat-rows">
         ${f.cc ? statRow(`${ico('weight')} Carry capacity`, `+${f.cc}`) : ''}
-        ${f.dr || f.er || f.rr ? `<div class="srow srow-icons">${ico('shield')}<span>${f.dr}</span>${ico('bolt')}<span>${f.er}</span>${ico('rad')}<span>${f.rr}</span></div>` : ''}
+        ${f.dr || f.er || f.rr ? `<div class="srow srow-icons">${ico('shield', '', 'Damage resistance')}<span>${f.dr}</span>${ico('bolt', '', 'Energy resistance')}<span>${f.er}</span>${ico('rad', '', 'Radiation resistance')}<span>${f.rr}</span></div>` : ''}
         ${f.hp ? statRow('Max HP / AP', `+${f.hp} / +${f.ap}`) : ''}
         ${spLine(f.sp) ? statRow('S.P.E.C.I.A.L.', spLine(f.sp)) : ''}
         ${f.notes.length ? `<div class="srow srow-full">${esc(f.notes.join('. '))}</div>` : ''}
@@ -704,7 +810,7 @@
   function clearModFilter() { modFilter = null; sfx.sub(); refresh(); }
 
   // ── INV › AID, JUNK, AMMO ─────────────────────────────────────────────
-  function partItems(kind) { return partsOf(kind).map(e => ({ key: e.name, label: e.name, count: e.qty, tag: S.tags.includes(e.name) ? '<span class="tag-mark" title="Tagged for search">⌕</span>' : '' })); }
+  function partItems(kind) { return partsOf(kind).map(e => ({ key: e.name, label: e.name, count: e.qty, tag: S.tags.includes(e.name) ? '<span class="tag-mark" title="Tagged for search">⌕</span>' : '', state: S.tags.includes(e.name) ? 'tagged for search' : '' })); }
   function partDetail(it) {
     const e = PARTS.get(it.key);
     const mods = e.uses.filter(u => u.mod), bases = e.uses.filter(u => !u.mod);
@@ -714,7 +820,7 @@
       <div class="stat-rows">
         ${statRow('To craft everything once', `×${e.qty}`)}
         ${split(['Mods', mods.length], ['Base recipes', bases.length])}
-        ${rows.map(u => statRow(esc(u.mod ? u.mod.name : `${u.pack.name} (base)`), `×${u.qty}`, ` <span class="dim">${u.mod ? esc(u.pack.name) : ''}</span>`)).join('')}
+        ${rows.map(u => statRow(`${esc(u.mod ? u.mod.name : `${u.pack.name} (base)`)}${u.mod ? `<span class="srow-sub">${esc(u.pack.name)}</span>` : ''}`, `×${u.qty}`)).join('')}
         ${e.uses.length > rows.length ? `<div class="srow srow-full dim">+ ${e.uses.length - rows.length} more</div>` : ''}
       </div>`;
   }
@@ -728,7 +834,7 @@
     const out = [{ group: 'MAGAZINES' }];
     ITEMS.forEach((i, n) => {
       if (!i.mag && ITEMS[n - 1]?.mag) out.push({ group: 'BOBBLEHEADS' });
-      out.push({ key: i.key, label: i.name, mark: isFound(i.key) ? 'on' : null });
+      out.push({ key: i.key, label: i.name, mark: isFound(i.key) ? 'on' : null, state: isFound(i.key) ? 'found' : '' });
     });
     return out;
   }
@@ -761,7 +867,7 @@
   const questDone = q => q.objectives().every(o => o.done());
   function questItems() {
     const sorted = QUESTS.slice().sort((a, b) => Number(questDone(a)) - Number(questDone(b)));
-    return sorted.map(q => ({ key: q.id, label: q.name, mark: S.track === q.id ? 'diamond' : null, dim: questDone(q), right: `${q.objectives().filter(o => o.done()).length}/${q.objectives().length}` }));
+    return sorted.map(q => ({ key: q.id, label: q.name, mark: S.track === q.id ? 'diamond' : null, dim: questDone(q), right: `${q.objectives().filter(o => o.done()).length}/${q.objectives().length}`, state: [S.track === q.id && 'tracked', questDone(q) && 'completed'].filter(Boolean).join(', ') }));
   }
   function questDetail(it) {
     const q = QUESTS.find(x => x.id === it.key);
@@ -788,7 +894,7 @@
   }
 
   // ── DATA › WORKSHOPS ──────────────────────────────────────────────────
-  function workshopItems() { return PACKS.map(p => ({ key: String(p.num), label: p.name, mark: isFound(`bp-${p.num}`) ? 'on' : null, right: `${p.mods.filter(craftable).length}/${p.mods.length}` })); }
+  function workshopItems() { return PACKS.map(p => ({ key: String(p.num), label: p.name, mark: isFound(`bp-${p.num}`) ? 'on' : null, right: `${p.mods.filter(craftable).length}/${p.mods.length}`, state: isFound(`bp-${p.num}`) ? 'found' : '' })); }
   function workshopDetail(it) {
     const p = byNum.get(Number(it.key)), can = p.mods.filter(craftable).length;
     const baseOk = hasPerks(p.basePerks);
@@ -848,8 +954,9 @@
   }
   function worldEnter() {
     window.catalogMap?.show();
-    const key = selected['map/world'];
-    requestAnimationFrame(() => { refreshMapPins(); if (key) { window.catalogMap?.focus(Number(key)); selected['map/world'] = null; } });
+    const key = selected['map/world'], bp = key && byNum.get(Number(key))?.bp, f = MAP_FILTERS[mapFilter][1];
+    if (bp && f && !f(bp)) mapFilter = 0;
+    requestAnimationFrame(() => { refreshMapPins(); if (bp) window.catalogMap?.focus(bp.num); selected['map/world'] = null; });
   }
   const worldHints = () => [
     { k: 'T', label: threat ? 'Pip-Boy Colors' : 'Threat Scan', run: () => { threat = !threat; ui.classList.toggle('is-threat', threat); sfx.sub(); renderHints(); } },
@@ -865,7 +972,7 @@
   window.openBackpack = num => go('inv', 'apparel', num, { open: true });
 
   function localItems() {
-    return [{ group: 'BACKPACKS' }, ...PACKS.map(p => ({ key: String(p.num), label: p.name, mark: isFound(`bp-${p.num}`) ? 'on' : null })), { group: 'COLLECTIBLES' }, ...ITEMS.filter(i => i.photo).map(i => ({ key: i.key, label: i.name, mark: isFound(i.key) ? 'on' : null }))];
+    return [{ group: 'BACKPACKS' }, ...PACKS.map(p => ({ key: String(p.num), label: p.name, mark: isFound(`bp-${p.num}`) ? 'on' : null, state: isFound(`bp-${p.num}`) ? 'found' : '' })), { group: 'COLLECTIBLES' }, ...ITEMS.filter(i => i.photo).map(i => ({ key: i.key, label: i.name, mark: isFound(i.key) ? 'on' : null, state: isFound(i.key) ? 'found' : '' }))];
   }
   function localDetail(it) {
     const i = itemByKey.get(it.key);
@@ -901,16 +1008,16 @@
       <div id="arc-slot"></div>
       <p class="desc dim" id="arc-status" role="status"></p>`;
     if (s.id === 'src') return `<p class="desc">Four channels from the Manpack radio transceiver. Each one sharpens V.A.T.S. a little more.</p><div class="stat-rows">${SRC.map(m => statRow(esc(m.name), esc(m.fx.notes.join(' ')))).join('')}</div>`;
-    if (s.id === 'beacon') { const here = [byNum.get(26), ...ITEMS.filter(i => i.edid === 'BackpackRoom')].filter(Boolean); return `<p class="desc">Morse, looping: B · B · H · Q. The beacon sits over the Backpack Room.</p><div class="stat-rows">${here.map(x => statRow(esc(x.name), esc(x.place))).join('')}</div>`; }
+    if (s.id === 'beacon') { const here = [byNum.get(26), ...ITEMS.filter(i => i.edid === 'BackpackRoom')].filter(Boolean); return `<p class="desc">Morse, looping: B · B · H · Q. The beacon sits over the Backpack Room.</p><div class="stat-rows">${here.map(x => statRow(`${esc(x.name)}<span class="srow-sub">${esc(x.place)}</span>`, '')).join('')}</div>`; }
     if (s.id === 'bulletin') return `<p class="desc bulletin" id="bulletin">${esc(bulletinLine())}</p>`;
     return '<p class="desc">"...too much weight... can\'t fast travel... send a Strong Back... or a bigger backpack..."</p><p class="desc dim">Recommended: equip something from INV › APPAREL.</p>';
   }
   let bulletinIdx = 0;
   const bulletinLine = () => { const b = ITEMS.filter(i => !i.mag); const i = b[bulletinIdx % b.length]; return `This is Vault-Tec with your bobblehead bulletin. ${i.name.replace('Vault-Tec Backpack ', 'The ')} was last seen at ${i.place}, ${i.hint}.`; };
-  function radioItems() { return STATIONS.map(s => ({ key: s.id, label: s.name, mark: playing === s.id ? 'on' : null, tag: s.tag ? `<span class="found-tag">${s.tag}</span>` : '' })); }
+  function radioItems() { return STATIONS.map(s => ({ key: s.id, label: s.name, mark: playing === s.id ? 'on' : null, tag: s.tag ? `<span class="found-tag">${s.tag}</span>` : '', state: playing === s.id ? 'playing' : '' })); }
   function radioDetail(it) {
     const s = STATIONS.find(x => x.id === it.key);
-    return `<div class="scope-wrap"><canvas class="scope" id="scope" aria-hidden="true"></canvas></div>${stationText(s)}${S.sound ? '' : '<p class="desc dim">Sound is off. Turn it on with the SOUND button.</p>'}`;
+    return `<div class="scope-wrap"><canvas class="scope" id="scope" aria-hidden="true"></canvas></div>${stationText(s)}${S.sound ? '' : '<p class="desc dim">Sound is off. Turn it on with the SOUND button or in HELP.</p>'}`;
   }
   // One stage element for the whole session: the viewer's resize observer is bound to it.
   let arcStage = null;
@@ -923,9 +1030,12 @@
     return arcStage;
   }
   function radioAfter(it) {
+    // Nothing draws while it can't be seen: a closed phone sheet or an open dialog.
+    const shown = (!narrow.matches || sheetOpen) && modal.hidden && !document.hidden;
+    if (it?.key === 'arc') $('#arc-slot')?.replaceWith(arcStageEl());
+    if (!shown) { leaveRadio(); return; }
     startScope();
     if (it?.key !== 'arc') { arc?.viewer?.setActive(false); return; }
-    $('#arc-slot')?.replaceWith(arcStageEl());
     if (arc?.viewer) mountArc();
     else if (arc?.video) arcVideo(arc.video);
     else if (arc?.loading) { arcStage.hidden = false; $('.scope-wrap')?.classList.add('is-hidden'); $('#arc-status').textContent = 'Decoding transmission…'; }
@@ -933,7 +1043,7 @@
   }
   function toggleStation(id) {
     playing = playing === id ? null : id;
-    clearInterval(radioTimer);
+    clearInterval(radioTimer); morseQueue = [];
     if (playing) {
       noise(0.25, 0.05, 0, 1200); sfx.ok();
       if (id === 'arc' && !isFound('signal')) { setFound('signal', true); checkQuests('signal'); }
@@ -1013,6 +1123,7 @@
     const stage = $('#arc-stage'); if (!stage || !arc?.viewer) return;
     stage.hidden = false; $('.scope-wrap')?.classList.add('is-hidden');
     $('.arc-poster', stage).hidden = true;
+    const video = $('video', stage); if (video) { video.pause(); video.hidden = true; }
     stage.classList.toggle('is-true', !!arc.trueColor);
     arc.viewer.setVisible(true); arc.viewer.setMotion(!motion.matches, !motion.matches); arc.viewer.setActive(true);
     const st = $('#arc-status'); if (st) st.textContent = 'Drag to orbit · scroll or pinch to zoom · arrow keys rotate when focused.';
@@ -1031,10 +1142,11 @@
   function leaveRadio() {
     cancelAnimationFrame(scopeRaf); scopeRaf = 0;
     if (arc?.viewer) { arc.viewer.setActive(false); }
+    arcStage?.querySelector('video')?.pause();
   }
   const radioHints = it => { if (!it) return []; const on = playing === it.key; return [
     { k: 'Enter', label: on ? 'Stop' : 'Tune In', run: () => toggleStation(it.key) },
-    it.key === 'arc' ? { k: 'P', label: arc?.viewer ? 'Reset View' : 'Power On 3D', run: () => (arc?.viewer && !$('#arc-stage')?.hidden ? arc.viewer.reset() : powerArc()) } : null,
+    it.key === 'arc' ? { k: 'P', label: arc?.viewer ? 'Reset View' : arc?.video ? 'Retry 3D' : 'Power On 3D', run: () => (arc?.viewer && !$('#arc-stage')?.hidden ? arc.viewer.reset() : powerArc()) } : null,
     it.key === 'arc' && arc?.viewer ? { k: 'V', label: arc.trueColor ? 'Pip-Boy Tint' : 'True Color', run: () => { arc.trueColor = !arc.trueColor; $('#arc-stage')?.classList.toggle('is-true', arc.trueColor); renderHints(); } } : null,
     it.key === 'beacon' ? { k: 'M', label: 'Show on Map', run: () => showOnMap(26) } : null
   ]; };
@@ -1065,7 +1177,7 @@
       { k: 'Bksp', label: 'Rank Down', run: () => setRank(it.key, rankOf(it.key) - 1), disabled: rankOf(it.key) <= 0 },
       { k: 'M', label: 'Show Mods', run: () => filterMods(it.key.toUpperCase(), m => m.perks.some(pk => pk.family === it.key)) }
     ] },
-    'inv/weapons': { label: 'Combat mods', items: () => modItems(m => m.fx.notes.some(n => COMBAT.test(n))), detail: modDetail, hints: it => modHints(it && modByKey.get(it.key)), head: () => 'COMBAT MODS', empty: 'No combat mods.' },
+    'inv/weapons': { label: 'Combat mods', items: () => modItems(isCombat), detail: modDetail, hints: it => modHints(it && modByKey.get(it.key)), head: () => 'COMBAT MODS', empty: 'No combat mods.' },
     'inv/apparel': { label: 'Backpacks', items: apparelItems, detail: apparelDetail, hints: apparelHints, head: () => `SORT: ${(SORTS.find(s => s[0] === S.sort) || SORTS[0])[1]}` },
     'inv/aid': { label: 'Aid', items: () => partItems('aid'), detail: partDetail, hints: partHints, head: () => 'USED IN RECIPES' },
     'inv/misc': { label: 'Collectibles', items: miscItems, detail: miscDetail, hints: miscHints },
@@ -1089,6 +1201,11 @@
 
   // ── Input ─────────────────────────────────────────────────────────────
   tabsEl.addEventListener('click', e => { const b = e.target.closest('.tab'); if (b) go(b.dataset.tab, lastSub[b.dataset.tab]); });
+  // A mouse click leaves focus on the clicked control, which would swallow the next Enter meant
+  // for the E) action. Keyboard activation (detail 0) keeps focus where it is.
+  document.addEventListener('click', e => {
+    if (e.detail > 0) document.activeElement?.closest?.('.tab, .subtab, .pbtn, .knob, .hint, .aid-btn')?.blur();
+  });
   strip.addEventListener('click', e => { const b = e.target.closest('.subtab'); if (b) go(route.tab, b.dataset.sub); });
   view.addEventListener('click', e => {
     const act = e.target.closest('[data-act]')?.dataset.act;
@@ -1102,10 +1219,23 @@
     if (e.defaultPrevented || e.altKey || e.ctrlKey || e.metaKey) return;
     if (bootState !== 'done') { finishBoot(); e.preventDefault(); return; }
     if (!modal.hidden) { if (e.key === 'Escape') { e.preventDefault(); closeModal(); } return; }
-    const t = e.target;
+    const t = e.target, k = e.key;
     if (t.closest?.('input, textarea, select, [contenteditable]')) return;
-    if (t.closest?.('#map-stage, #arc-stage canvas') && /^(Arrow|Home|End|PageUp|PageDown|\+|-|=|0| )/.test(e.key)) return;
-    const k = e.key;
+    if (t.closest?.('#map-stage, #arc-stage canvas') && /^(Arrow|Home|End|PageUp|PageDown|\+|-|=|0| )/.test(k)) return;
+    // Let a focused detail panel scroll itself.
+    if (t.closest?.('#detail') && /^(Arrow(Up|Down)|Page(Up|Down)|Home|End)$/.test(k)) return;
+    // Holding a key repeats movement, never actions like Equip or Mark Found.
+    if (e.repeat && !/^(Arrow|Page|Home|End)/.test(k) && !/^[wsWS]$/.test(k)) { e.preventDefault(); return; }
+    // Single-letter shortcuts can be switched off in HELP; arrows, Enter, Esc and 1–5 always work.
+    if (S.letters === false && k.length === 1 && !/^[1-5?]$/.test(k)) return;
+    // Arrow keys on a focused tab strip move along that strip, as a tablist should.
+    if ((k === 'ArrowLeft' || k === 'ArrowRight') && !e.shiftKey && t.closest?.('#tabs, #subtabs-strip')) {
+      e.preventDefault();
+      const main = !!t.closest('#tabs');
+      (main ? cycleTab : cycleSub)(k === 'ArrowLeft' ? -1 : 1);
+      $(main ? '.tab[aria-selected="true"]' : '.subtab[aria-selected="true"]')?.focus();
+      return;
+    }
     if (/^[1-5]$/.test(k)) { e.preventDefault(); const tab = TABS[Number(k) - 1]; go(tab, lastSub[tab]); return; }
     if (e.shiftKey && (k === 'ArrowLeft' || k === 'ArrowRight')) { e.preventDefault(); cycleTab(k === 'ArrowLeft' ? -1 : 1); return; }
     if (k === 'Escape') {
@@ -1118,8 +1248,10 @@
     // Contextual hint keys first: E) Equip, M) Map, and so on.
     const up = k.length === 1 ? k.toUpperCase() : k;
     const onControl = !!t.closest?.('button, a, canvas');   // Enter and Space belong to a focused control
+    // Phones and narrow windows: Enter on the list opens the detail sheet first.
+    if (k === 'Enter' && narrow.matches && !sheetOpen && t.closest?.('#list') && currentItem()) { e.preventDefault(); openSheet(); return; }
     let hint = null;
-    if (k === 'Enter' || up === 'E') hint = (k === 'Enter' && onControl) ? null : hintList.find(h => h.k === 'Enter') || hintList.find(h => h.k === up);
+    if (k === 'Enter' || up === 'E') hint = (k === 'Enter' && onControl) ? null : primaryHint();
     else if (k !== ' ') hint = hintList.find(h => h.k === up || (KEYMAP[h.k] || []).includes(k));
     if (hint) { e.preventDefault(); runHint(hint); return; }
     if (route.tab === 'map' && route.sub === 'world') {
@@ -1227,8 +1359,8 @@
   if (!hadHash) { route.tab = 'stat'; route.sub = 'status'; }
   render('tab');
   boot();
-  addEventListener('hashchange', () => { if (readHash()) render('tab'); });
-  addEventListener('resize', () => { placeNotch(); placeStrip(false); updateMore(); if (sheetOpen && !narrow.matches) closeSheet(false); });
+  addEventListener('hashchange', () => { if (skipHash) { skipHash = false; return; } if (readHash()) render('tab'); });
+  addEventListener('resize', () => { placeNotch(); placeStrip(false); updateMore(); updateDetailMore(); if (sheetOpen && !narrow.matches) closeSheet(false); });
   document.fonts?.ready.then(() => { placeNotch(); placeStrip(false); });
-  document.addEventListener('visibilitychange', () => { if (document.hidden) leaveRadio(); else if (route.tab === 'radio') refresh(); });
+  document.addEventListener('visibilitychange', () => { if (document.hidden) leaveRadio(); else if (route.tab === 'radio') radioAfter(currentItem()); });
 })();
