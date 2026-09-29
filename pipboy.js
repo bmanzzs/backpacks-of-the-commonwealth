@@ -1039,7 +1039,7 @@
     if (arc?.viewer) mountArc();
     else if (arc?.video) arcVideo(arc.video);
     else if (arc?.loading) { arcStage.hidden = false; $('.scope-wrap')?.classList.add('is-hidden'); $('#arc-status').textContent = 'Decoding transmission…'; }
-    else $('#arc-status').textContent = 'P) Power on the 3D preview (about 5 MB).';
+    else $('#arc-status').textContent = 'P) Power on the 3D preview (about 3 MB).';
   }
   function toggleStation(id) {
     playing = playing === id ? null : id;
