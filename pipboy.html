@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="referrer" content="no-referrer">
+<title>Pip-Boy · Backpacks of the Commonwealth</title>
+<meta name="description" content="The Backpacks of the Commonwealth catalog as a Pip-Boy 3000 Mk IV: 26 backpacks, 137 workbench mods, bobbleheads, magazines, a field map and an incoming transmission.">
+<link rel="icon" href="favicon.ico" sizes="16x16 32x32 48x48">
+<link rel="icon" type="image/png" sizes="32x32" href="assets/icons/favicon-32.png">
+<link rel="apple-touch-icon" sizes="180x180" href="assets/icons/apple-touch-icon.png">
+<meta name="theme-color" content="#020802">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Roboto+Condensed:wght@400;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="map-view.css">
+<link rel="stylesheet" href="pipboy.css">
+</head>
+<body class="pip is-booting">
+<a class="skip-link" href="#pip-body">Skip to content</a>
+
+<!-- Luminance → Pip-Boy colour. pipboy.js rewrites the matrix when the colour changes. -->
+<svg class="defs" width="0" height="0" aria-hidden="true" focusable="false">
+  <filter id="pip-tint" color-interpolation-filters="sRGB">
+    <feColorMatrix id="pip-tint-matrix" type="matrix" values="0.02 0.07 0.01 0 0  0.25 0.84 0.08 0 0  0.02 0.08 0.01 0 0  0 0 0 1 0"/>
+  </filter>
+  <symbol id="i-weight" viewBox="0 0 24 24"><path d="M8 7a4 4 0 1 1 8 0" fill="none" stroke="currentColor" stroke-width="2.2"/><path d="M5 9h14l2 12H3z"/></symbol>
+  <symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 2 20 5v6c0 5.2-3.4 9.3-8 11-4.6-1.7-8-5.8-8-11V5z"/></symbol>
+  <symbol id="i-bolt" viewBox="0 0 24 24"><path d="M14 1 4 14h7l-2 9 11-14h-7z"/></symbol>
+  <symbol id="i-rad" viewBox="0 0 24 24"><circle cx="12" cy="12" r="2.4"/><path d="M12 2a10 10 0 0 1 8.66 5L15 10.3A3.5 3.5 0 0 0 12 8.5zM3.34 7A10 10 0 0 1 12 2v6.5a3.5 3.5 0 0 0-3 1.8zM3.34 17 9 13.7a3.5 3.5 0 0 0 3 1.8V22a10 10 0 0 1-8.66-5zM20.66 17A10 10 0 0 1 12 22v-6.5a3.5 3.5 0 0 0 3-1.8z" transform="rotate(30 12 12)"/></symbol>
+  <symbol id="i-cap" viewBox="0 0 24 24"><path d="M12 1.5l1.9 1.6 2.4-.6 1 2.3 2.4.8-.2 2.5 1.8 1.7-1.3 2.2 1.3 2.2-1.8 1.7.2 2.5-2.4.8-1 2.3-2.4-.6L12 22.5l-1.9-1.6-2.4.6-1-2.3-2.4-.8.2-2.5L2.7 14.2 4 12 2.7 9.8l1.8-1.7-.2-2.5 2.4-.8 1-2.3 2.4.6z"/><circle cx="12" cy="12" r="5" fill="none" stroke="var(--knock, #031104)" stroke-width="1.6"/></symbol>
+  <symbol id="i-cross" viewBox="0 0 24 24"><circle cx="12" cy="12" r="7" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 1v6M12 17v6M1 12h6M17 12h6" stroke="currentColor" stroke-width="2"/></symbol>
+  <symbol id="i-lock" viewBox="0 0 24 24"><rect x="4" y="10" width="16" height="12"/><path d="M8 10V7a4 4 0 0 1 8 0v3" fill="none" stroke="currentColor" stroke-width="2.4"/></symbol>
+  <symbol id="i-pa" viewBox="0 0 24 24"><path d="M6 3h12l2 6-2 3 1 9H5l1-9-2-3zM9 8h6v3H9z" fill-rule="evenodd"/></symbol>
+</svg>
+
+<div class="device" id="device">
+  <div class="device-plate" aria-hidden="true"><span class="screw"></span><span class="plate-text">PIP-BOY 3000 · MK IV</span><span class="plate-sub">FIELD CATALOG EMULATOR</span><span class="screw"></span></div>
+
+  <div class="screen-well">
+    <div class="screen" id="screen">
+      <div class="ui" id="ui">
+        <header class="head">
+          <nav class="tabs" id="tabs" role="tablist" aria-label="Pip-Boy sections">
+            <button type="button" class="tab" role="tab" id="tab-stat" data-tab="stat" aria-controls="pip-body">STAT</button>
+            <button type="button" class="tab" role="tab" id="tab-inv" data-tab="inv" aria-controls="pip-body">INV</button>
+            <button type="button" class="tab" role="tab" id="tab-data" data-tab="data" aria-controls="pip-body">DATA</button>
+            <button type="button" class="tab" role="tab" id="tab-map" data-tab="map" aria-controls="pip-body">MAP</button>
+            <button type="button" class="tab" role="tab" id="tab-radio" data-tab="radio" aria-controls="pip-body">RADIO</button>
+            <span class="notch" id="notch" aria-hidden="true"></span>
+          </nav>
+          <div class="subtabs" id="subtabs"><div class="subtabs-strip" id="subtabs-strip" role="tablist" aria-label="Sub-sections"></div></div>
+        </header>
+
+        <main class="body" id="pip-body" tabindex="-1" aria-live="off">
+          <div class="view" id="view"></div>
+          <section class="view-map" id="view-map" hidden>
+            <div id="map-view" data-immersive aria-label="Backpack world locations">
+              <div class="map-shell" id="map-shell">
+                <div class="map-toolbar">
+                  <div class="map-title">
+                    <span class="map-kicker">WORLD MAP</span>
+                    <h2 class="map-heading">The Commonwealth</h2>
+                    <span class="map-count" id="map-count">26 LOCATIONS</span>
+                  </div>
+                  <div class="map-controls" role="group" aria-label="Map controls">
+                    <button type="button" class="map-btn" data-map="zoom-out" aria-label="Zoom out"><span class="map-btn-icon" aria-hidden="true">−</span></button>
+                    <span class="map-zoom" id="map-zoom" aria-hidden="true">1.0×</span>
+                    <button type="button" class="map-btn" data-map="zoom-in" aria-label="Zoom in"><span class="map-btn-icon" aria-hidden="true">+</span></button>
+                    <button type="button" class="map-btn" data-map="fit" aria-label="Show the whole map"><svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M1.5 5.5v-4h4M10.5 1.5h4v4M14.5 10.5v4h-4M5.5 14.5h-4v-4"/></svg><span class="map-btn-label">FIT</span></button>
+                    <button type="button" class="map-btn" data-map="expand" aria-pressed="false" aria-label="Expand map to full screen"><svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M9.5 1.5h5v5M14.5 1.5 9 7M6.5 14.5h-5v-5M1.5 14.5 7 9"/></svg><span class="map-btn-label">EXPAND</span></button>
+                  </div>
+                </div>
+                <div class="map-body">
+                  <div class="map-stage" id="map-stage" tabindex="0" role="region" aria-roledescription="interactive map" aria-label="Map of the Commonwealth. Drag to pan, scroll or pinch to zoom. When the map has focus, arrow keys pan, plus and minus zoom, and 0 shows the whole map. The location list jumps to each backpack.">
+                    <div class="map-status" id="map-status"><span>LOADING MAP</span></div>
+                    <div class="map-tint" aria-hidden="true"></div>
+                    <div class="map-pins" id="map-pins"></div>
+                    <div class="map-tip" id="map-tip" aria-hidden="true"><img alt=""><span class="map-tip-text"><span class="map-tip-meta"></span><span class="map-tip-name"></span><span class="map-tip-loc"></span></span></div>
+                    <div class="map-callout" id="map-callout" role="group" aria-label="Selected backpack location" hidden>
+                      <div class="map-callout-head">
+                        <img class="map-callout-img" alt="">
+                        <div>
+                          <div class="map-callout-meta"></div>
+                          <h3 class="map-callout-name"></h3>
+                          <div class="map-callout-loc"></div>
+                        </div>
+                        <button type="button" class="map-callout-close" data-callout="close" aria-label="Close location details">×</button>
+                      </div>
+                      <div class="map-callout-stats"><span class="cc"></span><span class="dr"></span><span class="wt"></span></div>
+                      <div class="map-callout-actions">
+                        <button type="button" data-callout="prev" aria-label="Previous location">◂</button>
+                        <button type="button" data-callout="stats">OPEN IN INV</button>
+                        <button type="button" data-callout="next" aria-label="Next location">▸</button>
+                      </div>
+                    </div>
+                    <div class="map-hint" id="map-hint" aria-hidden="true"></div>
+                  </div>
+                  <aside class="map-list-panel" aria-label="Backpack locations">
+                    <div class="map-list-head"><span>LOCATIONS</span><strong id="map-list-count">26</strong></div>
+                    <ol class="map-list" id="map-list"></ol>
+                    <p class="map-list-empty" id="map-list-empty" hidden>No locations match this filter.</p>
+                  </aside>
+                </div>
+                <div class="map-footer">
+                  <div class="map-legend">
+                    <span class="map-legend-label">EXPECTED THREAT LEVEL</span>
+                    <div class="map-legend-scale" role="img" aria-label="With the threat scan on, map colours show expected threat level, from blue for levels 1 to 5 up to dark red for level 45 and above.">
+                      <div class="map-legend-bar"></div>
+                      <div class="map-legend-ticks" aria-hidden="true"><span>1-5</span><span>6-14</span><span>15-25</span><span>20+</span><span>25+</span><span>30+</span><span>35+</span><span>40+</span><span>45+</span></div>
+                    </div>
+                  </div>
+                  <p class="map-help" id="map-help"></p>
+                </div>
+              </div>
+            </div>
+          </section>
+        </main>
+
+        <footer class="bar" id="bar" aria-label="Status"></footer>
+        <div class="hints" id="hints" role="toolbar" aria-label="Actions"></div>
+        <div class="toasts" id="toasts" role="status" aria-live="polite"></div>
+        <div class="modal" id="modal" hidden></div>
+      </div>
+
+      <div class="boot" id="boot" aria-hidden="true">
+        <pre class="boot-dump" id="boot-dump"></pre>
+        <pre class="boot-text" id="boot-text"></pre>
+        <div class="boot-splash" id="boot-splash">
+          <div class="bobble bobble-splash"><img class="bobble-body tint" src="assets/pipboy/bobble-body.webp" alt=""><img class="bobble-head tint" src="assets/pipboy/bobble-head.webp" alt=""></div>
+          <p>INITIATING...</p>
+        </div>
+        <p class="boot-skip">PRESS ANY KEY TO SKIP</p>
+      </div>
+
+      <div class="crt" aria-hidden="true">
+        <div class="crt-noise" id="crt-noise"></div>
+        <div class="crt-band"></div>
+        <div class="crt-scan"></div>
+        <div class="crt-vignette"></div>
+        <div class="crt-glass"></div>
+      </div>
+      <div class="power-line" aria-hidden="true"></div>
+    </div>
+  </div>
+
+  <aside class="controls" id="controls" aria-label="Pip-Boy controls">
+    <button type="button" class="knob" id="knob" aria-label="Selector knob: next section"><span class="knob-cap"></span><span class="knob-label">SELECT</span></button>
+    <div class="lamps" aria-hidden="true"><span class="lamp lamp-amber"></span><span class="lamp lamp-red"></span></div>
+    <button type="button" class="pbtn" data-ctl="color" aria-label="Pip-Boy colour"><span class="pbtn-face"></span><span class="pbtn-label">COLOR</span></button>
+    <button type="button" class="pbtn" data-ctl="light" aria-pressed="false" aria-label="Pip-Boy light"><span class="pbtn-face"></span><span class="pbtn-label">LIGHT</span></button>
+    <button type="button" class="pbtn" data-ctl="sound" aria-pressed="false" aria-label="Sound effects"><span class="pbtn-face"></span><span class="pbtn-label">SOUND</span></button>
+    <button type="button" class="pbtn" data-ctl="fx" aria-pressed="true" aria-label="CRT effects"><span class="pbtn-face"></span><span class="pbtn-label">CRT</span></button>
+    <button type="button" class="pbtn" data-ctl="help" aria-label="Controls"><span class="pbtn-face"></span><span class="pbtn-label">HELP</span></button>
+    <a class="pbtn pbtn-exit" href="./" aria-label="Exit to the main catalog"><span class="pbtn-face"></span><span class="pbtn-label">EXIT</span></a>
+  </aside>
+</div>
+
+<script type="importmap">{"imports":{"three":"./assets/vendor/three/three.module.min.js","three/addons/":"./assets/vendor/three/addons/"}}</script>
+<script src="backpacks-data.js"></script>
+<script src="collectibles-data.js"></script>
+<script src="map-view.js"></script>
+<script src="pipboy.js"></script>
+</body>
+</html>

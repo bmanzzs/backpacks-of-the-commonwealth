@@ -24,6 +24,8 @@
   const zoomEl = document.getElementById('map-zoom');
   const help = document.getElementById('map-help');
   const control = name => shell.querySelector(`[data-map="${name}"]`);
+  // An immersive map (the Pip-Boy) has no page behind it: plain scroll zooms and one finger pans.
+  const immersive = section.hasAttribute('data-immersive');
   const zoomInButton = control('zoom-in'), zoomOutButton = control('zoom-out'), expandButton = control('expand');
   const motion = matchMedia('(prefers-reduced-motion: reduce)');
   const coarse = matchMedia('(pointer: coarse)');
@@ -34,6 +36,7 @@
   let stageW = 0, stageH = 0, fit = 1, built = false, expanded = false, detailed = null, detailLoading = false;
   let match = () => true, raf = 0, last = 0, anim = null, selected = null, hot = null, tipFor = null;
   let tipSize = { w: 0, h: 0 }, calloutSize = { w: 0, h: 0 }, readout = '', hintTimer = 0;
+  const free = () => expanded || immersive;
 
   const pad2 = n => String(n).padStart(2, '0');
   const place = bp => { const parts = bp.location.split(' — '); return parts.length > 1 ? parts.slice(1).join(' — ').trim() : bp.location; };
@@ -309,9 +312,9 @@
   function hideHint() { clearTimeout(hintTimer); hint.classList.remove('is-visible'); }
   function updateHelp() {
     const touchFirst = coarse.matches;
-    help.innerHTML = expanded
+    help.innerHTML = free()
       ? touchFirst ? '<kbd>Drag</kbd> to pan · <kbd>Pinch</kbd> to zoom · <kbd>Double-tap</kbd> to zoom in'
-        : '<kbd>Drag</kbd> to pan · <kbd>Scroll</kbd> to zoom · <kbd>Esc</kbd> to close'
+        : `<kbd>Drag</kbd> to pan · <kbd>Scroll</kbd> to zoom${expanded ? ' · <kbd>Esc</kbd> to close' : ''}`
       : touchFirst ? '<kbd>Two fingers</kbd> to pan and zoom · <kbd>Double-tap</kbd> to zoom in · <kbd>Expand</kbd> for full screen'
         : `<kbd>Drag</kbd> to pan · <kbd>${mod} + scroll</kbd> or pinch to zoom · <kbd>Double-click</kbd> to zoom in`;
   }
@@ -437,10 +440,10 @@
     tween(zoomed(anim?.target || view, e.shiftKey ? 0.5 : 2, p.x, p.y), 320, p.x, p.y);
   });
 
-  // Plain wheel belongs to the page unless the map is expanded.
+  // Plain wheel belongs to the page unless the map is expanded or immersive.
   stage.addEventListener('wheel', e => {
     if (!built) return;
-    if (!expanded && !e.ctrlKey && !e.metaKey) return nudge('wheel');
+    if (!free() && !e.ctrlKey && !e.metaKey) return nudge('wheel');
     e.preventDefault();
     const dy = e.deltaMode === 1 ? e.deltaY * 16 : e.deltaMode === 2 ? e.deltaY * stageH : e.deltaY;
     if (!dy) return;
@@ -478,7 +481,7 @@
       const [a, b] = pts, mx = (a.x + b.x) / 2, my = (a.y + b.y) / 2;
       touch = { kind: 'pinch', dist: Math.hypot(a.x - b.x, a.y - b.y) || 1, s: view.s, wx: (mx - view.x) / view.s, wy: (my - view.y) / view.s };
     } else if (pts.length === 1) {
-      touch = { kind: expanded ? 'pan' : 'page', start: pts[0], from: { ...view }, moved: continuing, trail: [{ t: e.timeStamp, ...pts[0] }] };
+      touch = { kind: free() ? 'pan' : 'page', start: pts[0], from: { ...view }, moved: continuing, trail: [{ t: e.timeStamp, ...pts[0] }] };
     } else touch = null;
   }
   stage.addEventListener('touchstart', e => {
@@ -564,7 +567,10 @@
   });
   callout.addEventListener('click', e => {
     const action = e.target.closest('[data-callout]')?.dataset.callout;
-    if (action === 'stats' && selected) window.openBackpack?.(selected.num);
+    if (action === 'stats' && selected) {
+      if (window.openBackpack) window.openBackpack(selected.num);
+      else if (typeof openModal === 'function') openModal(selected.idx);
+    }
     else if (action === 'prev') step(-1);
     else if (action === 'next') step(1);
     else if (action === 'close') select(null);
@@ -585,7 +591,7 @@
     select(p, 'fly');
     // Below the map on narrow screens: bring the map back into view for the flight.
     const r = stage.getBoundingClientRect();
-    if (!expanded && (r.top < 0 || r.bottom > innerHeight)) stage.scrollIntoView({ block: 'nearest', behavior: motion.matches ? 'auto' : 'smooth' });
+    if (!free() && (r.top < 0 || r.bottom > innerHeight)) stage.scrollIntoView({ block: 'nearest', behavior: motion.matches ? 'auto' : 'smooth' });
   });
   list.addEventListener('pointerover', e => { if (e.pointerType === 'mouse') setHot(itemFrom(e.target)); });
   list.addEventListener('pointerleave', () => setHot(null));
@@ -593,7 +599,23 @@
   list.addEventListener('focusout', () => setHot(null));
   coarse.addEventListener('change', updateHelp);
 
-  // Fly to one backpack's pin, e.g. from the inventory's "Show on field map".
+  // Start fetching the map when someone reaches for the Map View button, and
+  // bring the whole panel on screen after they open it (main catalog only).
+  const mapButton = document.getElementById('btn-map');
+  let preloaded = false;
+  const preload = () => { if (!preloaded && !built) { preloaded = true; new Image().src = IMAGE.base; } };
+  if (mapButton) {
+    for (const type of ['pointerenter', 'focus', 'touchstart']) mapButton.addEventListener(type, preload, { passive: true });
+    mapButton.addEventListener('click', () => requestAnimationFrame(() => {
+      if (section.style.display === 'none') return;
+      const r = shell.getBoundingClientRect(), gap = 12;
+      if (r.top >= gap && r.bottom <= innerHeight - gap) return;
+      const top = r.height + gap * 2 <= innerHeight ? r.top - (innerHeight - r.height) / 2 : r.top - gap;
+      window.scrollBy({ top, behavior: motion.matches ? 'auto' : 'smooth' });
+    }));
+  }
+
+  // Fly to one backpack's pin, e.g. from the Pip-Boy inventory's "Show on map".
   function focus(num) {
     build();
     const p = pins.find(q => q.num === num);
