@@ -23,17 +23,33 @@
 
   // ── Saved in this browser: a random voter ID, the ballot, invitation snoozes ──
   const KEY = 'vt-survey.v1';
-  const store = (() => {
-    try { const saved = JSON.parse(localStorage.getItem(KEY)); return saved && typeof saved === 'object' && !Array.isArray(saved) ? saved : {}; } catch { return {}; }
-  })();
-  const save = () => { try { localStorage.setItem(KEY, JSON.stringify(store)); } catch { /* private browsing: works for this visit only */ } };
+  const isObject = value => Boolean(value) && typeof value === 'object' && !Array.isArray(value);
+  const readStore = () => { // null when storage is blocked or unreadable
+    try { const saved = JSON.parse(localStorage.getItem(KEY)); return isObject(saved) ? saved : saved === null ? {} : null; } catch { return null; }
+  };
+  const tidy = saved => {
+    if (!isObject(saved.ballots)) saved.ballots = {};
+    if (!isObject(saved.invite)) saved.invite = {};
+    return saved;
+  };
+  let store = tidy(readStore() || {});
   if (typeof store.voter !== 'string' || !/^v[a-z0-9]{15,39}$/.test(store.voter)) {
     const bytes = new Uint8Array(16);
     crypto.getRandomValues(bytes);
     store.voter = ('v' + Array.from(bytes, b => b.toString(36).padStart(2, '0')).join('')).slice(0, 24);
   }
-  if (!store.ballots || typeof store.ballots !== 'object') store.ballots = {};
-  if (!store.invite || typeof store.invite !== 'object') store.invite = {};
+  // Picks up what another open tab saved, keeping this tab's voter ID if none was saved yet.
+  function reload() {
+    const latest = tidy(readStore() || store);
+    if (typeof latest.voter !== 'string' || !/^v[a-z0-9]{15,39}$/.test(latest.voter)) latest.voter = store.voter;
+    store = latest;
+  }
+  // Each write starts from the saved copy, so another tab's ballot or snooze isn't overwritten.
+  function save(change) {
+    reload();
+    change?.(store);
+    try { localStorage.setItem(KEY, JSON.stringify(store)); } catch { /* private browsing: works for this visit only */ }
+  }
   save();
   const cleanPicks = list => (Array.isArray(list) ? [...new Set(list.map(Number))].filter(n => byNum.has(n)).slice(0, MAX) : []);
   const ballot = () => {
@@ -43,7 +59,7 @@
   const voted = () => Boolean(ballot()?.picks.length);
 
   // ── Talking to the survey script ──
-  let results = null, resultsAt = 0, loading = null;
+  let results = null, resultsAt = 0, loading = null, sent = 0;
   try {
     const cached = JSON.parse(sessionStorage.getItem('vt-survey-results'));
     if (cached && cached.survey === SURVEY && Date.now() - cached.at < RESULTS_TTL && valid(cached.data)) { results = cached.data; resultsAt = cached.at; }
@@ -73,13 +89,17 @@
   }
   function loadResults(force) {
     if (!force && results && Date.now() - resultsAt < RESULTS_TTL) return Promise.resolve(results);
-    if (!loading) loading = request().then(data => { remember(data); return data; }).finally(() => { loading = null; });
+    if (!loading) {
+      const before = sent;
+      loading = request().then(data => { if (before === sent) remember(data); return results; }).finally(() => { loading = null; });
+    }
     return loading;
   }
   async function submit(picks) {
+    reload(); // use the voter ID another tab may have saved first
     const data = await request({ method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify({ survey: SURVEY, voter: store.voter, picks }) });
-    store.ballots[SURVEY] = { picks: picks.slice(), at: new Date().toISOString() };
-    save();
+    save(latest => { latest.ballots[SURVEY] = { picks: picks.slice(), at: new Date().toISOString() }; });
+    sent++;
     remember(data);
     return data;
   }
@@ -204,18 +224,24 @@
       const i = Number(action.dataset.i);
       if (action.dataset.act === 'close') close();
       else if (action.dataset.act === 'send') send();
-      else if (action.dataset.act === 'edit') step('ballot');
+      else if (action.dataset.act === 'edit') { step('ballot'); $('#survey-title', dialog).focus({ preventScroll: true }); }
       else if (action.dataset.act === 'results') { close(); setTimeout(openResults, 0); }
       else if (action.dataset.act === 'up' || action.dataset.act === 'down') move(i, action.dataset.act === 'up' ? -1 : 1);
       else if (action.dataset.act === 'remove') remove(i);
     });
-    // Escape closes the survey here, before the catalog's own Escape handlers see it.
-    dialog.addEventListener('keydown', event => { if (event.key === 'Escape') { event.preventDefault(); event.stopPropagation(); close(); } });
+    // While the survey is open, Escape closes only the survey: this runs before the catalog's own
+    // Escape handlers (the backpack page, the ? panel), wherever focus is.
+    addEventListener('keydown', event => {
+      if (event.key !== 'Escape' || !dialog.open) return;
+      event.preventDefault();
+      event.stopImmediatePropagation();
+      close();
+    }, true);
     dialog.addEventListener('cancel', event => { event.preventDefault(); close(); });
     dialog.addEventListener('close', () => {
       dialog.removeAttribute('aria-modal');
       if (!document.getElementById('modal-overlay')?.classList.contains('visible')) document.body.classList.remove('modal-open');
-      const back = opener && opener.isConnected ? opener : null;
+      const back = [opener, helpButton].find(shown);
       opener = null;
       renderLike();
       back?.focus({ preventScroll: true });
@@ -247,9 +273,13 @@
       live(notice);
     }
   }
-  function close() { if (dialog?.open) dialog.close(); }
+  function close() { if (dialog?.open && !sending) dialog.close(); }
+  // Visible and focusable: not inside a closed backpack page, a hidden element or an inert one.
+  const shown = el => Boolean(el?.isConnected && el.getClientRects().length && !el.closest('[hidden], [inert], #modal-overlay:not(.visible)'));
   function step(name) {
     dialog.querySelectorAll('[data-step]').forEach(section => { section.hidden = section.dataset.step !== name; });
+    $('[data-live]', dialog).textContent = '';
+    $('.survey-x', dialog).disabled = sending;
     if (name === 'ballot') { renderBallot(); message(''); }
   }
   const live = text => { const el = $('[data-live]', dialog); el.textContent = ''; requestAnimationFrame(() => { el.textContent = text; }); };
@@ -262,18 +292,12 @@
     $('.survey-lede', dialog).innerHTML = b?.picks.length
       ? `<span class="survey-onfile">Your ballot is on file${b.at ? ` from ${esc(new Date(b.at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }))}` : ''}.</span> Change your picks and submit again to update it.`
       : `Pick up to ${MAX} backpacks, in order. Your first pick is your favorite.`;
-    const focusKey = document.activeElement?.closest?.('.survey-slots [data-act]') ? `${document.activeElement.dataset.act}:${document.activeElement.dataset.i}` : '';
     $('.survey-slots', dialog).innerHTML = Array.from({ length: MAX }, (_, i) => {
       const pack = byNum.get(draft[i]);
       if (!pack) return `<li class="survey-slot${i === draft.length ? ' is-next' : ''}"><span class="survey-slot-rank">#${i + 1}</span><span class="survey-slot-thumb is-empty" aria-hidden="true">?</span><span class="survey-slot-name">${i === draft.length ? (i ? 'Pick your next favorite' : 'Pick your favorite') : 'Empty'}</span></li>`;
       return `<li class="survey-slot is-filled"><span class="survey-slot-rank">#${i + 1}</span><img class="survey-slot-thumb" src="${esc(pack.img)}" alt=""><span class="survey-slot-name">${esc(pack.name)}<small>LVL ${pack.level}${i === 0 ? ' · FAVORITE' : ''}</small></span>
         <span class="survey-slot-tools"><button type="button" data-act="up" data-i="${i}" aria-label="Move ${esc(pack.name)} up"${i === 0 ? ' disabled' : ''}>▲</button><button type="button" data-act="down" data-i="${i}" aria-label="Move ${esc(pack.name)} down"${i === draft.length - 1 ? ' disabled' : ''}>▼</button><button type="button" data-act="remove" data-i="${i}" aria-label="Remove ${esc(pack.name)}">✕</button></span></li>`;
     }).join('');
-    if (focusKey) {
-      const [act, i] = focusKey.split(':');
-      const target = $(`.survey-slots [data-act="${act}"][data-i="${i}"]:not(:disabled)`, dialog) || $(`.survey-slots [data-i="${i}"]:not(:disabled)`, dialog) || $('.survey-slots [data-act]:not(:disabled)', dialog);
-      (target || $('.survey-grid .survey-pick', dialog))?.focus({ preventScroll: true });
-    }
     dialog.querySelectorAll('.survey-pick').forEach(tile => {
       const num = Number(tile.dataset.num), rank = draft.indexOf(num) + 1, pack = byNum.get(num);
       tile.setAttribute('aria-pressed', String(rank > 0));
@@ -283,8 +307,10 @@
       tile.setAttribute('aria-label', `${pack.name}, level ${pack.level}${rank ? `, your number ${rank} pick` : num === wanted ? ', the backpack you liked' : ''}`);
     });
     const sendButton = $('[data-act="send"]', dialog);
-    sendButton.disabled = !draft.length || sending;
+    sendButton.disabled = !draft.length;
+    sendButton.setAttribute('aria-disabled', String(sending)); // not disabled: that would drop keyboard focus
     sendButton.classList.toggle('is-busy', sending);
+    $('.survey-x', dialog).disabled = sending;
     sendButton.textContent = sending ? 'TRANSMITTING' : ballot()?.picks.length ? 'UPDATE MY BALLOT' : 'SUBMIT TO VAULT-TEC';
   }
   function toggle(num, tile) {
@@ -294,7 +320,6 @@
     else if (draft.length < MAX) { draft.push(num); notice = ''; if (num === wanted) wanted = 0; live(`${pack.name} is your number ${draft.length} pick.`); }
     else {
       message(`You already picked ${MAX}. Remove one first.`);
-      live(`You already picked ${MAX}. Remove one first.`);
       if (!motion.matches) { tile.classList.remove('is-shake'); void tile.offsetWidth; tile.classList.add('is-shake'); }
       return;
     }
@@ -308,7 +333,8 @@
     notice = '';
     live(`${byNum.get(draft[j]).name} is now number ${j + 1}.`);
     renderBallot();
-    $(`.survey-slots [data-act="${by < 0 ? 'up' : 'down'}"][data-i="${j}"]:not(:disabled)`, dialog)?.focus({ preventScroll: true });
+    const [same, other] = by < 0 ? ['up', 'down'] : ['down', 'up'];
+    ($(`.survey-slots [data-act="${same}"][data-i="${j}"]:not(:disabled)`, dialog) || $(`.survey-slots [data-act="${other}"][data-i="${j}"]:not(:disabled)`, dialog) || $(`.survey-slots [data-act="remove"][data-i="${j}"]`, dialog))?.focus({ preventScroll: true });
   }
   function remove(i) {
     if (sending) return;
@@ -316,6 +342,7 @@
     notice = '';
     live(`Removed ${byNum.get(num).name}.`);
     renderBallot();
+    ($(`.survey-slots [data-act="remove"][data-i="${Math.min(i, draft.length - 1)}"]`, dialog) || $('.survey-grid .survey-pick', dialog))?.focus({ preventScroll: true });
   }
   async function send() {
     if (!draft.length || sending) return;
@@ -329,11 +356,13 @@
       showThanks(data);
       updateCard();
       updateInviteState();
-      if (!panel.hidden) renderPanel(data);
+      renderLike();
+      if (panel && section && !panel.hidden) renderPanel(data);
     } catch (error) {
       sending = false;
       renderBallot();
       message(problem(error.code));
+      if (!dialog.contains(document.activeElement)) $('[data-act="send"]', dialog).focus({ preventScroll: true });
     }
   }
   function showThanks(data) {
@@ -388,6 +417,7 @@
   function openResults() {
     if (!panel || !section) return;
     if (document.getElementById('modal-overlay')?.classList.contains('visible') && typeof closeModal === 'function') closeModal();
+    document.querySelector('.map-shell.is-expanded [data-map="expand"]')?.click();
     if (panel.hidden) helpButton.click();
     requestAnimationFrame(() => {
       const heading = $('#survey-results-title');
@@ -497,24 +527,31 @@
   function dismissInvite(snooze) {
     if (!invite) return;
     if (snooze) {
-      store.invite.snoozes = (Number(store.invite.snoozes) || 0) + 1;
-      store.invite.until = Date.now() + SNOOZE;
-      if (store.invite.snoozes >= 2) store.invite.off = true; // two "not now"s: only the card and ? panel remain
-      save();
+      save(latest => {
+        latest.invite.snoozes = (Number(latest.invite.snoozes) || 0) + 1;
+        latest.invite.until = Date.now() + SNOOZE;
+        if (latest.invite.snoozes >= 2) latest.invite.off = true; // two "not now"s: only the card and ? panel remain
+      });
     }
     const leaving = invite;
     invite = null;
-    if (leaving.contains(document.activeElement)) (card && !showcase.hidden ? card : helpButton)?.focus({ preventScroll: true });
+    if (leaving.contains(document.activeElement)) {
+      const box = card && !showcase.hidden ? card.getBoundingClientRect() : null;
+      (box && box.bottom > 0 && box.top < innerHeight ? card : helpButton)?.focus({ preventScroll: true });
+    }
     if (motion.matches) leaving.remove();
     else { leaving.classList.add('is-leaving'); setTimeout(() => leaving.remove(), 260); }
   }
   function scheduleInvite() {
     if (!inviteAllowed()) return;
-    let fired = false, tries = 0;
+    let fired = false, waiting = false, tries = 0;
     const started = performance.now();
     const fire = () => {
-      if (fired) return;
-      if (busy()) { if (++tries < 30) setTimeout(fire, 4000); return; }
+      if (fired || waiting) return;
+      if (busy()) {
+        if (++tries < 30) { waiting = true; setTimeout(() => { waiting = false; fire(); }, 4000); }
+        return;
+      }
       fired = true;
       removeEventListener('scroll', onScroll);
       showInvite();
@@ -528,6 +565,15 @@
     const watch = new MutationObserver(() => { if (boot.classList.contains('gone')) { watch.disconnect(); scheduleInvite(); } });
     watch.observe(boot, { attributes: true, attributeFilter: ['class'] });
   } else scheduleInvite();
+
+  addEventListener('storage', event => {
+    if (event.key !== KEY && event.key !== null) return;
+    reload();
+    updateCard();
+    if (panel && section) updateTake();
+    renderLike();
+    if (voted() || store.invite.off || Number(store.invite.until) > Date.now()) dismissInvite(false);
+  });
 
   window.vaultTecSurvey = { open: () => open(null), results: () => openResults() };
 })();

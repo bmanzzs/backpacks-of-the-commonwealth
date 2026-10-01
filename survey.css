@@ -43,8 +43,8 @@
 .survey-card.is-done .survey-card-go { color: var(--vt-yellow); background: transparent; box-shadow: inset 0 0 0 1px var(--vt-yellow-dim); }
 
 /* ── Invitation ────────────────────────────────────────────────────── */
-.survey-invite { position: fixed; left: max(16px, env(safe-area-inset-left)); bottom: max(16px, env(safe-area-inset-bottom)); z-index: 10045; width: min(370px, calc(100vw - 32px));
-  font-family: 'Share Tech Mono', monospace; color: var(--vt-cream); animation: survey-invite-in .55s cubic-bezier(.2, 1.4, .4, 1) both; }
+.survey-invite { position: fixed; left: max(16px, env(safe-area-inset-left)); bottom: max(16px, env(safe-area-inset-bottom)); z-index: 10045; width: min(370px, calc(100vw - 32px)); max-height: calc(100dvh - 32px); overflow-y: auto;
+  font-family: 'Share Tech Mono', monospace; color: var(--vt-cream); filter: drop-shadow(0 14px 28px #000b); animation: survey-invite-in .55s cubic-bezier(.2, 1.4, .4, 1) both; }
 .survey-invite.is-leaving { animation: survey-invite-out .25s ease-in forwards; }
 @keyframes survey-invite-in { from { opacity: 0; transform: translateY(40px) rotate(-2deg) scale(.96); } }
 @keyframes survey-invite-out { to { opacity: 0; transform: translateY(24px); } }
@@ -71,7 +71,10 @@
 .survey-invite-fine { position: relative; margin: 8px 0 0; color: var(--vt-dim); font-size: 10px; }
 .survey-invite-x { position: absolute; top: 6px; right: 8px; z-index: 2; width: 32px; height: 32px; border: 0; background: none; color: var(--vt-ink); font: 22px/1 'Share Tech Mono', monospace; cursor: pointer; }
 .survey-invite-x:hover { color: var(--vt-cream); }
-.survey-invite :focus-visible, .survey-card:focus-visible { outline: 2px solid var(--vt-yellow); outline-offset: 2px; }
+.survey-invite :focus-visible { outline: 2px solid var(--vt-yellow); outline-offset: 2px; }
+/* These are clipped to an angled shape, so their focus ring sits inside the edge. */
+.survey-card:focus-visible { outline: 2px solid var(--vt-yellow); outline-offset: -5px; }
+.survey-invite .survey-invite-go:focus-visible, #survey-dialog .survey-btn.is-primary:focus-visible { outline: 2px solid var(--vt-navy); outline-offset: -5px; }
 
 /* ── Ballot dialog ─────────────────────────────────────────────────── */
 #survey-dialog { width: min(1000px, calc(100vw - 32px)); height: min(860px, calc(100dvh - 32px)); max-width: none; max-height: none; margin: auto; padding: 0; border: 0; overflow: visible;
@@ -89,7 +92,8 @@
 .survey-head-brand { font: 900 12px 'Orbitron', sans-serif; letter-spacing: 3px; }
 .survey-head-form { font: 700 10px 'Share Tech Mono', monospace; letter-spacing: 1px; opacity: .75; }
 .survey-x { margin-left: auto; width: 36px; height: 36px; border: 0; background: transparent; color: var(--vt-navy); font: 28px/1 'Share Tech Mono', monospace; cursor: pointer; }
-.survey-x:hover { background: #00000018; }
+.survey-x:hover:not(:disabled) { background: #00000018; }
+.survey-x:disabled { opacity: .35; cursor: default; }
 .survey-step { display: flex; flex-direction: column; flex: 1; min-height: 0; }
 .survey-step[hidden] { display: none; }
 .survey-intro { padding: 16px 22px 12px; border-bottom: 1px solid var(--vt-line); }
@@ -127,7 +131,7 @@
 .survey-pick-rank { position: absolute; top: 4px; left: 4px; display: none; min-width: 34px; padding: 4px 6px; color: var(--vt-navy); background: var(--vt-yellow); font: 900 13px 'Orbitron', sans-serif; text-align: center; box-shadow: 0 2px 8px #000a; }
 .survey-pick[aria-pressed="true"] { border-color: var(--vt-yellow); background: #18376f; box-shadow: inset 0 0 0 1px var(--vt-yellow); }
 .survey-pick[aria-pressed="true"] .survey-pick-rank { display: block; }
-.survey-pick.is-full:not([aria-pressed="true"]):not(.is-wanted) { opacity: .55; }
+.survey-pick.is-full:not([aria-pressed="true"]):not(.is-wanted) img { opacity: .5; }
 /* The backpack someone liked while their ballot was full */
 .survey-pick.is-wanted:not([aria-pressed="true"]) { border: 1px dashed var(--vt-yellow); animation: survey-wanted 1.2s ease-in-out 3; }
 @keyframes survey-wanted { 50% { box-shadow: 0 0 0 3px #ffcd3c55, 0 0 18px #ffcd3c44; } }
@@ -139,11 +143,12 @@
 .survey-foot-msg:empty { display: none; }
 .survey-foot-text { display: grid; gap: 3px; min-width: 0; }
 .survey-btn { min-height: 42px; padding: 0 18px; border: 1px solid var(--vt-line); background: #0b1c40; color: var(--vt-cream); font: 700 11px 'Orbitron', sans-serif; letter-spacing: 2px; cursor: pointer; white-space: nowrap; }
-.survey-btn:hover:not(:disabled) { border-color: var(--vt-yellow); color: var(--vt-yellow); }
+.survey-btn:hover:not(:disabled, [aria-disabled="true"]) { border-color: var(--vt-yellow); color: var(--vt-yellow); }
 .survey-btn.is-primary { border-color: var(--vt-yellow); background: var(--vt-yellow); color: var(--vt-navy);
   clip-path: polygon(0 0, calc(100% - 10px) 0, 100% 10px, 100% 100%, 10px 100%, 0 calc(100% - 10px)); }
-.survey-btn.is-primary:hover:not(:disabled) { background: #ffe07a; color: var(--vt-navy); }
+.survey-btn.is-primary:hover:not(:disabled, [aria-disabled="true"]) { background: #ffe07a; color: var(--vt-navy); }
 .survey-btn:disabled { opacity: .45; cursor: default; }
+.survey-btn.is-busy { cursor: progress; }
 .survey-btn.is-busy::after { content: '_'; animation: survey-blink .6s steps(1) infinite; }
 @keyframes survey-blink { 50% { opacity: 0; } }
 .survey-foot .survey-btn.is-primary { margin-left: auto; }
@@ -182,7 +187,7 @@
 .survey-row-sub { color: #91a984; font-size: 10px; }
 .survey-row-pts { color: #cfe8c3; font: 18px 'VT323', monospace; text-align: right; white-space: nowrap; }
 .survey-row-pts small { color: #91a984; font: 10px 'Share Tech Mono', monospace; }
-.survey-row.is-zero { opacity: .6; }
+.survey-row.is-zero :is(.survey-row-thumb, .survey-row-bar) { opacity: .6; }
 .survey-results-more, .survey-results-retry { margin-top: 10px; border: 1px solid var(--green-dim); color: var(--green); background: transparent; padding: 7px 10px; font: 13px 'Share Tech Mono', monospace; cursor: pointer; }
 .survey-results-note { color: #91a984; font-size: 12px; line-height: 1.6; margin-top: 10px; }
 .survey-results-take { display: inline-flex; align-items: center; gap: 8px; margin-top: 12px; min-height: 36px; padding: 0 12px; border: 1px solid var(--vt-yellow-dim); color: var(--vt-navy); background: var(--vt-yellow); font: 700 10px 'Orbitron', sans-serif; letter-spacing: 2px; cursor: pointer; }
@@ -215,6 +220,13 @@
 .like-text:empty { display: none; }
 .like-badge { display: inline-grid; place-items: center; flex: none; width: 18px; height: 18px; border-radius: 50%; background: linear-gradient(#18afff, #0062e0); }
 .like-badge .like-icon { width: 10px; height: 10px; fill: #fff; }
+
+/* ── Short screens: the whole ballot step scrolls ───────────────────── */
+@media (max-height: 600px) {
+  .survey-step[data-step="ballot"] { overflow-y: auto; overscroll-behavior: contain; }
+  .survey-body { flex: none; }
+  .survey-slots-panel, .survey-grid { overflow: visible; }
+}
 
 /* ── Phones ────────────────────────────────────────────────────────── */
 @media (max-width: 720px) {
@@ -257,6 +269,13 @@
   .survey-invite-title { font-size: 15px; }
   .survey-invite-text { font-size: 20px; }
   .like-bar { padding: 10px 14px; }
+}
+@media (max-width: 720px) and (max-height: 600px) {
+  .survey-body { display: block; }
+}
+/* Narrow phones: keep the invitation clear of the ? button in the corner. */
+@media (max-width: 460px) {
+  .survey-invite { bottom: max(64px, env(safe-area-inset-bottom)); max-height: calc(100dvh - 80px); }
 }
 
 @media (prefers-reduced-motion: reduce) {

@@ -1355,13 +1355,6 @@
     <span class="arc-invite">◈ EXPLORE 3D</span>
   </button>
 </section>
-<section id="survey-showcase" aria-label="Vault-Tec survey" hidden>
-  <button type="button" class="survey-card" id="survey-card" aria-haspopup="dialog">
-    <span class="survey-bobble" aria-hidden="true"><img class="survey-bobble-body" src="assets/pipboy/bobble-body.webp" alt=""><img class="survey-bobble-head" src="assets/pipboy/bobble-head.webp" alt=""></span>
-    <span class="survey-card-copy"><span class="survey-card-kicker">VAULT-TEC CITIZEN SURVEY</span><span class="survey-card-title">Which backpacks are your favorites?</span><span class="survey-card-desc">Rank your top 5 in about a minute. Results are in the ? panel.</span></span>
-    <span class="survey-card-go">◈ TAKE SURVEY</span>
-  </button>
-</section>
 <div id="arc-preview" role="dialog" aria-labelledby="arc-preview-title" hidden>
   <div class="arc-preview-head"><div><span class="arc-kicker">ATOMIC RESONANCE CARRIER</span><h2 id="arc-preview-title">Arc-tesla P.C.D. Mk IV</h2></div><button type="button" class="arc-close" aria-label="Close ARC preview">×</button></div>
   <div class="arc-stage"><img class="arc-poster" src="assets/previews/arc-tesla/poster.webp" alt="ARC-Tesla backpack with glowing coils and a front reactor fan"><video hidden controls loop muted playsinline preload="none" poster="assets/previews/arc-tesla/poster.webp" aria-label="Rendered ARC-Tesla turntable"></video></div>
@@ -1369,6 +1362,13 @@
   <div class="arc-controls"><button type="button" data-arc="animation" aria-pressed="true">Pause animation</button><button type="button" data-arc="orbit" aria-pressed="true">Turntable</button><button type="button" data-arc="reset">Reset view</button><button type="button" data-arc="mode">Watch render</button><a href="assets/previews/arc-tesla/turntable.mp4" target="_blank" rel="noopener">Open MP4 ↗</a></div>
   <p class="arc-preview-note">Presentation preview · lighting and effect timing adapted for the web.</p>
 </div>
+<section id="survey-showcase" aria-label="Vault-Tec survey" hidden>
+  <button type="button" class="survey-card" id="survey-card" aria-haspopup="dialog">
+    <span class="survey-bobble" aria-hidden="true"><img class="survey-bobble-body" src="assets/pipboy/bobble-body.webp" alt=""><img class="survey-bobble-head" src="assets/pipboy/bobble-head.webp" alt=""></span>
+    <span class="survey-card-copy"><span class="survey-card-kicker">VAULT-TEC CITIZEN SURVEY</span><span class="survey-card-title">Which backpacks are your favorites?</span><span class="survey-card-desc">Rank your top 5 in about a minute. Results are in the ? panel.</span></span>
+    <span class="survey-card-go">◈ TAKE SURVEY</span>
+  </button>
+</section>
 <div class="grid" id="grid"></div>
 <div class="grid" id="collectible-grid" hidden></div>
 <div id="collectible-table-view" hidden><table class="collectible-table" aria-label="Collectible effects and locations"><thead><tr>
@@ -1990,6 +1990,7 @@ let hideTimer;
 const overlay = document.createElement('div');
 overlay.id = 'modal-overlay';
 overlay.innerHTML = `<div id="modal"></div>`;
+overlay.inert = true;
 document.body.appendChild(overlay);
 const modal = document.getElementById('modal');
 
@@ -2189,12 +2190,14 @@ function openModal(idx) {
     </div>`;
 
   document.body.classList.add('modal-open');
+  overlay.inert = false;
   overlay.classList.add('visible');
 
   document.getElementById('modal-close-btn').addEventListener('click', closeModal);
 }
 
 function closeModal() {
+  overlay.inert = true;
   overlay.classList.remove('visible');
   document.body.classList.remove('modal-open');
 }

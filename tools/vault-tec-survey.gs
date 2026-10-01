@@ -35,7 +35,21 @@ const VOTER_ID = /^v[a-z0-9]{15,39}$/; // starts with a letter so Sheets never t
 function doGet(e) {
   const survey = String((e && e.parameter && e.parameter.survey) || '');
   if (!SURVEY_ID.test(survey)) return reply_({ ok: false, error: 'bad-survey' });
-  return reply_(Object.assign({ ok: true }, results_(survey)));
+  const cache = CacheService.getScriptCache();
+  const cached = cache.get(cacheKey_(survey));
+  if (cached) return reply_(Object.assign({ ok: true }, JSON.parse(cached)));
+  // Count under the script lock, so a tally read before a ballot was written can't be cached after it.
+  // If the lock stays busy, answer without caching.
+  const lock = LockService.getScriptLock();
+  const locked = lock.tryLock(5000);
+  try {
+    const filled = locked && cache.get(cacheKey_(survey)); // another request counted while this one waited
+    const out = filled ? JSON.parse(filled) : tally_(survey);
+    if (locked && !filled) cache.put(cacheKey_(survey), JSON.stringify(out), RESULTS_SECONDS);
+    return reply_(Object.assign({ ok: true }, out));
+  } finally {
+    if (locked) lock.releaseLock();
+  }
 }
 
 function doPost(e) {
@@ -51,24 +65,29 @@ function doPost(e) {
   const lock = LockService.getScriptLock();
   if (!lock.tryLock(15000)) return reply_({ ok: false, error: 'busy' });
   let updated = false;
+  let out;
   try {
     if (tooBusy_()) return reply_({ ok: false, error: 'busy' });
-    const sheet = votesSheet_();
+    const sheet = votesSheet_(true);
     const now = new Date();
     const picks = ballot.picks.concat(Array(MAX_PICKS - ballot.picks.length).fill(''));
-    const row = findBallot_(sheet, ballot.survey, ballot.voter);
-    if (row) {
-      sheet.getRange(row, 2, 1, 3 + MAX_PICKS).setValues([[now, ballot.survey, ballot.voter].concat(picks)]);
-      updated = true;
-    } else {
-      sheet.appendRow([now, now, ballot.survey, ballot.voter].concat(picks));
+    let row = findBallot_(sheet, ballot.survey, ballot.voter);
+    updated = row > 0;
+    if (!updated) {
+      row = sheet.getLastRow() + 1;
+      if (row > sheet.getMaxRows()) sheet.insertRowsAfter(sheet.getMaxRows(), 500);
     }
+    // Round and voter ID stay text: Sheets would turn a round like "oct-2026" into a date.
+    sheet.getRange(row, 3, 1, 2).setNumberFormat('@');
+    if (updated) sheet.getRange(row, 2, 1, 3 + MAX_PICKS).setValues([[now, ballot.survey, ballot.voter].concat(picks)]);
+    else sheet.getRange(row, 1, 1, 4 + MAX_PICKS).setValues([[now, now, ballot.survey, ballot.voter].concat(picks)]);
     SpreadsheetApp.flush();
-    CacheService.getScriptCache().remove(cacheKey_(ballot.survey));
+    out = tally_(ballot.survey);
+    CacheService.getScriptCache().put(cacheKey_(ballot.survey), JSON.stringify(out), RESULTS_SECONDS);
   } finally {
     lock.releaseLock();
   }
-  return reply_(Object.assign({ ok: true, updated: updated }, results_(ballot.survey)));
+  return reply_(Object.assign({ ok: true, updated: updated }, out));
 }
 
 // A valid ballot, or null. Picks are distinct whole backpack numbers in ranked order.
@@ -84,16 +103,13 @@ function ballot_(body) {
   return { survey: survey, voter: voter, picks: picks };
 }
 
-function results_(survey) {
-  const cache = CacheService.getScriptCache();
-  const cached = cache.get(cacheKey_(survey));
-  if (cached) return JSON.parse(cached);
-
+// Current standings for a round, counted from the sheet.
+function tally_(survey) {
   const tally = {};
   let ballots = 0;
   let latest = 0;
-  const sheet = votesSheet_();
-  const rows = sheet.getLastRow() - 1;
+  const sheet = votesSheet_(false);
+  const rows = sheet ? sheet.getLastRow() - 1 : 0;
   if (rows > 0) {
     sheet.getRange(2, 1, rows, 4 + MAX_PICKS).getValues().forEach(r => {
       if (String(r[2]) !== survey) return;
@@ -112,7 +128,7 @@ function results_(survey) {
   }
   const results = Object.keys(tally).map(k => tally[k])
     .sort((a, b) => b.points - a.points || b.first - a.first || b.picks - a.picks || a.id - b.id);
-  const out = {
+  return {
     survey: survey,
     ballots: ballots,
     maxPicks: MAX_PICKS,
@@ -120,8 +136,6 @@ function results_(survey) {
     generated: new Date().toISOString(),
     results: results
   };
-  cache.put(cacheKey_(survey), JSON.stringify(out), RESULTS_SECONDS);
-  return out;
 }
 
 function findBallot_(sheet, survey, voter) {
@@ -135,11 +149,14 @@ function findBallot_(sheet, survey, voter) {
   return 0;
 }
 
-function votesSheet_() {
+// The votes tab, or null when it doesn't exist yet. create (only under the lock) makes the tab
+// and its header if they are missing, including after someone clears the tab.
+function votesSheet_(create) {
   const book = SpreadsheetApp.getActiveSpreadsheet();
   let sheet = book.getSheetByName(VOTES_SHEET);
-  if (!sheet) {
-    sheet = book.insertSheet(VOTES_SHEET);
+  if (!create) return sheet;
+  if (!sheet) sheet = book.insertSheet(VOTES_SHEET);
+  if (sheet.getLastRow() === 0) {
     sheet.getRange(1, 1, 1, HEADER.length).setValues([HEADER]).setFontWeight('bold');
     sheet.setFrozenRows(1);
   }
