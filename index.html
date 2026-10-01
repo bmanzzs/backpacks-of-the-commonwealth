@@ -1290,6 +1290,7 @@
 <link rel="stylesheet" href="arc-preview.css">
 <link rel="stylesheet" href="map-view.css">
 <link rel="stylesheet" href="pipboy-launch.css">
+<link rel="stylesheet" href="survey.css">
 </head>
 <body>
 <div id="boot-screen">
@@ -1352,6 +1353,13 @@
     <img src="assets/previews/arc-tesla/poster.webp" alt="" width="116" height="116" loading="lazy">
     <span class="arc-tile-copy"><span class="arc-kicker">FIELD LAB · 3D PREVIEW</span><span class="arc-name">Arc-tesla P.C.D. Mk IV</span><span class="arc-description">Live coils. Spinning reactor. Every angle.<br>Open to explore the backpack in 360°.</span></span>
     <span class="arc-invite">◈ EXPLORE 3D</span>
+  </button>
+</section>
+<section id="survey-showcase" aria-label="Vault-Tec survey" hidden>
+  <button type="button" class="survey-card" id="survey-card" aria-haspopup="dialog">
+    <span class="survey-bobble" aria-hidden="true"><img class="survey-bobble-body" src="assets/pipboy/bobble-body.webp" alt=""><img class="survey-bobble-head" src="assets/pipboy/bobble-head.webp" alt=""></span>
+    <span class="survey-card-copy"><span class="survey-card-kicker">VAULT-TEC CITIZEN SURVEY</span><span class="survey-card-title">Which backpacks are your favorites?</span><span class="survey-card-desc">Rank your top 5 in about a minute. Results are in the ? panel.</span></span>
+    <span class="survey-card-go">◈ TAKE SURVEY</span>
   </button>
 </section>
 <div id="arc-preview" role="dialog" aria-labelledby="arc-preview-title" hidden>
@@ -1438,6 +1446,16 @@
 <button id="help-btn" aria-label="About this catalog and site traffic" aria-expanded="false" aria-controls="help-popup">?</button>
 <aside id="help-popup" aria-label="About this catalog and site traffic" hidden>
   <div class="help-header">◈ FIELD CATALOG <button id="help-close" aria-label="Close about panel">×</button></div>
+  <section class="survey-results" id="survey-results" aria-labelledby="survey-results-title" hidden>
+    <div class="survey-results-head"><h2 id="survey-results-title" tabindex="-1">FAVORITE BACKPACKS</h2><span class="survey-results-kicker">VAULT-TEC SURVEY</span></div>
+    <p class="survey-results-status" id="survey-results-status" role="status" aria-live="polite"></p>
+    <p class="survey-results-total" id="survey-results-total" hidden></p>
+    <ol class="survey-standings" id="survey-results-list" hidden></ol>
+    <button type="button" class="survey-results-more" id="survey-results-more" aria-expanded="false" hidden>Show all</button>
+    <button type="button" class="survey-results-retry" id="survey-results-retry" hidden>Try again</button>
+    <p class="survey-results-note">Ranked by points: a #1 pick earns 5, each place below earns one less. <span id="survey-results-meta"></span></p>
+    <button type="button" class="survey-results-take" id="survey-results-take">◈ TAKE THE SURVEY</button>
+  </section>
   <section class="traffic" aria-labelledby="traffic-title">
     <div class="traffic-heading"><h2 id="traffic-title">SITE TRAFFIC</h2><div class="traffic-ranges" role="group" aria-label="Traffic date range">
       <button data-traffic-range="1m" aria-pressed="true" aria-label="Past month">1M</button>
@@ -2407,6 +2425,8 @@ document.addEventListener('click', function(e) {
 <script src="map-view.js"></script>
 <script src="collectibles.js"></script>
 <script src="arc-preview.js"></script>
+<script src="survey-config.js"></script>
+<script src="survey.js"></script>
 <script src="analytics-config.js"></script>
 <script src="analytics.js"></script>
 <script src="pipboy-launch.js"></script>

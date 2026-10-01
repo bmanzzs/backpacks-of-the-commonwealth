@@ -89,6 +89,30 @@ GoatCounter counters can be cached for up to four hours. The chart uses UTC date
 
 GitHub Pages serves the main catalog from `index.html`. Include the collectible, analytics, and map JS/CSS files and `assets/map/` alongside it when publishing updates.
 
+## Vault-Tec survey
+
+Visitors rank up to five favorite backpacks. A #1 pick earns 5 points, and each place below earns one less. The survey shows up in four places:
+
+- A "Vault-Tec has selected you to participate in a survey!" invitation in the bottom left. It appears once per visit, after the boot screen, and waits while a detail page, the ? panel, or a text field is in use. Two "Not now"s turn it off in that browser.
+- A featured card under the ARC tile (backpack card view only).
+- A 👍 **Like** button on every backpack's detail page. It opens the survey with that backpack already on the ballot. It reads **Liked** once that backpack is on the visitor's submitted ballot. "N people like this" counts the ballots that include it.
+- Results in the ? panel: ballots cast and the standings, top five first.
+
+Ballots go to a Google Apps Script web app that stores them in a Google Sheet you own:
+
+1. Create a Google Sheet (any name), then choose **Extensions > Apps Script**.
+2. Replace `Code.gs` with `tools/vault-tec-survey.gs` and save.
+3. Choose **Deploy > New deployment > Web app**. Set **Execute as** to *Me* and **Who has access** to *Anyone*. Deploy and authorize it. Google warns that your own script is unverified: choose **Advanced > Go to (project name)**.
+4. Copy the web app URL (it ends in `/exec`) into `survey-config.js` as `endpoint`.
+
+After editing the script later, use **Deploy > Manage deployments > Edit > Version: New version** so the URL stays the same.
+
+- `survey.js` / `survey.css`: invitation, featured card, ballot dialog, Like buttons, and ? panel results.
+- `survey-config.js`: the endpoint, the survey round (`id`), and the ballot length (`picks`, 1–5). An empty endpoint hides every part of the survey, including the Like buttons.
+- `tools/vault-tec-survey.gs`: the backend. It validates ballots, caches results for two minutes, and accepts at most 60 ballots a minute across all visitors.
+
+The sheet's **Survey Votes** tab has one row per browser and round: first and last submission time, round, a random browser ID, and the picks as backpack numbers. It stores no names, emails, or IP addresses. Submitting again from the same browser replaces that browser's row. Another browser, or cleared site data, counts as a new voter, so treat the results as a fan poll rather than a secure vote. To start a fresh round, change `id` (for example, to `favorites-2`); earlier rows stay in the sheet but stop counting. Backpacks added to the catalog join the survey automatically.
+
 ## ARC-Tesla interactive preview
 
 The separate **Field Lab** tile previews Arc-tesla P.C.D. Mk IV without adding unverified stats or locations to the 26-entry catalog. Hover or focus the tile to open the viewer; click or tap to keep it open. Drag to orbit through 360°, scroll/pinch to zoom, or focus the canvas and use arrow keys and +/−. Reset, turntable, animation, and close controls are available. Moving between the tile and popout keeps it open; Escape closes it.

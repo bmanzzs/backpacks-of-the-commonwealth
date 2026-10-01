@@ -1,0 +1,277 @@
+/* Vault-Tec citizen survey: invitation, featured card, ballot dialog, and results.
+   Vault-Tec blue and yellow on purpose: it should stand out from the green catalog. */
+:root {
+  --vt-navy: #081631;
+  --vt-blue: #12306b;
+  --vt-blue-hi: #1d4a9c;
+  --vt-yellow: #ffcd3c;
+  --vt-yellow-dim: #b38a1e;
+  --vt-cream: #fff3cf;
+  --vt-ink: #c9d3ea;
+  --vt-dim: #9aa8c8;
+  --vt-line: #2b4c8d;
+}
+
+/* ── Shared pieces ─────────────────────────────────────────────────── */
+.survey-bobble { position: relative; display: block; }
+.survey-bobble img { position: absolute; inset: 0; width: 100%; height: 100%; }
+.survey-bobble .survey-bobble-body { -webkit-mask-image: linear-gradient(#000 82%, transparent); mask-image: linear-gradient(#000 82%, transparent); }
+.survey-bobble .survey-bobble-head { transform-origin: 55% 39%; }
+@keyframes survey-bobble { 0%, 100% { transform: rotate(0); } 10% { transform: rotate(16deg); } 22% { transform: rotate(-12deg); } 34% { transform: rotate(8deg); } 46% { transform: rotate(-5deg); } 58% { transform: rotate(2deg); } 70% { transform: rotate(0); } }
+.survey-sr { position: absolute !important; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+
+/* ── Featured card (under the ARC tile) ────────────────────────────── */
+#survey-showcase { max-width: 1100px; margin: -6px auto 22px; padding: 0 20px; }
+#survey-showcase[hidden] { display: none !important; }
+.survey-card { display: flex; align-items: center; gap: 18px; width: 100%; min-height: 96px; padding: 10px 22px 10px 14px; text-align: left; color: var(--vt-cream); cursor: pointer;
+  font-family: 'Share Tech Mono', monospace;
+  background: linear-gradient(105deg, var(--vt-blue) 0%, #0d2552 55%, var(--vt-navy) 100%);
+  border: 1px solid var(--vt-yellow-dim);
+  clip-path: polygon(0 0, calc(100% - 14px) 0, 100% 14px, 100% 100%, 14px 100%, 0 calc(100% - 14px));
+  box-shadow: inset 0 0 0 1px #ffcd3c22, inset 0 0 40px #00000055;
+  transition: border-color .2s, box-shadow .2s, background .2s; }
+.survey-card:hover, .survey-card:focus-visible { border-color: var(--vt-yellow); box-shadow: inset 0 0 0 1px #ffcd3c66, 0 0 22px #ffcd3c26; outline: 2px solid transparent; }
+.survey-card:focus-visible { box-shadow: inset 0 0 0 2px var(--vt-yellow), 0 0 22px #ffcd3c33; }
+.survey-card .survey-bobble { flex: none; width: 34px; height: 81px; }
+.survey-card:is(:hover, :focus-visible) .survey-bobble-head { animation: survey-bobble 1.4s ease-out; }
+.survey-card-copy { display: grid; gap: 6px; min-width: 0; }
+.survey-card-kicker { color: var(--vt-yellow); font: 700 10px 'Orbitron', sans-serif; letter-spacing: 3px; }
+.survey-card-title { color: var(--vt-cream); font: 27px/1.05 'VT323', monospace; }
+.survey-card-desc { color: var(--vt-ink); font-size: 12px; line-height: 1.5; }
+.survey-card-go { margin-left: auto; flex: none; padding: 9px 14px; color: var(--vt-navy); background: var(--vt-yellow); font: 700 11px 'Orbitron', sans-serif; letter-spacing: 2px; white-space: nowrap;
+  clip-path: polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px)); }
+.survey-card.is-done .survey-card-go { color: var(--vt-yellow); background: transparent; box-shadow: inset 0 0 0 1px var(--vt-yellow-dim); }
+
+/* ── Invitation ────────────────────────────────────────────────────── */
+.survey-invite { position: fixed; left: max(16px, env(safe-area-inset-left)); bottom: max(16px, env(safe-area-inset-bottom)); z-index: 10045; width: min(370px, calc(100vw - 32px));
+  font-family: 'Share Tech Mono', monospace; color: var(--vt-cream); animation: survey-invite-in .55s cubic-bezier(.2, 1.4, .4, 1) both; }
+.survey-invite.is-leaving { animation: survey-invite-out .25s ease-in forwards; }
+@keyframes survey-invite-in { from { opacity: 0; transform: translateY(40px) rotate(-2deg) scale(.96); } }
+@keyframes survey-invite-out { to { opacity: 0; transform: translateY(24px); } }
+.survey-invite-card { position: relative; padding: 14px 16px 12px 70px;
+  background: linear-gradient(160deg, var(--vt-blue-hi), var(--vt-blue) 45%, var(--vt-navy));
+  border: 2px solid var(--vt-yellow);
+  clip-path: polygon(0 0, calc(100% - 14px) 0, 100% 14px, 100% 100%, 14px 100%, 0 calc(100% - 14px));
+  box-shadow: 0 18px 50px #000c; }
+.survey-invite-card::before { content: ''; position: absolute; inset: 0; pointer-events: none; opacity: .5;
+  background: repeating-linear-gradient(0deg, transparent 0 2px, #00000022 2px 4px); }
+.survey-invite .survey-bobble { position: absolute; left: 14px; bottom: 10px; width: 46px; height: 110px; z-index: 1; animation: survey-pop .6s .35s cubic-bezier(.2, 1.6, .4, 1) both; }
+.survey-invite .survey-bobble-head { animation: survey-bobble 1.6s 1s ease-out both; }
+@keyframes survey-pop { from { transform: translateY(30px) scale(.6); opacity: 0; } }
+.survey-invite-kicker { position: relative; margin: 0 0 6px; color: var(--vt-yellow); font: 700 9px 'Orbitron', sans-serif; letter-spacing: 2px; }
+.survey-invite-title { position: relative; margin: 0; color: var(--vt-yellow); font: 900 17px/1.15 'Orbitron', sans-serif; letter-spacing: 1px; text-shadow: 0 0 12px #ffcd3c55; }
+.survey-invite-text { position: relative; margin: 6px 0 0; color: var(--vt-cream); font: 22px/1.05 'VT323', monospace; }
+.survey-invite-sub { position: relative; margin: 6px 0 0; color: var(--vt-ink); font-size: 12px; line-height: 1.45; }
+.survey-invite-actions { position: relative; display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-top: 12px; }
+.survey-invite-go { min-height: 36px; padding: 0 14px; border: 0; cursor: pointer; color: var(--vt-navy); background: var(--vt-yellow); font: 700 11px 'Orbitron', sans-serif; letter-spacing: 2px;
+  clip-path: polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px)); }
+.survey-invite-go:hover { background: #ffe07a; }
+.survey-invite-later { min-height: 36px; padding: 0 10px; border: 1px solid var(--vt-line); background: transparent; color: var(--vt-ink); font: 13px 'Share Tech Mono', monospace; cursor: pointer; }
+.survey-invite-later:hover { color: var(--vt-cream); border-color: var(--vt-dim); }
+.survey-invite-fine { position: relative; margin: 8px 0 0; color: var(--vt-dim); font-size: 10px; }
+.survey-invite-x { position: absolute; top: 6px; right: 8px; z-index: 2; width: 32px; height: 32px; border: 0; background: none; color: var(--vt-ink); font: 22px/1 'Share Tech Mono', monospace; cursor: pointer; }
+.survey-invite-x:hover { color: var(--vt-cream); }
+.survey-invite :focus-visible, .survey-card:focus-visible { outline: 2px solid var(--vt-yellow); outline-offset: 2px; }
+
+/* ── Ballot dialog ─────────────────────────────────────────────────── */
+#survey-dialog { width: min(1000px, calc(100vw - 32px)); height: min(860px, calc(100dvh - 32px)); max-width: none; max-height: none; margin: auto; padding: 0; border: 0; overflow: visible;
+  color: var(--vt-cream); background: transparent; font-family: 'Share Tech Mono', monospace; }
+#survey-dialog::backdrop { background: rgba(2, 6, 18, .84); backdrop-filter: blur(3px); }
+#survey-dialog[open] { animation: survey-open .2s ease-out; }
+@keyframes survey-open { from { opacity: 0; transform: translateY(14px) scale(.98); } }
+.survey-sheet { position: relative; display: flex; flex-direction: column; height: 100%;
+  background: radial-gradient(ellipse at 20% 0%, #163a7d 0%, var(--vt-navy) 55%), var(--vt-navy);
+  border: 2px solid var(--vt-yellow);
+  clip-path: polygon(0 0, calc(100% - 20px) 0, 100% 20px, 100% 100%, 20px 100%, 0 calc(100% - 20px));
+  box-shadow: 0 30px 90px #000; }
+.survey-sheet::after { content: ''; position: absolute; inset: 0; pointer-events: none; opacity: .35; background: repeating-linear-gradient(0deg, transparent 0 2px, #00000026 2px 4px); }
+.survey-head { display: flex; align-items: center; gap: 12px; padding: 10px 14px 10px 18px; background: var(--vt-yellow); color: var(--vt-navy); }
+.survey-head-brand { font: 900 12px 'Orbitron', sans-serif; letter-spacing: 3px; }
+.survey-head-form { font: 700 10px 'Share Tech Mono', monospace; letter-spacing: 1px; opacity: .75; }
+.survey-x { margin-left: auto; width: 36px; height: 36px; border: 0; background: transparent; color: var(--vt-navy); font: 28px/1 'Share Tech Mono', monospace; cursor: pointer; }
+.survey-x:hover { background: #00000018; }
+.survey-step { display: flex; flex-direction: column; flex: 1; min-height: 0; }
+.survey-step[hidden] { display: none; }
+.survey-intro { padding: 16px 22px 12px; border-bottom: 1px solid var(--vt-line); }
+.survey-intro h2 { margin: 0; color: var(--vt-yellow); font: 900 22px/1.1 'Orbitron', sans-serif; letter-spacing: 1px; text-shadow: 0 0 14px #ffcd3c40; }
+.survey-intro p { margin: 6px 0 0; color: var(--vt-ink); font-size: 13px; line-height: 1.5; }
+.survey-intro .survey-onfile { color: var(--vt-yellow); }
+.survey-intro .survey-notice { margin-top: 8px; padding: 7px 10px; border-left: 3px solid var(--vt-yellow); background: #ffcd3c17; color: var(--vt-cream); }
+.survey-intro .survey-notice[hidden] { display: none; }
+.survey-body { display: grid; grid-template-columns: 340px minmax(0, 1fr); flex: 1; min-height: 0; }
+.survey-slots-panel { min-height: 0; overflow-y: auto; overscroll-behavior: contain; padding: 14px 14px 16px 18px; border-right: 1px solid var(--vt-line); background: #00000026; }
+.survey-slots-title { margin: 0 0 10px; color: var(--vt-dim); font: 700 10px 'Orbitron', sans-serif; letter-spacing: 2px; }
+.survey-slots { display: grid; gap: 8px; margin: 0; padding: 0; list-style: none; }
+.survey-slot { display: grid; grid-template-columns: 30px 40px minmax(0, 1fr) auto; align-items: center; gap: 8px; min-height: 58px; padding: 6px 6px 6px 8px; border: 1px dashed var(--vt-line); color: var(--vt-dim); }
+.survey-slot.is-filled { border-style: solid; border-color: var(--vt-line); background: linear-gradient(90deg, #1a3c80cc, #0c1f45cc); color: var(--vt-cream); }
+.survey-slot.is-filled:first-child { border-color: var(--vt-yellow); box-shadow: 0 0 16px #ffcd3c22; }
+.survey-slot.is-next { border-color: var(--vt-yellow-dim); color: var(--vt-ink); }
+.survey-slot-rank { color: var(--vt-yellow); font: 900 16px 'Orbitron', sans-serif; text-align: center; }
+.survey-slot-thumb { width: 40px; height: 40px; object-fit: contain; background: #000; }
+.survey-slot-thumb.is-empty { display: grid; place-items: center; border: 1px dashed var(--vt-line); background: transparent; font-size: 18px; }
+.survey-slot-name { min-width: 0; font-size: 13px; line-height: 1.3; }
+.survey-slot-name small { display: block; color: var(--vt-dim); font-size: 10px; letter-spacing: 1px; }
+.survey-slot-tools { display: flex; gap: 2px; }
+.survey-slot-tools button { width: 28px; height: 28px; border: 1px solid var(--vt-line); background: #0a1a3c; color: var(--vt-ink); font: 13px 'Share Tech Mono', monospace; cursor: pointer; }
+.survey-slot-tools button:hover:not(:disabled) { border-color: var(--vt-yellow); color: var(--vt-yellow); }
+.survey-slot-tools button:disabled { opacity: .3; cursor: default; }
+.survey-points { margin: 12px 0 0; color: var(--vt-dim); font-size: 11px; line-height: 1.5; }
+.survey-grid { min-height: 0; overflow-y: auto; overscroll-behavior: contain; padding: 14px 18px 18px; display: grid; grid-template-columns: repeat(auto-fill, minmax(146px, 1fr)); gap: 10px; align-content: start; }
+.survey-pick { position: relative; display: grid; grid-template-rows: auto auto 1fr; gap: 6px; padding: 8px 8px 10px; text-align: left; cursor: pointer;
+  color: var(--vt-cream); background: #0b1c40; border: 1px solid var(--vt-line); font: 12px/1.3 'Share Tech Mono', monospace; transition: border-color .15s, background .15s, transform .12s; }
+.survey-pick:hover { border-color: var(--vt-dim); background: #10275a; }
+.survey-pick:active { transform: scale(.98); }
+.survey-pick img { width: 100%; aspect-ratio: 208 / 200; object-fit: contain; background: #000; }
+.survey-pick-meta { display: flex; justify-content: space-between; gap: 6px; color: var(--vt-dim); font-size: 10px; letter-spacing: 1px; }
+.survey-pick-name { font-size: 12px; }
+.survey-pick-rank { position: absolute; top: 4px; left: 4px; display: none; min-width: 34px; padding: 4px 6px; color: var(--vt-navy); background: var(--vt-yellow); font: 900 13px 'Orbitron', sans-serif; text-align: center; box-shadow: 0 2px 8px #000a; }
+.survey-pick[aria-pressed="true"] { border-color: var(--vt-yellow); background: #18376f; box-shadow: inset 0 0 0 1px var(--vt-yellow); }
+.survey-pick[aria-pressed="true"] .survey-pick-rank { display: block; }
+.survey-pick.is-full:not([aria-pressed="true"]):not(.is-wanted) { opacity: .55; }
+/* The backpack someone liked while their ballot was full */
+.survey-pick.is-wanted:not([aria-pressed="true"]) { border: 1px dashed var(--vt-yellow); animation: survey-wanted 1.2s ease-in-out 3; }
+@keyframes survey-wanted { 50% { box-shadow: 0 0 0 3px #ffcd3c55, 0 0 18px #ffcd3c44; } }
+.survey-pick.is-shake { animation: survey-shake .3s; }
+@keyframes survey-shake { 25% { transform: translateX(-4px); } 75% { transform: translateX(4px); } }
+.survey-foot { display: flex; align-items: center; gap: 14px; padding: 12px 18px; border-top: 1px solid var(--vt-line); background: #00000033; }
+.survey-foot-note { margin: 0; color: var(--vt-dim); font-size: 11px; line-height: 1.5; }
+.survey-foot-msg { margin: 0; color: var(--vt-yellow); font-size: 12px; line-height: 1.45; }
+.survey-foot-msg:empty { display: none; }
+.survey-foot-text { display: grid; gap: 3px; min-width: 0; }
+.survey-btn { min-height: 42px; padding: 0 18px; border: 1px solid var(--vt-line); background: #0b1c40; color: var(--vt-cream); font: 700 11px 'Orbitron', sans-serif; letter-spacing: 2px; cursor: pointer; white-space: nowrap; }
+.survey-btn:hover:not(:disabled) { border-color: var(--vt-yellow); color: var(--vt-yellow); }
+.survey-btn.is-primary { border-color: var(--vt-yellow); background: var(--vt-yellow); color: var(--vt-navy);
+  clip-path: polygon(0 0, calc(100% - 10px) 0, 100% 10px, 100% 100%, 10px 100%, 0 calc(100% - 10px)); }
+.survey-btn.is-primary:hover:not(:disabled) { background: #ffe07a; color: var(--vt-navy); }
+.survey-btn:disabled { opacity: .45; cursor: default; }
+.survey-btn.is-busy::after { content: '_'; animation: survey-blink .6s steps(1) infinite; }
+@keyframes survey-blink { 50% { opacity: 0; } }
+.survey-foot .survey-btn.is-primary { margin-left: auto; }
+#survey-dialog :focus-visible { outline: 2px solid var(--vt-yellow); outline-offset: 2px; }
+#survey-dialog .survey-head :focus-visible { outline-color: var(--vt-navy); }
+
+/* Thank-you step */
+.survey-thanks { flex: 1; min-height: 0; overflow-y: auto; padding: 22px 26px; display: grid; grid-template-columns: 120px minmax(0, 1fr); gap: 8px 26px; align-content: safe center; }
+.survey-thanks .survey-bobble { grid-row: span 3; width: 70px; height: 167px; justify-self: center; }
+.survey-thanks .survey-bobble-head { animation: survey-bobble 1.5s .2s ease-out 2; }
+.survey-thanks h2 { margin: 6px 0 0; color: var(--vt-yellow); font: 900 26px/1.1 'Orbitron', sans-serif; text-shadow: 0 0 16px #ffcd3c55; }
+.survey-thanks p { margin: 0; color: var(--vt-ink); font-size: 13px; line-height: 1.55; }
+.survey-thanks h3 { margin: 10px 0 2px; color: var(--vt-dim); font: 700 10px 'Orbitron', sans-serif; letter-spacing: 2px; }
+.survey-thanks .survey-standings { grid-column: 2; }
+.survey-thanks-actions { grid-column: 1 / -1; display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 10px; margin-top: 14px; }
+
+/* ── Results (? panel and thank-you step) ──────────────────────────── */
+.survey-results { padding: 18px 18px 14px; border-bottom: 1px solid var(--border); }
+.survey-results[hidden], .survey-results [hidden] { display: none !important; }
+.survey-results-head { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 4px 10px; }
+.survey-results-head h2 { font: 700 13px 'Orbitron', sans-serif; color: var(--amber); letter-spacing: 1px; }
+.survey-results-kicker { color: #8fb3e6; font: 700 9px 'Orbitron', sans-serif; letter-spacing: 2px; }
+.survey-results-status { color: #b5c9aa; font-size: 14px; line-height: 1.6; margin: 12px 0 4px; }
+.survey-results-total { margin: 12px 0 2px; color: #aac89c; font-size: 13px; }
+.survey-results-total strong { font: 700 24px 'Orbitron', sans-serif; color: var(--green); margin-right: 6px; }
+.survey-standings { display: grid; gap: 4px; margin: 10px 0 0; padding: 0; list-style: none; }
+.survey-row { display: grid; grid-template-columns: 22px 30px minmax(0, 1fr) auto; align-items: center; gap: 8px; padding: 4px 0; }
+.survey-row-pos { color: #9bb88d; font: 16px 'VT323', monospace; text-align: right; }
+.survey-row-thumb { width: 30px; height: 30px; object-fit: contain; background: #000; border: 1px solid #1e3a1e; }
+.survey-row-main { display: grid; gap: 3px; min-width: 0; }
+.survey-row-name { overflow: hidden; color: #cfe8c3; font-size: 12px; white-space: nowrap; text-overflow: ellipsis; }
+.survey-row-mine { color: var(--amber); font-size: 10px; letter-spacing: 1px; }
+.survey-row-bar { display: block; height: 6px; background: #12230f; }
+.survey-row-bar span { display: block; height: 100%; min-width: 2px; background: var(--green); border-radius: 0 3px 3px 0; opacity: .85; }
+.survey-row.is-mine .survey-row-bar span { opacity: 1; box-shadow: 0 0 6px var(--green-glow); }
+.survey-row-sub { color: #91a984; font-size: 10px; }
+.survey-row-pts { color: #cfe8c3; font: 18px 'VT323', monospace; text-align: right; white-space: nowrap; }
+.survey-row-pts small { color: #91a984; font: 10px 'Share Tech Mono', monospace; }
+.survey-row.is-zero { opacity: .6; }
+.survey-results-more, .survey-results-retry { margin-top: 10px; border: 1px solid var(--green-dim); color: var(--green); background: transparent; padding: 7px 10px; font: 13px 'Share Tech Mono', monospace; cursor: pointer; }
+.survey-results-note { color: #91a984; font-size: 12px; line-height: 1.6; margin-top: 10px; }
+.survey-results-take { display: inline-flex; align-items: center; gap: 8px; margin-top: 12px; min-height: 36px; padding: 0 12px; border: 1px solid var(--vt-yellow-dim); color: var(--vt-navy); background: var(--vt-yellow); font: 700 10px 'Orbitron', sans-serif; letter-spacing: 2px; cursor: pointer; }
+.survey-results-take.is-done { color: var(--vt-yellow); background: transparent; }
+#help-popup .survey-results button:focus-visible { outline: 2px solid var(--amber); outline-offset: 3px; }
+/* Same rows on the navy thank-you step */
+.survey-thanks .survey-row-name { color: var(--vt-cream); }
+.survey-thanks .survey-row-pos, .survey-thanks .survey-row-sub, .survey-thanks .survey-row-pts small { color: var(--vt-dim); }
+.survey-thanks .survey-row-pts { color: var(--vt-cream); }
+.survey-thanks .survey-row-thumb { border-color: var(--vt-line); }
+.survey-thanks .survey-row-bar { background: #0b1c40; }
+.survey-thanks .survey-row-bar span { background: var(--vt-yellow); }
+.survey-thanks .survey-row-mine { color: var(--vt-yellow); }
+
+/* ── 👍 Like on each backpack page: styled like a social network's button on purpose ── */
+.like-bar { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; padding: 10px 18px; border-bottom: 1px solid var(--border); background: #071107;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; }
+.like-btn { display: inline-flex; align-items: center; gap: 6px; height: 32px; padding: 0 14px 0 11px; border: 0; border-radius: 6px; cursor: pointer;
+  color: #fff; background: #0866ff; font: 600 14px/1 -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; letter-spacing: normal; text-transform: none;
+  -webkit-tap-highlight-color: transparent; transition: background-color .15s ease, transform .1s ease; }
+.like-btn:hover { background: #0759e0; }
+.like-btn:active { transform: scale(.96); }
+.like-btn:focus-visible { outline: 2px solid #4599ff; outline-offset: 2px; }
+.like-btn .like-icon { flex: none; width: 16px; height: 16px; fill: currentColor; }
+.like-btn.is-liked { color: #4599ff; background: #1c2b41; }
+.like-btn.is-liked:hover { background: #22344f; }
+.like-btn.is-pop .like-icon { animation: like-pop .45s cubic-bezier(.3, 1.6, .5, 1); }
+@keyframes like-pop { 35% { transform: scale(1.45) rotate(-14deg); } }
+.like-text { display: inline-flex; align-items: center; gap: 6px; min-width: 0; color: #b0b3b8; font-size: 13px; line-height: 1.35; }
+.like-text:empty { display: none; }
+.like-badge { display: inline-grid; place-items: center; flex: none; width: 18px; height: 18px; border-radius: 50%; background: linear-gradient(#18afff, #0062e0); }
+.like-badge .like-icon { width: 10px; height: 10px; fill: #fff; }
+
+/* ── Phones ────────────────────────────────────────────────────────── */
+@media (max-width: 720px) {
+  #survey-showcase { margin-top: -8px; }
+  .survey-card { gap: 12px; padding: 10px 12px; }
+  .survey-card .survey-bobble { width: 28px; height: 67px; }
+  .survey-card-title { font-size: 22px; }
+  .survey-card-desc { font-size: 11px; }
+  .survey-card-go { display: none; }
+  #survey-dialog { width: 100vw; height: 100dvh; margin: 0; }
+  .survey-sheet { border-width: 0; clip-path: none; padding-bottom: env(safe-area-inset-bottom); }
+  .survey-intro { padding: 12px 14px 10px; }
+  .survey-intro h2 { font-size: 17px; }
+  .survey-intro p { font-size: 12px; }
+  .survey-body { grid-template-columns: 1fr; grid-template-rows: auto minmax(0, 1fr); }
+  .survey-slots-panel { overflow: visible; padding: 10px 12px; border-right: 0; border-bottom: 1px solid var(--vt-line); }
+  .survey-slots-title, .survey-points { display: none; }
+  .survey-slots { gap: 5px; }
+  .survey-slot { grid-template-columns: 28px 30px minmax(0, 1fr) auto; min-height: 40px; padding: 3px 4px 3px 6px; }
+  .survey-slot:not(.is-filled):not(.is-next) { display: none; }
+  .survey-slot-rank { font-size: 13px; }
+  .survey-slot-thumb { width: 30px; height: 30px; }
+  .survey-slot-name { font-size: 12px; }
+  .survey-slot-name small { display: none; }
+  .survey-slot-tools button { width: 34px; height: 34px; }
+  .survey-grid { grid-template-columns: repeat(auto-fill, minmax(104px, 1fr)); gap: 8px; padding: 10px 12px 14px; }
+  .survey-pick { padding: 6px 6px 8px; font-size: 11px; }
+  .survey-pick-name { font-size: 11px; }
+  .survey-foot { padding: 10px 12px; flex-wrap: wrap; }
+  .survey-foot .survey-btn.is-primary { width: 100%; margin-left: 0; }
+  .survey-thanks { grid-template-columns: 1fr; padding: 18px 16px; }
+  .survey-thanks .survey-bobble { grid-row: auto; width: 46px; height: 110px; }
+  .survey-thanks .survey-standings { grid-column: 1; }
+  .survey-thanks h2 { font-size: 21px; text-align: center; }
+  .survey-thanks h2 + p { text-align: center; }
+  .survey-thanks-actions { justify-content: stretch; }
+  .survey-thanks-actions .survey-btn { flex: 1; }
+  .survey-invite-card { padding: 12px 14px 12px 60px; }
+  .survey-invite .survey-bobble { left: 10px; width: 40px; height: 95px; }
+  .survey-invite-title { font-size: 15px; }
+  .survey-invite-text { font-size: 20px; }
+  .like-bar { padding: 10px 14px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .survey-invite, .survey-invite.is-leaving, .survey-invite .survey-bobble, #survey-dialog[open] { animation: none; }
+  .survey-bobble-head, .survey-invite .survey-bobble-head, .survey-thanks .survey-bobble-head, .survey-card:is(:hover, :focus-visible) .survey-bobble-head { animation: none !important; }
+  .survey-pick, .survey-card { transition: none; }
+  .survey-pick.is-shake, .survey-pick.is-wanted { animation: none; }
+  .survey-btn.is-busy::after { animation: none; }
+  .like-btn { transition: none; }
+  .like-btn.is-pop .like-icon { animation: none; }
+}
+@media (forced-colors: active) {
+  .survey-pick[aria-pressed="true"] { outline: 3px solid Highlight; }
+  .survey-pick-rank { forced-color-adjust: none; background: Highlight; color: HighlightText; }
+  .survey-row-bar span { forced-color-adjust: none; background: CanvasText; }
+  .like-btn { border: 1px solid ButtonText; }
+  .like-btn.is-liked { border-width: 3px; }
+}
