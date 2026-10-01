@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://qconsulting.ca/fo3/ModConfig5.0.xsd">
+  <moduleName>Trailbound • Field Kit</moduleName>
+  <moduleImage path="fomod\images\field-kit.svg" showImage="true" showFade="false" />
+  <requiredInstallFiles>
+    <file source="Core\Trailbound.esp" destination="Trailbound.esp" priority="0" />
+    <folder source="Core\Meshes" destination="meshes\Trailbound" priority="0" />
+  </requiredInstallFiles>
+  <installSteps order="Explicit">
+    <installStep name="Texture quality">
+      <optionalFileGroups order="Explicit">
+        <group name="Choose your texture resolution" type="SelectExactlyOne">
+          <plugins order="Explicit">
+            <plugin name="2K · Balanced">
+              <description>Sharp canvas, worn brass, and stitched webbing. A balanced texture set for everyday adventures. This fictional package is a safe simulation fixture.</description>
+              <image path="fomod\images\field-kit.svg" />
+              <files><folder source="Textures\2K" destination="textures\Trailbound" priority="10" /></files>
+              <conditionFlags><flag name="quality">2k</flag></conditionFlags>
+              <typeDescriptor><type name="Recommended" /></typeDescriptor>
+            </plugin>
+            <plugin name="4K · Extra detail">
+              <description>Higher resolution fabric and hardware for close-up screenshots. Select this to see the planned texture sources change.</description>
+              <image path="fomod\images\field-kit.svg" />
+              <files><folder source="Textures\4K" destination="textures\Trailbound" priority="10" /></files>
+              <conditionFlags><flag name="quality">4k</flag></conditionFlags>
+              <typeDescriptor><type name="Optional" /></typeDescriptor>
+            </plugin>
+          </plugins>
+        </group>
+      </optionalFileGroups>
+    </installStep>
+    <installStep name="Optional extras">
+      <optionalFileGroups order="Explicit">
+        <group name="Make it yours" type="SelectAny">
+          <plugins order="Explicit">
+            <plugin name="Weathered appearance">
+              <description>Trade the fresh field finish for a well-traveled look. Enables a third page where you can choose the weathering tone.</description>
+              <image path="fomod\images\field-kit.svg" />
+              <conditionFlags><flag name="weathered">true</flag></conditionFlags>
+              <typeDescriptor><type name="Optional" /></typeDescriptor>
+            </plugin>
+            <plugin name="Companion compatibility patch">
+              <description>Demonstrates a mod dependency. Set CompanionMod.esp to Active in the simulated environment to make this patch available.</description>
+              <files><file source="Patches\Trailbound-Companion.esp" destination="Trailbound-Companion.esp" priority="20" /></files>
+              <typeDescriptor>
+                <dependencyType>
+                  <defaultType name="NotUsable" />
+                  <patterns><pattern><dependencies operator="And"><fileDependency file="CompanionMod.esp" state="Active" /></dependencies><type name="Recommended" /></pattern></patterns>
+                </dependencyType>
+              </typeDescriptor>
+            </plugin>
+          </plugins>
+        </group>
+      </optionalFileGroups>
+    </installStep>
+    <installStep name="Weathering tone">
+      <visible><flagDependency flag="weathered" value="true" /></visible>
+      <optionalFileGroups order="Explicit">
+        <group name="Choose a field finish" type="SelectExactlyOne">
+          <plugins order="Explicit">
+            <plugin name="Amber · Sun worn">
+              <description>Sun-faded canvas with warm dust. Its priority of 30 supersedes the base color texture at priority 10, while retaining the selected normal map.</description>
+              <image path="fomod\images\field-kit.svg" />
+              <files><file source="Weathered\Amber.dds" destination="textures\Trailbound\pack_d.dds" priority="30" /></files>
+              <typeDescriptor><type name="Recommended" /></typeDescriptor>
+            </plugin>
+            <plugin name="Charcoal · Storm worn">
+              <description>Cool soot and rain-darkened fabric. This alternate color also demonstrates priority-based replacement in the installation plan.</description>
+              <image path="fomod\images\field-kit.svg" />
+              <files><file source="Weathered\Charcoal.dds" destination="textures\Trailbound\pack_d.dds" priority="30" /></files>
+              <typeDescriptor><type name="Optional" /></typeDescriptor>
+            </plugin>
+          </plugins>
+        </group>
+      </optionalFileGroups>
+    </installStep>
+  </installSteps>
+</config>
