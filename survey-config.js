@@ -5,7 +5,7 @@
 // picks:    how many backpacks each ballot ranks (1–5). Scoring is fixed: a #1 pick earns 5 points and
 //           each place below earns one less, so a 3-pick ballot scores 5, 4 and 3.
 window.VAULT_TEC_SURVEY = {
-  endpoint: '',
+  endpoint: 'https://script.google.com/macros/s/AKfycbyNToG831ozqnZNGxxI9RzMyrl05YNep3T0eEPjRrFj6ImH0_7p0pGvyuF8ACd0MOki/exec',
   id: 'favorites-1',
   picks: 5
 };
