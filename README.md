@@ -98,11 +98,11 @@ Visitors rank up to five favorite backpacks. A #1 pick earns 5 points, and each 
 - A 👍 **Like** button on every backpack's detail page. It opens the survey with that backpack already on the ballot. It reads **Liked** once that backpack is on the visitor's submitted ballot. "N people like this" counts the ballots that include it.
 - Results in the ? panel: ballots cast and the standings, top five first.
 
-Ballots go to a Google Apps Script web app that stores them in a Google Sheet you own:
+Ballots go to a small Google Apps Script web app that you own. A static GitHub Pages site can't store anything other visitors can see, so the script is the free place that keeps everyone's votes. It stores them in its own built-in storage (Script Properties): no spreadsheet, and no access to your Drive or Sheets.
 
-1. Create a Google Sheet (any name), then choose **Extensions > Apps Script**.
+1. Go to [script.google.com](https://script.google.com) and choose **New project**.
 2. Replace `Code.gs` with `tools/vault-tec-survey.gs` and save.
-3. Choose **Deploy > New deployment > Web app**. Set **Execute as** to *Me* and **Who has access** to *Anyone*. Deploy and authorize it. Google warns that your own script is unverified: choose **Advanced > Go to (project name)**.
+3. Choose **Deploy > New deployment > Web app**. Set **Execute as** to *Me* and **Who has access** to *Anyone*, then deploy. If Google asks you to authorize, it's only for the script's own storage.
 4. Copy the web app URL (it ends in `/exec`) into `survey-config.js` as `endpoint`.
 
 After editing the script later, use **Deploy > Manage deployments > Edit > Version: New version** so the URL stays the same.
@@ -111,7 +111,7 @@ After editing the script later, use **Deploy > Manage deployments > Edit > Versi
 - `survey-config.js`: the endpoint, the survey round (`id`), and the ballot length (`picks`, 1–5). An empty endpoint hides every part of the survey, including the Like buttons.
 - `tools/vault-tec-survey.gs`: the backend. It validates ballots, caches results for two minutes, and accepts at most 60 ballots a minute across all visitors.
 
-The sheet's **Survey Votes** tab has one row per browser and round: first and last submission time, round, a random browser ID, and the picks as backpack numbers. It stores no names, emails, or IP addresses. Submitting again from the same browser replaces that browser's row. Another browser, or cleared site data, counts as a new voter, so treat the results as a fan poll rather than a secure vote. To start a fresh round, change `id` (for example, to `favorites-2`); earlier rows stay in the sheet but stop counting. Backpacks added to the catalog join the survey automatically.
+The script keeps one entry per browser and round: a random browser ID and the picks as backpack numbers, plus the time of the round's latest ballot. It stores no names, emails, or IP addresses. Submitting again from the same browser replaces that browser's ballot. Another browser, or cleared site data, counts as a new voter, so treat the results as a fan poll rather than a secure vote. The storage holds 500 KB, roughly 8,000 ballots; after that, new ballots are refused with a message while existing voters can still change theirs. To start a fresh round, change `id` (for example, to `favorites-2`); earlier ballots stay stored but stop counting. Backpacks added to the catalog join the survey automatically.
 
 ## ARC-Tesla interactive preview
 

@@ -1,36 +1,35 @@
 /**
  * Vault-Tec Citizen Survey: the backend for the field catalog's favourite-backpack poll.
+ * Ballots are kept in this script's own storage (Script Properties). No spreadsheet is needed,
+ * and the script never touches your Drive, Sheets or other Google data.
  *
  * Setup (once):
- *   1. Open the survey spreadsheet, then Extensions > Apps Script.
+ *   1. Go to script.google.com and choose New project.
  *   2. Replace everything in Code.gs with this file and save.
  *   3. Deploy > New deployment > Select type: Web app.
  *        Execute as: Me
  *        Who has access: Anyone
- *      Deploy, then authorise it. Google warns that the app is unverified because it is your
- *      own script: choose Advanced > Go to (project name).
+ *      Deploy. If Google asks you to authorize, it is only for this script's own storage.
  *   4. Copy the Web app URL (it ends in /exec) into survey-config.js as `endpoint`.
  *
  * After editing this file later, use Deploy > Manage deployments > Edit > Version: New version,
  * so the /exec URL stays the same.
  *
- * What it stores: one row per browser and survey round on the "Survey Votes" tab (first and
- * last submission time, the round, a random browser ID, and up to five backpack numbers).
- * No names, emails or IP addresses. Submitting again from the same browser replaces that
- * browser's ballot instead of adding a new one.
+ * What it stores: one entry per browser and survey round (a random browser ID and up to five
+ * backpack numbers), plus the time of each round's latest ballot. No names, emails or IP
+ * addresses. Submitting again from the same browser replaces that browser's ballot. Script
+ * Properties hold up to 500 KB, which is room for roughly 8,000 ballots.
  *
  * GET  ?survey=<round>             -> current results for that round
  * POST {survey, voter, picks:[n…]} -> store the ballot, then return the updated results
  */
 
-const VOTES_SHEET = 'Survey Votes';
-const HEADER = ['First submitted', 'Last updated', 'Survey', 'Voter ID', 'Pick 1', 'Pick 2', 'Pick 3', 'Pick 4', 'Pick 5'];
-const MAX_PICKS = 5;           // columns Pick 1-5; ballots may rank fewer
+const MAX_PICKS = 5;           // ballots rank up to five; #1 earns 5 points, each place below one less
 const MAX_BACKPACK = 40;       // highest backpack number accepted (room for new backpacks)
 const RESULTS_SECONDS = 120;   // how long results are cached between reads
-const BALLOTS_PER_MINUTE = 60; // across all visitors; protects the sheet from floods
+const BALLOTS_PER_MINUTE = 60; // across all visitors; protects the store from floods
 const SURVEY_ID = /^[a-z][a-z0-9-]{0,31}$/;
-const VOTER_ID = /^v[a-z0-9]{15,39}$/; // starts with a letter so Sheets never turns it into a number
+const VOTER_ID = /^v[a-z0-9]{15,39}$/;
 
 function doGet(e) {
   const survey = String((e && e.parameter && e.parameter.survey) || '');
@@ -38,7 +37,7 @@ function doGet(e) {
   const cache = CacheService.getScriptCache();
   const cached = cache.get(cacheKey_(survey));
   if (cached) return reply_(Object.assign({ ok: true }, JSON.parse(cached)));
-  // Count under the script lock, so a tally read before a ballot was written can't be cached after it.
+  // Count under the script lock, so a tally read before a ballot was saved can't be cached after it.
   // If the lock stays busy, answer without caching.
   const lock = LockService.getScriptLock();
   const locked = lock.tryLock(5000);
@@ -68,20 +67,17 @@ function doPost(e) {
   let out;
   try {
     if (tooBusy_()) return reply_({ ok: false, error: 'busy' });
-    const sheet = votesSheet_(true);
-    const now = new Date();
-    const picks = ballot.picks.concat(Array(MAX_PICKS - ballot.picks.length).fill(''));
-    let row = findBallot_(sheet, ballot.survey, ballot.voter);
-    updated = row > 0;
-    if (!updated) {
-      row = sheet.getLastRow() + 1;
-      if (row > sheet.getMaxRows()) sheet.insertRowsAfter(sheet.getMaxRows(), 500);
+    const store = PropertiesService.getScriptProperties();
+    const key = ballotKey_(ballot.survey, ballot.voter);
+    updated = store.getProperty(key) !== null;
+    const change = {};
+    change[key] = ballot.picks.join(',');
+    change[latestKey_(ballot.survey)] = String(Date.now());
+    try {
+      store.setProperties(change);
+    } catch (err) {
+      return reply_({ ok: false, error: 'full' }); // the 500 KB store is full
     }
-    // Round and voter ID stay text: Sheets would turn a round like "oct-2026" into a date.
-    sheet.getRange(row, 3, 1, 2).setNumberFormat('@');
-    if (updated) sheet.getRange(row, 2, 1, 3 + MAX_PICKS).setValues([[now, ballot.survey, ballot.voter].concat(picks)]);
-    else sheet.getRange(row, 1, 1, 4 + MAX_PICKS).setValues([[now, now, ballot.survey, ballot.voter].concat(picks)]);
-    SpreadsheetApp.flush();
     out = tally_(ballot.survey);
     CacheService.getScriptCache().put(cacheKey_(ballot.survey), JSON.stringify(out), RESULTS_SECONDS);
   } finally {
@@ -103,64 +99,36 @@ function ballot_(body) {
   return { survey: survey, voter: voter, picks: picks };
 }
 
-// Current standings for a round, counted from the sheet.
+// Current standings for a round, counted from every stored ballot.
 function tally_(survey) {
+  const all = PropertiesService.getScriptProperties().getProperties();
+  const prefix = ballotKey_(survey, '');
   const tally = {};
   let ballots = 0;
-  let latest = 0;
-  const sheet = votesSheet_(false);
-  const rows = sheet ? sheet.getLastRow() - 1 : 0;
-  if (rows > 0) {
-    sheet.getRange(2, 1, rows, 4 + MAX_PICKS).getValues().forEach(r => {
-      if (String(r[2]) !== survey) return;
-      const picks = r.slice(4, 4 + MAX_PICKS).map(Number).filter(n => Number.isInteger(n) && n > 0);
-      if (!picks.length) return;
-      ballots++;
-      const at = r[1] instanceof Date ? r[1].getTime() : 0;
-      if (at > latest) latest = at;
-      picks.forEach((id, rank) => {
-        const t = tally[id] || (tally[id] = { id: id, points: 0, first: 0, picks: 0 });
-        t.points += MAX_PICKS - rank;
-        t.picks += 1;
-        if (rank === 0) t.first += 1;
-      });
+  Object.keys(all).forEach(key => {
+    if (key.indexOf(prefix) !== 0) return;
+    const picks = String(all[key]).split(',').map(Number)
+      .filter(n => Number.isInteger(n) && n > 0 && n <= MAX_BACKPACK).slice(0, MAX_PICKS);
+    if (!picks.length) return;
+    ballots++;
+    picks.forEach((id, rank) => {
+      const t = tally[id] || (tally[id] = { id: id, points: 0, first: 0, picks: 0 });
+      t.points += MAX_PICKS - rank;
+      t.picks += 1;
+      if (rank === 0) t.first += 1;
     });
-  }
+  });
+  const latest = Number(all[latestKey_(survey)]) || 0;
   const results = Object.keys(tally).map(k => tally[k])
     .sort((a, b) => b.points - a.points || b.first - a.first || b.picks - a.picks || a.id - b.id);
   return {
     survey: survey,
     ballots: ballots,
     maxPicks: MAX_PICKS,
-    latest: latest ? new Date(latest).toISOString() : null,
+    latest: ballots && latest ? new Date(latest).toISOString() : null,
     generated: new Date().toISOString(),
     results: results
   };
-}
-
-function findBallot_(sheet, survey, voter) {
-  const rows = sheet.getLastRow() - 1;
-  if (rows < 1) return 0;
-  const cells = sheet.getRange(2, 4, rows, 1).createTextFinder(voter).matchEntireCell(true).findAll();
-  for (let i = 0; i < cells.length; i++) {
-    const row = cells[i].getRow();
-    if (String(sheet.getRange(row, 3).getValue()) === survey) return row;
-  }
-  return 0;
-}
-
-// The votes tab, or null when it doesn't exist yet. create (only under the lock) makes the tab
-// and its header if they are missing, including after someone clears the tab.
-function votesSheet_(create) {
-  const book = SpreadsheetApp.getActiveSpreadsheet();
-  let sheet = book.getSheetByName(VOTES_SHEET);
-  if (!create) return sheet;
-  if (!sheet) sheet = book.insertSheet(VOTES_SHEET);
-  if (sheet.getLastRow() === 0) {
-    sheet.getRange(1, 1, 1, HEADER.length).setValues([HEADER]).setFontWeight('bold');
-    sheet.setFrozenRows(1);
-  }
-  return sheet;
 }
 
 // Counts ballots per minute; runs inside the script lock, so the count is not raced.
@@ -171,6 +139,14 @@ function tooBusy_() {
   if (count >= BALLOTS_PER_MINUTE) return true;
   cache.put(key, String(count + 1), 120);
   return false;
+}
+
+function ballotKey_(survey, voter) {
+  return 'b|' + survey + '|' + voter;
+}
+
+function latestKey_(survey) {
+  return 'latest|' + survey;
 }
 
 function cacheKey_(survey) {

@@ -1,6 +1,6 @@
 // Vault-Tec citizen survey: visitors rank their favourite backpacks (#1 earns the most points).
-// Ballots go to the Google Apps Script in tools/vault-tec-survey.gs, which keeps them in a Google
-// Sheet. Results show in the ? panel. Nothing appears until survey-config.js has an endpoint.
+// Ballots go to the Google Apps Script in tools/vault-tec-survey.gs, which keeps them in its own
+// storage. Results show in the ? panel. Nothing appears until survey-config.js has an endpoint.
 (() => {
   'use strict';
   const config = window.VAULT_TEC_SURVEY || {};
@@ -105,6 +105,8 @@
   }
   const problem = code => code === 'busy'
     ? 'Vault-Tec’s survey terminal is overloaded. Please try again in a minute.'
+    : code === 'full'
+      ? 'Vault-Tec’s survey terminal is out of room for new ballots. Thanks for trying, citizen.'
     : /^bad-/.test(code)
       ? 'Vault-Tec rejected that form. Please check your picks and submit again.'
       : 'No signal from Vault-Tec. Check your connection and try again. Your picks are still here.';
