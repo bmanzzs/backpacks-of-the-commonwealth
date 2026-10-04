@@ -101,6 +101,13 @@
   orbitButton.addEventListener('click', () => { turntable = !turntable; sync(); });
   panel.querySelector('[data-arc="reset"]').addEventListener('click', () => { viewer?.reset(); turntable = !motion.matches; sync(); });
   modeButton.addEventListener('click', () => mode === '3d' ? fallback() : load3d());
+  // The Arc-tesla is catalog entry 29 since 2.1.0: open its stats page from the preview.
+  panel.querySelector('[data-arc="stats"]').addEventListener('click', () => {
+    const idx = BACKPACKS.findIndex(bp => bp.id === 'BPArc');
+    if (idx < 0 || typeof openModal !== 'function') return;
+    close();
+    openModal(idx);
+  });
   video.addEventListener('error', () => { status.textContent = 'The render could not load. Try 3D or open the MP4 below.'; });
   document.addEventListener('keydown', event => { if (event.key === 'Escape' && !panel.hidden) { event.preventDefault(); close(true); } });
   document.addEventListener('pointerdown', event => { if (!panel.hidden && !panel.contains(event.target) && !tile.contains(event.target)) close(); });

@@ -1,5 +1,5 @@
 # backpacks-of-the-commonwealth
-Field catalog for Backpacks of the Commonwealth: 26 backpacks, 4 backpack upgrade bobbleheads, and 5 magazines.
+Field catalog for Backpacks of the Commonwealth 2.1.0: 29 backpacks, 4 backpack upgrade bobbleheads, and 5 magazines.
 
 ## Editing and previewing
 
@@ -12,9 +12,9 @@ Open `index.html` in a browser. This is a static GitHub Pages site; no install o
 - `collectibles.css`: collectible styles extending the original Pip-Boy theme.
 - `backpacks.html`: separate legacy page; the main catalog is `index.html`.
 - `pipboy.html`, `pipboy.css`, `pipboy.js`: the Pip-Boy mode (see **Pip-Boy mode**).
-- `pipboy-launch.css`, `pipboy-launch.js`: the **Open Pip-Boy here** button in the main catalog's top corner.
+- `pipboy-launch.css`, `pipboy-launch.js`: the **Open Pip-Boy here** button. It is off for now (see **Pip-Boy mode**); the files are kept for when it returns.
 - `backpacks-data.js`: the backpack records (`BACKPACKS`), workbench mods (`OMODS`) and thumbnail paths (`IMGS`) used by the Pip-Boy. The main catalog still keeps its own inline copy in `index.html`, so a data change has to be made in both places.
-- `assets/backpacks/`: one WebP thumbnail per backpack (208 × 247), exported from the images embedded in `index.html`.
+- `assets/backpacks/`: one WebP thumbnail per backpack (208 × 247). Backpacks 1–26 are exported from the images embedded in `index.html`; 27–29 are referenced by path. 27 and 28 are marked placeholders until catalog renders arrive, and 29 is cropped from the 3D preview's poster.
 - `assets/pipboy/`: the Charisma bobblehead cut out of its black background and split at the neck (`bobble-head.webp`, `bobble-body.webp`, both 81 × 193) so the head can bobble.
 
 ## Map view
@@ -36,7 +36,7 @@ Pin positions live in `MAP_PINS` at the top of `map-view.js`, as percentages of 
 
 ## Pip-Boy mode
 
-`pipboy.html` shows the same catalog as a Fallout 4 Pip-Boy 3000 Mk IV. The main catalog links to it from the **Open Pip-Boy here** button; hovering the button slides a bobblehead out from behind it, and clicking it switches the page off like a CRT before loading the Pip-Boy.
+`pipboy.html` shows the same catalog as a Fallout 4 Pip-Boy 3000 Mk IV. **It is unlisted while it gets refined:** the main catalog no longer shows the **Open Pip-Boy here** button, and the page carries `noindex`, though it still opens at its address. To bring the button back, restore `<link rel="stylesheet" href="pipboy-launch.css">`, the `<a class="pb-launch">` block before `<header>` and `<script src="pipboy-launch.js"></script>` in `index.html` (see the commit that removed them). Hovering the button slides a bobblehead out from behind it, and clicking it switches the page off like a CRT before loading the Pip-Boy.
 
 - **Screen:** one colour (Fallout 4's default Pip-Boy green, `#14FF17`, from `fPipboyEffectColor` 0.08 / 1.00 / 0.09), with hierarchy from brightness only. Roboto Condensed for the interface and Share Tech Mono for the boot text. Scanlines, a rolling refresh band, grain, flicker, vignette and glass are overlays that never block clicks.
 - **Boot:** a memory dump, the PIP-OS boot text, then the bobblehead splash. It runs once per browser session; any key or click skips it.
@@ -59,6 +59,10 @@ Pip-Boy visits are not counted by the traffic panel, which counts the main catal
 ## Browser icons
 
 `favicon.ico` and `assets/icons/` provide browser-tab, Chrome shortcut, and Apple touch icons. `site.webmanifest` uses relative paths for GitHub Pages. The square source crop in `assets/icons/backpack-source.png` comes directly from the author's P.E.G.A. backpack screenshot supplied on September 13, 2026; the smaller files are Lanczos downscaled exports, with 16/32/48px frames in the ICO.
+
+## 2.1.0 backpacks
+
+Backpacks 27–29 (RobCo Nukatility Combo Pack, Brotherhood S.E.N.T.R.Y. Device, Arc-tesla P.C.D. Mk IV) come from the reference spreadsheet's `Main` tab, read on October 4, 2026, with the 2.1.0 patch notes and the `Tracker` tab applied: the S.E.N.T.R.Y.'s Reconnaissance Burst lasts six seconds, and the Arc-tesla sits in Vault-Tec Bunker Sigma (it moved from Poseidon Energy). Their workbench mods have names and descriptions but no per-mod components yet. The same release raised the P.E.G.A.'s level from 60 to 65 and corrected four mod texts (Hidden Stash and Lucky Teddy Bear to +65, the Plenty-O'-Pockets apostrophe, and the Wastelander's Rad-X pouch removing rads). The Arc-tesla has no map pin until Bunker Sigma's position is known.
 
 ## Collectible source
 
@@ -115,7 +119,7 @@ The script keeps one entry per browser and round: a random browser ID and the pi
 
 ## ARC-Tesla interactive preview
 
-The separate **Field Lab** tile previews Arc-tesla P.C.D. Mk IV without adding unverified stats or locations to the 26-entry catalog. Hover or focus the tile to open the viewer; click or tap to keep it open. Drag to orbit through 360°, scroll/pinch to zoom, or focus the canvas and use arrow keys and +/−. Reset, turntable, animation, and close controls are available. Moving between the tile and popout keeps it open; Escape closes it.
+The **Field Lab** tile is the interactive 3D preview of the Arc-tesla P.C.D. Mk IV, catalog entry 29 since 2.1.0; its **Full stats** button opens that entry. Hover or focus the tile to open the viewer; click or tap to keep it open. Drag to orbit through 360°, scroll/pinch to zoom, or focus the canvas and use arrow keys and +/−. Reset, turntable, animation, and close controls are available. Moving between the tile and popout keeps it open; Escape closes it.
 
 - `arc-preview.js` / `arc-preview.css`: accessible popout, catalog filtering, video fallback, and visibility lifecycle.
 - `arc-viewer.js`: lighting, orbit controls, bloom, fan rotation, alternating lightning, fluid and CRT scrolling, signal bars, and reactor glow. Effects use presentation timings rather than the game’s combat state.
