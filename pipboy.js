@@ -99,8 +99,8 @@
   const CC_TOP = Math.max(...PACKS.map(p => p.ccMax));
   const DR_TOP = Math.max(...PACKS.map(p => p.drMax));
 
-  // Collectibles: magazines first, then bobbleheads, in sheet order.
-  const PLACES = { GameStart: 'Game start', ConcordMuseumExt02: 'Concord Museum exterior', CabotHouse03: 'Cabot House', CambridgePD01: 'Cambridge Police Station', BackpackRoom: 'Boston Backpacks HQ', VaultTecOffice01: 'Vault-Tec offices', Vault81: 'Vault 81', DLC03Vault118: 'Vault 118 (Far Harbor)' };
+  // Collectibles: magazines first, then Vault-Tec charms, in source order.
+  const PLACES = { GameStart: 'Game start', ConcordMuseumExt02: 'Concord Museum exterior', CabotHouse03: 'Cabot House', CambridgePD01: 'Cambridge Police Station', BackpackRoom: 'Boston Backpacks HQ', VaultTecOffice01: 'Vault-Tec offices', Vault81: 'Vault 81', DLC03Vault118: 'Vault 118 (Far Harbor)', BackpackBunker: 'Vault-Tec Bunker Sigma', Vault75: 'Vault 75', Vault114: 'Vault 114', Vault111Cryo: 'Vault 111' };
   const FX_LABEL = { '+1 CHR': '+1 Charisma', '+10% Energy': '+10% energy damage', '+10% Guns': '+10% gun damage', '+10% Sneak': '+10% sneak', '+5RR': '+5 Rad Resistance', '+5DR': '+5 Damage Resistance', '+BP': 'Aesthetic issue · no stat bonus', '+20PACC': '+20 Power Armor carry capacity', '+PACC': 'Power Armor carry capacity bonus', '+SpawnRate': 'Backpacks turn up a little more often' };
   const ITEMS = COLLECTIBLES.map(c => {
     const mag = c.type === 'magazines';
@@ -114,7 +114,7 @@
   const AMMO = /^Fusion (Cell|Core)$/;
   const PARTS = new Map();
   const usePart = (pt, source) => {
-    if (/Bobblehead$/.test(pt.name)) return;
+    if (/(Bobblehead|Charm)$/.test(pt.name)) return;
     const e = PARTS.get(pt.name) || { name: pt.name, qty: 0, uses: [], kind: AMMO.test(pt.name) ? 'ammo' : AID.test(pt.name) ? 'aid' : 'junk' };
     e.qty += pt.qty; e.uses.push({ ...source, qty: pt.qty });
     PARTS.set(pt.name, e);
@@ -833,7 +833,7 @@
   function miscItems() {
     const out = [{ group: 'MAGAZINES' }];
     ITEMS.forEach((i, n) => {
-      if (!i.mag && ITEMS[n - 1]?.mag) out.push({ group: 'BOBBLEHEADS' });
+      if (!i.mag && ITEMS[n - 1]?.mag) out.push({ group: 'CHARMS' });
       out.push({ key: i.key, label: i.name, mark: isFound(i.key) ? 'on' : null, state: isFound(i.key) ? 'found' : '' });
     });
     return out;
@@ -847,7 +847,7 @@
         ${i.hint ? statRow('Where', esc(i.hint)) : ''}
         ${statRow('Status', isFound(i.key) ? 'Found' : 'Not found')}
       </div>
-      ${i.mag ? '' : para('One of four upgrade bobbleheads for the Vault-Tec Utility Backpack.')}
+      ${i.mag ? '' : para('One of eight Vault-Tec charms. Its Vault-Tec Utility Backpack edition hangs the animated charm from the pack.')}
       <p class="desc dim">${esc(i.edid)}</p>`;
   }
   const miscHints = it => { const i = it && itemByKey.get(it.key); return i && [
@@ -860,7 +860,7 @@
   const packObjective = p => ({ key: `bp-${p.num}`, text: `Find the ${p.name}`, place: p.place, sub: `${p.place} · LVL ${p.level}`, done: () => isFound(`bp-${p.num}`), num: p.num });
   const QUESTS = [
     { id: 'main', name: 'Backpacks of the Commonwealth', about: 'Track down every backpack in the Commonwealth, from Sanctuary to Nuka-World.', objectives: () => PACKS.slice().sort((a, b) => a.level - b.level || a.num - b.num).map(packObjective) },
-    { id: 'bobbleheads', name: 'Vault-Tec Bobblehead Program', about: 'Four upgrade bobbleheads unlock the Vault-Tec Utility Backpack editions.', objectives: () => ITEMS.filter(i => !i.mag).map(i => ({ key: i.key, text: `Recover the ${i.name.replace('Vault-Tec Backpack ', '')}`, place: i.place, sub: `${i.place}${i.hint ? ` · ${i.hint}` : ''}`, done: () => isFound(i.key) })) },
+    { id: 'bobbleheads', name: 'Vault-Tec Charm Program', about: 'Eight Vault-Tec charms unlock the Vault-Tec Utility Backpack editions.', objectives: () => ITEMS.filter(i => !i.mag).map(i => ({ key: i.key, text: `Recover the ${i.name.replace('Vault-Tec Backpack ', '')}`, place: i.place, sub: `${i.place}${i.hint ? ` · ${i.hint}` : ''}`, done: () => isFound(i.key) })) },
     { id: 'reading', name: 'The Reading List', about: 'Five issues of the backpack magazine. Four of them add Power Armor carry capacity.', objectives: () => ITEMS.filter(i => i.mag).map(i => ({ key: i.key, text: `Read ${i.name}`, place: i.place, sub: `${i.place}${i.hint ? ` · ${i.hint}` : ''}`, done: () => isFound(i.key) })) },
     { id: 'signal', name: 'Incoming Transmission', about: 'An unidentified signal on the Pip-Boy radio. Source: unknown.', objectives: () => [{ key: 'signal', text: 'Tune in to the ARC-Tesla transmission', place: 'RADIO', sub: 'RADIO › ARC-Tesla Transmission', done: () => isFound('signal') }, { key: 'signal-2', text: '████████ ███ ██████', place: '', sub: 'SEALED UNTIL UPDATE', done: () => false, locked: true }] }
   ];
@@ -916,10 +916,10 @@
     const rows = [];
     const heaviest = PACKS.reduce((a, b) => (b.weight > a.weight ? b : a)), lightest = PACKS.reduce((a, b) => (b.weight < a.weight ? b : a));
     const priciest = PACKS.reduce((a, b) => (b.value > a.value ? b : a)), best = PACKS.reduce((a, b) => (b.ccMax / b.weight > a.ccMax / a.weight ? b : a));
-    if (it.key === 'general') rows.push(['Backpacks', PACKS.length], ['Workbench mods', MODS.length], ['Carry slot mods', MODS.filter(m => m.slot === 'cc').length], ['Armor slot mods', MODS.filter(m => m.slot === 'dr').length], ['Components and items', PARTS.size], ['Perks referenced', PERK_LIST.length], ['Bobbleheads', ITEMS.filter(i => !i.mag).length], ['Magazines', ITEMS.filter(i => i.mag).length], ['Level range', `${LEVELS[0]}–${LEVELS[LEVELS.length - 1]}`]);
+    if (it.key === 'general') rows.push(['Backpacks', PACKS.length], ['Workbench mods', MODS.length], ['Carry slot mods', MODS.filter(m => m.slot === 'cc').length], ['Armor slot mods', MODS.filter(m => m.slot === 'dr').length], ['Components and items', PARTS.size], ['Perks referenced', PERK_LIST.length], ['Charms', ITEMS.filter(i => !i.mag).length], ['Magazines', ITEMS.filter(i => i.mag).length], ['Level range', `${LEVELS[0]}–${LEVELS[LEVELS.length - 1]}`]);
     if (it.key === 'collection') {
       const fp = PACKS.filter(p => isFound(`bp-${p.num}`)).length, fb = ITEMS.filter(i => !i.mag && isFound(i.key)).length, fm = ITEMS.filter(i => i.mag && isFound(i.key)).length;
-      rows.push(['Backpacks found', `${fp}/${PACKS.length}`], ['Bobbleheads found', `${fb}/4`], ['Magazines read', `${fm}/5`], ['Caps value found', sum(PACKS.filter(p => isFound(`bp-${p.num}`)), p => p.value).toLocaleString('en-US')], ['Available at your level', S.level == null ? 'Set your level' : `${PACKS.filter(p => !locked(p)).length}/${PACKS.length}`]);
+      rows.push(['Backpacks found', `${fp}/${PACKS.length}`], ['Charms found', `${fb}/8`], ['Magazines read', `${fm}/5`], ['Caps value found', sum(PACKS.filter(p => isFound(`bp-${p.num}`)), p => p.value).toLocaleString('en-US')], ['Available at your level', S.level == null ? 'Set your level' : `${PACKS.filter(p => !locked(p)).length}/${PACKS.length}`]);
     }
     if (it.key === 'crafting') rows.push(['Craftable with your perks', `${MODS.filter(craftable).length}/${MODS.length}`], ['Mods with no perk', MODS.filter(m => !m.perks.length).length], ['Mods needing two perks', MODS.filter(m => m.perks.length >= 2).length], ['Units to craft everything once', sum([...PARTS.values()], e => e.qty).toLocaleString('en-US')], ['Most used component', `${partsOf('junk')[0].name} ×${partsOf('junk')[0].qty}`], ['Nuka-Cola needed', `×${PARTS.get('Nuka-Cola')?.qty || 0}`]);
     if (it.key === 'records') rows.push(['Most carry capacity', `+${CC_TOP}`], ['Most damage resistance', `${DR_TOP}`], ['Heaviest', `${heaviest.name} · ${heaviest.weight} lb`], ['Lightest', `${lightest.name} · ${lightest.weight} lb`], ['Most valuable', `${priciest.name} · ${priciest.value}`], ['Best carry per pound', `${best.name} · ${(best.ccMax / best.weight).toFixed(1)}`], ['Total catalog weight', `${sum(PACKS, p => p.weight)} lb`], ['Total catalog value', sum(PACKS, p => p.value).toLocaleString('en-US')]);
@@ -994,9 +994,9 @@
   // ── RADIO ─────────────────────────────────────────────────────────────
   const STATIONS = [
     { id: 'arc', name: 'ARC-Tesla Transmission', tag: 'NEW', kind: 'arc' },
-    { id: 'src', name: 'SRC-3000 Field Net', kind: 'src' },
+    { id: 'src', name: 'SCR-3000 Field Net', kind: 'src' },
     { id: 'beacon', name: 'Boston Backpacks HQ Beacon', kind: 'morse', morse: 'BBHQ' },
-    { id: 'bulletin', name: 'Vault-Tec Bobblehead Bulletin', kind: 'bulletin' },
+    { id: 'bulletin', name: 'Vault-Tec Charm Bulletin', kind: 'bulletin' },
     { id: 'mule', name: 'Distress Signal: Overencumbered', kind: 'morse', morse: 'SOS' }
   ];
   const MORSE = { A: '.-', B: '-...', C: '-.-.', H: '....', Q: '--.-', O: '---', S: '...' };
@@ -1013,7 +1013,7 @@
     return '<p class="desc">"...too much weight... can\'t fast travel... send a Strong Back... or a bigger backpack..."</p><p class="desc dim">Recommended: equip something from INV › APPAREL.</p>';
   }
   let bulletinIdx = 0;
-  const bulletinLine = () => { const b = ITEMS.filter(i => !i.mag); const i = b[bulletinIdx % b.length]; return `This is Vault-Tec with your bobblehead bulletin. ${i.name.replace('Vault-Tec Backpack ', 'The ')} was last seen at ${i.place}, ${i.hint}.`; };
+  const bulletinLine = () => { const b = ITEMS.filter(i => !i.mag); const i = b[bulletinIdx % b.length]; return `This is Vault-Tec with your charm bulletin. ${i.name.replace('Vault-Tec ', 'The ')} was last seen at ${i.place}${i.hint ? ', ' + i.hint : ''}.`; };
   function radioItems() { return STATIONS.map(s => ({ key: s.id, label: s.name, mark: playing === s.id ? 'on' : null, tag: s.tag ? `<span class="found-tag">${s.tag}</span>` : '', state: playing === s.id ? 'playing' : '' })); }
   function radioDetail(it) {
     const s = STATIONS.find(x => x.id === it.key);

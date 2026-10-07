@@ -1,5 +1,5 @@
 # backpacks-of-the-commonwealth
-Field catalog for Backpacks of the Commonwealth 2.1.0: 29 backpacks, 4 backpack upgrade bobbleheads, and 5 magazines.
+Field catalog for Backpacks of the Commonwealth 2.1.2: 29 backpacks, 8 Vault-Tec charms, and 5 magazines.
 
 ## Editing and previewing
 
@@ -7,7 +7,7 @@ Open `index.html` in a browser. This is a static GitHub Pages site; no install o
 
 - `index.html`: backpack records, embedded images, backpack card/table views, the map panel markup, and shared catalog controls.
 - `map-view.js` / `map-view.css`: the interactive backpack map (see **Map view**).
-- `collectibles-data.js`: magazine and bobblehead source records.
+- `collectibles-data.js`: magazine and Vault-Tec charm records.
 - `collectibles.js`: collectible effects, readable location labels, category switching, search, sorting, and detail dialogs.
 - `collectibles.css`: collectible styles extending the original Pip-Boy theme.
 - `backpacks.html`: separate legacy page; the main catalog is `index.html`.
@@ -67,6 +67,10 @@ Backpacks 27–29 (RobCo Nukatility Combo Pack, Brotherhood S.E.N.T.R.Y. Device,
 Locations: RobCo sits in a terminal-locked storage cage at Wilson Atomatoys Factory, the S.E.N.T.R.Y. behind a terminal-locked gate in Fort Strong's sublevel, and the Arc-tesla in a Master-locked case in Vault-Tec Bunker Sigma, in the south-east Glowing Sea about 43,000 units south of Vault 95. The Arc-tesla's pin is Bunker Sigma's own map marker, converted with a linear fit of the ten packs that lie in exterior cells (each lands within about 1% of its pin); the same fit confirms the Wilson Atomatoys and Fort Strong pins.
 
 Checked against the same plugin, packs 1–26 now show: the P.E.G.A. at level 65; the Radio's SCR-3000 to SCR-3003 frames; the in-game colour names (the P.E.G.A. has ten radiation colours, the Scribe four finishes, the Wastelander none); the 2.1.0 mod texts (Hidden Stash and Lucky Teddy Bear +65, Plenty-O'-Pockets, the Wastelander's Rad-X pouch removing rads, the G.A.R.I.'s anti-gravity field); and corrections to weights (Trapper 2, Super Mutant 10, R.O.B.B. 7, Junkie's 4, Vault-Tec 6 and P.E.G.A. 8 lbs), the G.A.R.I.'s in-game name and value (834 caps), the Trapper's and Woodsman's frame texts, Brahmin, and recipes that were listed under a sibling mod (Wastelander, Squire, R.O.B.B., G.A.R.I., Mercenary, Vault-Tec, P.E.G.A.). The legacy `backpacks.html` is not updated.
+
+## 2.1.2 update
+
+Checked against the 2.1.2 release plugin (`ReleasePipeline\staging.1.2`, not the live development copy). The four bobbleheads are now the eight Vault-Tec charms (category key `charms`): each unlocks a Vault-Tec Utility Backpack edition that hangs its animated charm from the pack. Their cells come from the plugin's placed references; the four original location photos still match (the placements did not move). Charm thumbnails are renders of the installed item models, front-on so VAULT-TEC reads on the base. The Vault-Tec pack lists all ten editions; the Small Shoulder Bag, Leather Shoulder Bag and Raider's container show their new effects; the Mountaineer's Backpack mentions its bedroll and Straps / Strapless option. Vault-Tec Bunker Sigma moved to the northern Glowing Sea (cell -24,-19), so the Arc-tesla pin now comes from the new map marker. The bobbling Vault Boy icon was re-cut: the head sprite holds only the head, the body sprite carries the whole bedroll plus a short shadowed neck, so no part of the pack moves with the head (tool: `ReleasePipeline\website\icon_recut.py`).
 
 ## Collectible source
 

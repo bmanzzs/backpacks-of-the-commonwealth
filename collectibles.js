@@ -5,9 +5,13 @@ const COLLECTIBLE_LOCATIONS = {
   CabotHouse03: 'Cabot House',
   CambridgePD01: 'Cambridge Police Station',
   BackpackRoom: 'Boston Backpacks HQ',
-  VaultTecOffice01: 'Vault-Tec offices',
+  VaultTecOffice01: 'Vault-Tec Regional HQ',
   Vault81: 'Vault 81',
-  DLC03Vault118: 'Vault 118'
+  DLC03Vault118: 'Vault 118',
+  BackpackBunker: 'Vault-Tec Bunker Sigma (northern Glowing Sea)',
+  Vault75: 'Vault 75',
+  Vault114: 'Vault 114 (Park Street Station)',
+  Vault111Cryo: 'Vault 111'
 };
 // Magazine shorthand clarified by the mod author on 2026-09-07.
 const COLLECTIBLE_EFFECT_LABELS = {
@@ -34,7 +38,7 @@ function collectibleMatches(item, query) {
 }
 
 function setCatalogCategory(category) {
-  if (!['backpacks','bobbleheads','magazines'].includes(category)) return;
+  if (!['backpacks','charms','magazines'].includes(category)) return;
   catalogCategory = category;
   document.querySelectorAll('.catalog-tab').forEach(button => button.setAttribute('aria-pressed', String(button.dataset.category === category)));
   const mapButton = document.getElementById('btn-map');
@@ -77,8 +81,8 @@ function applyCatalogSearch() {
   document.getElementById('catalog-count').textContent = `${count} of ${total} ${catalogCategory}`;
   document.getElementById('catalog-description').textContent = catalogCategory === 'backpacks'
     ? 'Carry capacity, upgrades, crafting, and world locations.'
-    : catalogCategory === 'bobbleheads'
-      ? 'Upgrade items for the Vault-Tec Utility Backpack. Locations are listed below; collectible map pins are not yet available.'
+    : catalogCategory === 'charms'
+      ? 'Vault-Tec charms: each unlocks a Vault-Tec Utility Backpack edition that hangs the animated charm from the pack. Locations are listed below; collectible map pins are not yet available.'
       : 'Magazine effects and acquisition locations. Locations are listed below; collectible map pins are not yet available.';
   document.getElementById('catalog-empty').hidden = count > 0;
   window.updateArcPreview?.();
@@ -92,7 +96,7 @@ function renderCollectibles() {
     const right = collectibleSort.key === 'name' ? b.name : collectibleLocation(b);
     return left.localeCompare(right) * collectibleSort.direction;
   });
-  const kind = catalogCategory === 'bobbleheads' ? 'BACKPACK UPGRADE' : 'MAGAZINE';
+  const kind = catalogCategory === 'charms' ? 'VAULT-TEC CHARM' : 'MAGAZINE';
   document.getElementById('collectible-grid').innerHTML = items.map(item => `
     <button class="collectible-card" data-collectible-row="${item.sourceRow}" aria-label="View details for ${escapeCatalog(item.name)}">
       <div class="collectible-kicker">${kind}</div>
@@ -114,14 +118,14 @@ function openCollectible(row) {
   const item = COLLECTIBLES.find(entry => entry.sourceRow === row);
   if (!item) return;
   hideCollectiblePreview();
-  const isBobblehead = item.type === 'bobbleheads';
-  const unexpanded = item.effects.some(effect => !COLLECTIBLE_EFFECT_LABELS[effect]);
+  const isCharm = item.type === 'charms';
+  const unexpanded = !isCharm && item.effects.some(effect => !COLLECTIBLE_EFFECT_LABELS[effect]);
   collectibleDialog.innerHTML = `
     <button class="collectible-close" aria-label="Close details" autofocus>×</button>
-    <div class="collectible-kicker">${isBobblehead ? 'VAULT-TEC BACKPACK UPGRADE' : 'MAGAZINE'}</div>
+    <div class="collectible-kicker">${isCharm ? 'VAULT-TEC CHARM' : 'MAGAZINE'}</div>
     <h2 id="collectible-dialog-title">${escapeCatalog(item.name)}</h2>
-    ${isBobblehead ? '<p>One of the four upgrade bobbleheads for the Vault-Tec Utility Backpack.</p>' : item.effects.includes('+BP') ? '<p>An aesthetic introduction to the mod, indicating that it is installed and backpacks will appear in the game. This magazine provides no stat bonus.</p>' : ''}
-    <h3>▸ ${isBobblehead ? 'UPGRADE EFFECT' : 'EFFECTS'}</h3>
+    ${isCharm ? `<p>One of the eight Vault-Tec charms. Craft the ${escapeCatalog(item.edition)} at an armor workbench and the animated charm hangs from the pack.</p>` : item.effects.includes('+BP') ? '<p>An aesthetic introduction to the mod, indicating that it is installed and backpacks will appear in the game. This magazine provides no stat bonus.</p>' : ''}
+    <h3>▸ ${isCharm ? 'EDITION EFFECT' : 'EFFECTS'}</h3>
     <div class="collectible-effects">${collectibleEffects(item).map(effect => `<span class="collectible-effect">${escapeCatalog(effect)}</span>`).join('')}</div>
     ${unexpanded ? '<p class="source-effects">Some effects are listed using the source sheet’s shorthand; exact bonuses have not been expanded.</p>' : ''}
     <h3>▸ ${item.locationId === 'GameStart' ? 'ACQUISITION' : 'WORLD LOCATION'}</h3>
