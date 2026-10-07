@@ -120,20 +120,35 @@ function openCollectible(row) {
   hideCollectiblePreview();
   const isCharm = item.type === 'charms';
   const unexpanded = !isCharm && item.effects.some(effect => !COLLECTIBLE_EFFECT_LABELS[effect]);
+  const photo = item.locationImage ? `<figure class="cd-photo">
+      ${item.locationImageB ? `<div class="cd-photo-tabs" role="tablist" aria-label="Location photos">
+        <button type="button" role="tab" aria-selected="true" data-src="${escapeCatalog(item.locationImage)}">Where to find it</button>
+        <button type="button" role="tab" aria-selected="false" data-src="${escapeCatalog(item.locationImageB)}">Close-up</button></div>` : ''}
+      <a href="${escapeCatalog(item.locationImage)}" target="_blank" rel="noopener" aria-label="Open full-size location screenshot for ${escapeCatalog(item.name)}"><img src="${escapeCatalog(item.locationImage)}" alt="${escapeCatalog(item.name + ' ' + item.locationHint + ' at ' + collectibleLocation(item))}" width="640" height="640"></a>
+      <figcaption>${escapeCatalog(item.locationHint)}</figcaption></figure>` : '';
+  collectibleDialog.classList.toggle('has-photo', Boolean(item.locationImage));
   collectibleDialog.innerHTML = `
     <button class="collectible-close" aria-label="Close details" autofocus>×</button>
-    <div class="collectible-kicker">${isCharm ? 'VAULT-TEC CHARM' : 'MAGAZINE'}</div>
-    <h2 id="collectible-dialog-title">${escapeCatalog(item.name)}</h2>
+    <div class="cd-grid">
+    <div class="cd-head"><div class="collectible-kicker">${isCharm ? 'VAULT-TEC CHARM' : 'MAGAZINE'}</div>
+    <h2 id="collectible-dialog-title">${escapeCatalog(item.name)}</h2></div>
+    ${photo}
+    <div class="cd-body">
     ${isCharm ? `<p>One of the eight Vault-Tec charms. Craft the ${escapeCatalog(item.edition)} at an armor workbench and the animated charm hangs from the pack.</p>` : item.effects.includes('+BP') ? '<p>An aesthetic introduction to the mod, indicating that it is installed and backpacks will appear in the game. This magazine provides no stat bonus.</p>' : ''}
     <h3>▸ ${isCharm ? 'EDITION EFFECT' : 'EFFECTS'}</h3>
     <div class="collectible-effects">${collectibleEffects(item).map(effect => `<span class="collectible-effect">${escapeCatalog(effect)}</span>`).join('')}</div>
     ${unexpanded ? '<p class="source-effects">Some effects are listed using the source sheet’s shorthand; exact bonuses have not been expanded.</p>' : ''}
     <h3>▸ ${item.locationId === 'GameStart' ? 'ACQUISITION' : 'WORLD LOCATION'}</h3>
     <p>${escapeCatalog(collectibleLocation(item))}</p>
-    <p class="source-effects">${item.locationId === 'GameStart' ? 'Available at game start.' : 'Location ID: ' + escapeCatalog(item.locationId)}</p>
-    ${item.locationImage ? `<figure class="collectible-location-photo"><figcaption>${escapeCatalog(item.locationHint)}</figcaption><a href="${escapeCatalog(item.locationImage)}" target="_blank" rel="noopener" aria-label="Open full-size location screenshot for ${escapeCatalog(item.name)}"><img src="${escapeCatalog(item.locationImage)}" alt="${escapeCatalog(item.name + ' ' + item.locationHint + ' at ' + collectibleLocation(item))}" width="640" height="640"></a></figure>` : ''}
-    `;
+    <p class="source-effects">${item.locationId === 'GameStart' ? 'Available at game start.' : 'Location ID: ' + escapeCatalog(item.locationId)}</p></div>
+    </div>`;
   collectibleDialog.querySelector('.collectible-close').addEventListener('click', () => collectibleDialog.close());
+  collectibleDialog.querySelectorAll('.cd-photo-tabs button').forEach(tab => tab.addEventListener('click', () => {
+    const fig = tab.closest('.cd-photo');
+    fig.querySelectorAll('.cd-photo-tabs button').forEach(other => other.setAttribute('aria-selected', String(other === tab)));
+    fig.querySelector('img').src = tab.dataset.src;
+    fig.querySelector('a').href = tab.dataset.src;
+  }));
   document.body.classList.add('modal-open');
   collectibleDialog.showModal();
   collectibleDialog.scrollTop = 0;

@@ -1,5 +1,5 @@
 // Source: Main!G34:L38 (magazines), read 2026-09-07; Vault-Tec charms from the 2.1.2 release plugin (2026-10-06). Keep source effects verbatim for traceability.
-// Photos and location hints supplied by the mod author on 2026-09-08.
+// Magazine photos and hints supplied by the mod author on 2026-09-08; charm photos shot in FO4 Lightbox on 2026-10-07 (A = where to find it, B = close-up).
 const COLLECTIBLES = [
   {
     "type": "magazines",
@@ -75,8 +75,9 @@ const COLLECTIBLES = [
       "5% better buying and selling prices"
     ],
     "thumbnail": "assets/collectibles/charm-smooth-operator.webp",
-    "locationImage": "assets/collectibles/bobblelocationCharisma.jpg",
-    "locationHint": "on a desk next to a fan"
+    "locationImage": "assets/collectibles/charm-smooth-operator-where.jpg",
+    "locationHint": "on a desk next to a fan",
+    "locationImageB": "assets/collectibles/charm-smooth-operator-close.jpg"
   },
   {
     "type": "charms",
@@ -88,8 +89,9 @@ const COLLECTIBLES = [
       "Energy weapon kills restore 10 Action Points"
     ],
     "thumbnail": "assets/collectibles/charm-goo-on-my-shoe.webp",
-    "locationImage": "assets/collectibles/bobblelocationEnergy.jpg",
-    "locationHint": "on a desk inside a cage"
+    "locationImage": "assets/collectibles/charm-goo-on-my-shoe-where.jpg",
+    "locationHint": "on a small table in a chain-link cage",
+    "locationImageB": "assets/collectibles/charm-goo-on-my-shoe-close.jpg"
   },
   {
     "type": "charms",
@@ -101,8 +103,9 @@ const COLLECTIBLES = [
       "+15% ballistic damage against targets at full health"
     ],
     "thumbnail": "assets/collectibles/charm-big-boom.webp",
-    "locationImage": "assets/collectibles/bobblelocationGuns.jpg",
-    "locationHint": "on top of a dresser"
+    "locationImage": "assets/collectibles/charm-big-boom-where.jpg",
+    "locationHint": "on a dresser next to a vase, below a lighthouse painting",
+    "locationImageB": "assets/collectibles/charm-big-boom-close.jpg"
   },
   {
     "type": "charms",
@@ -115,8 +118,9 @@ const COLLECTIBLES = [
       "15% at night"
     ],
     "thumbnail": "assets/collectibles/charm-stealthy-boy.webp",
-    "locationImage": "assets/collectibles/bobblelocationSneak.jpg",
-    "locationHint": "on a nightstand"
+    "locationImage": "assets/collectibles/charm-stealthy-boy-where.jpg",
+    "locationHint": "on a nightstand between a bed and a dresser",
+    "locationImageB": "assets/collectibles/charm-stealthy-boy-close.jpg"
   },
   {
     "type": "charms",
@@ -128,7 +132,10 @@ const COLLECTIBLES = [
       "+15 Radiation Resistance",
       "+1 Endurance while above 300 rads"
     ],
-    "thumbnail": "assets/collectibles/charm-rad-ical.webp"
+    "thumbnail": "assets/collectibles/charm-rad-ical.webp",
+    "locationImage": "assets/collectibles/charm-rad-ical-where.jpg",
+    "locationImageB": "assets/collectibles/charm-rad-ical-close.jpg",
+    "locationHint": "on a desk under an observation window"
   },
   {
     "type": "charms",
@@ -139,7 +146,10 @@ const COLLECTIBLES = [
     "effects": [
       "Unarmed and melee power attacks do 10% more damage"
     ],
-    "thumbnail": "assets/collectibles/charm-iron-fist.webp"
+    "thumbnail": "assets/collectibles/charm-iron-fist.webp",
+    "locationImage": "assets/collectibles/charm-iron-fist-where.jpg",
+    "locationImageB": "assets/collectibles/charm-iron-fist-close.jpg",
+    "locationHint": "on a curved desk by a big round window"
   },
   {
     "type": "charms",
@@ -150,7 +160,10 @@ const COLLECTIBLES = [
     "effects": [
       "5% faster movement out of combat"
     ],
-    "thumbnail": "assets/collectibles/charm-jet-setter.webp"
+    "thumbnail": "assets/collectibles/charm-jet-setter.webp",
+    "locationImage": "assets/collectibles/charm-jet-setter-where.jpg",
+    "locationImageB": "assets/collectibles/charm-jet-setter-close.jpg",
+    "locationHint": "on a desk with a terminal and a desk lamp"
   },
   {
     "type": "charms",
@@ -161,6 +174,9 @@ const COLLECTIBLES = [
     "effects": [
       "+1 Perception and +1 Intelligence from 8 PM to 6 AM"
     ],
-    "thumbnail": "assets/collectibles/charm-night-owl.webp"
+    "thumbnail": "assets/collectibles/charm-night-owl.webp",
+    "locationImage": "assets/collectibles/charm-night-owl-where.jpg",
+    "locationImageB": "assets/collectibles/charm-night-owl-close.jpg",
+    "locationHint": "on a curved desk facing a door marked 111"
   }
 ];
