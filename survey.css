@@ -20,8 +20,8 @@
 @keyframes survey-bobble { 0%, 100% { transform: rotate(0); } 10% { transform: rotate(16deg); } 22% { transform: rotate(-12deg); } 34% { transform: rotate(8deg); } 46% { transform: rotate(-5deg); } 58% { transform: rotate(2deg); } 70% { transform: rotate(0); } }
 .survey-sr { position: absolute !important; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
 
-/* ── Featured card (under the ARC tile) ────────────────────────────── */
-#survey-showcase { max-width: 1100px; margin: -6px auto 22px; padding: 0 20px; }
+/* ── Featured card (above the catalog) ───────────────────────────── */
+#survey-showcase { max-width: 1100px; margin: 0 auto 22px; padding: 0 20px; }
 #survey-showcase[hidden] { display: none !important; }
 .survey-card { display: flex; align-items: center; gap: 18px; width: 100%; min-height: 96px; padding: 10px 22px 10px 14px; text-align: left; color: var(--vt-cream); cursor: pointer;
   font-family: 'Share Tech Mono', monospace;
@@ -30,17 +30,24 @@
   clip-path: polygon(0 0, calc(100% - 14px) 0, 100% 14px, 100% 100%, 14px 100%, 0 calc(100% - 14px));
   box-shadow: inset 0 0 0 1px #ffcd3c22, inset 0 0 40px #00000055;
   transition: border-color .2s, box-shadow .2s, background .2s; }
-.survey-card:hover, .survey-card:focus-visible { border-color: var(--vt-yellow); box-shadow: inset 0 0 0 1px #ffcd3c66, 0 0 22px #ffcd3c26; outline: 2px solid transparent; }
-.survey-card:focus-visible { box-shadow: inset 0 0 0 2px var(--vt-yellow), 0 0 22px #ffcd3c33; }
+.survey-card:hover, .survey-card:has(:focus-visible) { border-color: var(--vt-yellow); box-shadow: inset 0 0 0 1px #ffcd3c66, 0 0 22px #ffcd3c26; }
 .survey-card .survey-bobble { flex: none; width: 34px; height: 81px; }
-.survey-card:is(:hover, :focus-visible) .survey-bobble-head { animation: survey-bobble 1.4s ease-out; }
+.survey-card:is(:hover, :has(:focus-visible)) .survey-bobble-head { animation: survey-bobble 1.4s ease-out; }
 .survey-card-copy { display: grid; gap: 6px; min-width: 0; }
 .survey-card-kicker { color: var(--vt-yellow); font: 700 10px 'Orbitron', sans-serif; letter-spacing: 3px; }
 .survey-card-title { color: var(--vt-cream); font: 27px/1.05 'VT323', monospace; }
 .survey-card-desc { color: var(--vt-ink); font-size: 12px; line-height: 1.5; }
-.survey-card-go { margin-left: auto; flex: none; padding: 9px 14px; color: var(--vt-navy); background: var(--vt-yellow); font: 700 11px 'Orbitron', sans-serif; letter-spacing: 2px; white-space: nowrap;
+.survey-card-copy { flex: 1; }
+.survey-card-actions { margin-left: auto; flex: none; display: flex; flex-direction: column; gap: 8px; }
+.survey-card-actions button { padding: 9px 14px; border: 0; cursor: pointer; font: 700 11px 'Orbitron', sans-serif; letter-spacing: 2px; white-space: nowrap;
   clip-path: polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px)); }
-.survey-card.is-done .survey-card-go { color: var(--vt-yellow); background: transparent; box-shadow: inset 0 0 0 1px var(--vt-yellow-dim); }
+.survey-card-actions button[hidden] { display: none; }
+.survey-card-go { color: var(--vt-navy); background: var(--vt-yellow); }
+.survey-card-go:hover { background: #ffe07a; }
+.survey-card.is-done .survey-card-go, .survey-card-results { color: var(--vt-yellow); background: transparent; box-shadow: inset 0 0 0 1px var(--vt-yellow-dim); }
+.survey-card.is-done .survey-card-go:hover, .survey-card-results:hover { color: var(--vt-navy); background: var(--vt-yellow); }
+.survey-card.is-done .survey-card-results { color: var(--vt-navy); background: var(--vt-yellow); box-shadow: none; }
+.survey-card.is-done .survey-card-results:hover { background: #ffe07a; }
 
 /* ── Invitation ────────────────────────────────────────────────────── */
 .survey-invite { position: fixed; left: max(16px, env(safe-area-inset-left)); bottom: max(16px, env(safe-area-inset-bottom)); z-index: 10045; width: min(370px, calc(100vw - 32px)); max-height: calc(100dvh - 32px); overflow-y: auto;
@@ -73,7 +80,8 @@
 .survey-invite-x:hover { color: var(--vt-cream); }
 .survey-invite :focus-visible { outline: 2px solid var(--vt-yellow); outline-offset: 2px; }
 /* These are clipped to an angled shape, so their focus ring sits inside the edge. */
-.survey-card:focus-visible { outline: 2px solid var(--vt-yellow); outline-offset: -5px; }
+.survey-card-actions button:focus-visible { outline: 2px solid var(--vt-navy); outline-offset: -4px; }
+.survey-card.is-done .survey-card-go:focus-visible { outline-color: var(--vt-yellow); }
 .survey-invite .survey-invite-go:focus-visible, #survey-dialog .survey-btn.is-primary:focus-visible { outline: 2px solid var(--vt-navy); outline-offset: -5px; }
 
 /* ── Ballot dialog ─────────────────────────────────────────────────── */
@@ -235,7 +243,10 @@
   .survey-card .survey-bobble { width: 28px; height: 67px; }
   .survey-card-title { font-size: 22px; }
   .survey-card-desc { font-size: 11px; }
-  .survey-card-go { display: none; }
+  .survey-card { flex-wrap: wrap; }
+  .survey-card-actions { display: none; }
+  .survey-card.is-done .survey-card-actions { display: flex; flex-direction: row; width: 100%; margin-left: 0; }
+  .survey-card.is-done .survey-card-actions button { flex: 1; padding: 9px 8px; font-size: 10px; letter-spacing: 1px; }
   #survey-dialog { width: 100vw; height: 100dvh; margin: 0; }
   .survey-sheet { border-width: 0; clip-path: none; padding-bottom: env(safe-area-inset-bottom); }
   .survey-intro { padding: 12px 14px 10px; }
@@ -280,7 +291,7 @@
 
 @media (prefers-reduced-motion: reduce) {
   .survey-invite, .survey-invite.is-leaving, .survey-invite .survey-bobble, #survey-dialog[open] { animation: none; }
-  .survey-bobble-head, .survey-invite .survey-bobble-head, .survey-thanks .survey-bobble-head, .survey-card:is(:hover, :focus-visible) .survey-bobble-head { animation: none !important; }
+  .survey-bobble-head, .survey-invite .survey-bobble-head, .survey-thanks .survey-bobble-head, .survey-card:is(:hover, :has(:focus-visible)) .survey-bobble-head { animation: none !important; }
   .survey-pick, .survey-card { transition: none; }
   .survey-pick.is-shake, .survey-pick.is-wanted { animation: none; }
   .survey-btn.is-busy::after { animation: none; }

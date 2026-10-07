@@ -1,19 +1,20 @@
+// The Arc-tesla 3D preview. It opens from any ARC badge ([data-arc-open], built by arcBadge() in index.html):
+// the grid card, the table row, the details page and the map callout. The panel sits next to the badge it came from.
 (() => {
   'use strict';
-  const section = document.getElementById('arc-showcase');
-  const tile = document.getElementById('arc-tile');
   const panel = document.getElementById('arc-preview');
+  if (!panel) return;
   const stage = panel.querySelector('.arc-stage');
   const poster = panel.querySelector('.arc-poster');
   const status = panel.querySelector('.arc-status');
   const video = panel.querySelector('video');
   const motion = matchMedia('(prefers-reduced-motion: reduce)');
-  const fine = matchMedia('(hover: hover) and (pointer: fine)');
-  let viewer, loading, closeTimer, hoverTimer, pinned = false, mode = '3d', dismissedHover = false;
+  let viewer, loading, anchor = null, mode = '3d';
   let animate = !motion.matches, turntable = !motion.matches;
   const animationButton = panel.querySelector('[data-arc="animation"]');
   const orbitButton = panel.querySelector('[data-arc="orbit"]');
   const modeButton = panel.querySelector('[data-arc="mode"]');
+  const statsButton = panel.querySelector('[data-arc="stats"]');
   function sync() {
     animationButton.setAttribute('aria-pressed', String(animate));
     animationButton.textContent = animate ? 'Pause animation' : 'Play animation';
@@ -27,12 +28,17 @@
       else video.pause();
     }
   }
+  const visible = el => Boolean(el?.isConnected && el.getClientRects().length);
+  // Beside the badge on wide screens, otherwise below it (or above when there is more room there).
   function position() {
     if (panel.hidden) return;
-    const r = tile.getBoundingClientRect(), width = panel.offsetWidth;
-    let left = r.right - width, top = r.bottom + 8;
+    if (!visible(anchor)) { close(); return; }
+    const r = anchor.getBoundingClientRect(), width = panel.offsetWidth, height = panel.offsetHeight;
+    if (r.bottom < 0 || r.top > innerHeight) { close(); return; } // scrolled away from its badge
+    let left = r.left, top = r.bottom + 8;
     if (innerWidth > 1000 && r.right + width + 12 < innerWidth) { left = r.right + 12; top = r.top; }
-    if (top + panel.offsetHeight > innerHeight - 12) top = Math.max(12, innerHeight - panel.offsetHeight - 12);
+    else if (top + height > innerHeight - 12 && r.top - 8 - height >= 12) top = r.top - 8 - height;
+    if (top + height > innerHeight - 12) top = Math.max(12, innerHeight - height - 12);
     panel.style.left = Math.max(12, Math.min(left, innerWidth - width - 12)) + 'px';
     panel.style.top = Math.max(12, top) + 'px';
   }
@@ -66,63 +72,57 @@
     }).catch(() => { loading = null; if (mode === '3d') fallback('3D could not load. Showing the rendered preview.'); });
     await loading;
   }
-  function open(pin = false) {
-    if (pin) dismissedHover = false;
-    clearTimeout(closeTimer); clearTimeout(hoverTimer);
-    if (pin) pinned = true;
-    panel.hidden = false; tile.setAttribute('aria-expanded', 'true'); position();
+  function open(badge) {
+    if (anchor && anchor !== badge) anchor.setAttribute('aria-expanded', 'false');
+    anchor = badge;
+    anchor.setAttribute('aria-expanded', 'true');
+    statsButton.hidden = Boolean(anchor.closest('#modal')); // already on the stats page
+    panel.hidden = false; position();
     if (mode === '3d') load3d(); else fallback();
-    if (pin) panel.querySelector('.arc-close').focus({preventScroll:true});
+    panel.querySelector('.arc-close').focus({ preventScroll: true });
   }
   function close(restoreFocus = false) {
-    if (restoreFocus) dismissedHover = true;
-    clearTimeout(closeTimer); clearTimeout(hoverTimer);
-    panel.hidden = true; pinned = false; tile.setAttribute('aria-expanded', 'false');
+    if (panel.hidden) return;
+    panel.hidden = true;
+    anchor?.setAttribute('aria-expanded', 'false');
     viewer?.setActive(false); video.pause();
-    if (restoreFocus) { suppressFocus = true; tile.focus({preventScroll:true}); suppressFocus = false; }
+    if (restoreFocus && visible(anchor)) anchor.focus({ preventScroll: true });
   }
-  function delayedClose() {
-    clearTimeout(closeTimer);
-    closeTimer = setTimeout(() => {
-      if (!pinned && !panel.matches(':hover') && !tile.matches(':hover') && !panel.contains(document.activeElement) && document.activeElement !== tile) close();
-    }, 350);
-  }
-  let suppressFocus = false;
-  tile.addEventListener('pointerenter', e => { if (!dismissedHover && fine.matches && e.pointerType !== 'touch') hoverTimer = setTimeout(() => open(), 220); });
-  tile.addEventListener('pointerleave', () => { dismissedHover = false; clearTimeout(hoverTimer); delayedClose(); });
-  tile.addEventListener('focus', () => { if (!suppressFocus && fine.matches) open(); });
-  tile.addEventListener('blur', delayedClose);
-  tile.addEventListener('click', () => open(true));
-  panel.addEventListener('pointerenter', () => clearTimeout(closeTimer));
-  panel.addEventListener('pointerleave', delayedClose);
-  panel.addEventListener('focusout', delayedClose);
+  // Capture phase: a badge sits inside a clickable card, table row or callout, which must not open as well.
+  document.addEventListener('click', event => {
+    const badge = event.target.closest?.('[data-arc-open]');
+    if (!badge) return;
+    event.preventDefault(); event.stopPropagation();
+    if (!panel.hidden && anchor === badge) close(true); else open(badge);
+  }, true);
   panel.querySelector('.arc-close').addEventListener('click', () => close(true));
   animationButton.addEventListener('click', () => { animate = !animate; sync(); });
   orbitButton.addEventListener('click', () => { turntable = !turntable; sync(); });
   panel.querySelector('[data-arc="reset"]').addEventListener('click', () => { viewer?.reset(); turntable = !motion.matches; sync(); });
   modeButton.addEventListener('click', () => mode === '3d' ? fallback() : load3d());
   // The Arc-tesla is catalog entry 29 since 2.1.0: open its stats page from the preview.
-  panel.querySelector('[data-arc="stats"]').addEventListener('click', () => {
+  statsButton.addEventListener('click', () => {
     const idx = BACKPACKS.findIndex(bp => bp.id === 'BPArc');
     if (idx < 0 || typeof openModal !== 'function') return;
     close();
     openModal(idx);
   });
   video.addEventListener('error', () => { status.textContent = 'The render could not load. Try 3D or open the MP4 below.'; });
-  document.addEventListener('keydown', event => { if (event.key === 'Escape' && !panel.hidden) { event.preventDefault(); close(true); } });
-  document.addEventListener('pointerdown', event => { if (!panel.hidden && !panel.contains(event.target) && !tile.contains(event.target)) close(); });
+  // Escape closes the preview first, before the details page or the map underneath it.
+  window.addEventListener('keydown', event => {
+    if (event.key !== 'Escape' || panel.hidden) return;
+    event.preventDefault(); event.stopImmediatePropagation();
+    close(true);
+  }, true);
+  document.addEventListener('pointerdown', event => { if (!panel.hidden && !panel.contains(event.target) && !anchor?.contains(event.target)) close(); });
   document.addEventListener('visibilitychange', () => {
     viewer?.setActive(!document.hidden && !panel.hidden && mode === '3d'); sync();
   });
   motion.addEventListener('change', () => { if (motion.matches) { animate = false; turntable = false; sync(); } });
   window.addEventListener('resize', position);
   new ResizeObserver(position).observe(panel);
-  window.addEventListener('scroll', () => { if (!pinned) close(); else position(); }, {passive:true});
-  window.updateArcPreview = () => {
-    const query = catalogQuery();
-    section.hidden = catalogCategory !== 'backpacks' || catalogView !== 'grid' || !'arc-tesla arc tesla p.c.d. mk iv atomic resonance carrier animated 3d preview'.includes(query);
-    if (section.hidden) close();
-    else if (query && document.getElementById('catalog-empty').hidden === false) document.getElementById('catalog-empty').hidden = true;
-  };
-  sync(); window.updateArcPreview();
+  document.addEventListener('scroll', position, { capture: true, passive: true });
+  // Called after searches and view changes (collectibles.js, survey.js): close when the badge is filtered out.
+  window.updateArcPreview = position;
+  sync();
 })();

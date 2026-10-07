@@ -166,9 +166,10 @@
     $('.survey-card-kicker', card).textContent = b?.picks.length ? 'VAULT-TEC CITIZEN SURVEY · ON FILE' : 'VAULT-TEC CITIZEN SURVEY';
     $('.survey-card-title', card).textContent = b?.picks.length ? 'Thanks for taking the survey, citizen!' : 'Which backpacks are your favorites?';
     $('.survey-card-desc', card).textContent = b?.picks.length
-      ? `Your #1: ${byNum.get(b.picks[0]).name}. Change your picks anytime; results are in the ? panel.`
+      ? `Your #1: ${byNum.get(b.picks[0]).name}. Change your picks anytime, or see how everyone voted.`
       : `Rank your top ${MAX} in about a minute. Results are in the ? panel.`;
     $('.survey-card-go', card).textContent = b?.picks.length ? '◈ UPDATE PICKS' : '◈ TAKE SURVEY';
+    $('.survey-card-results', card).hidden = !b?.picks.length;
   }
   function updateShowcase() {
     if (!showcase) return;
@@ -179,7 +180,11 @@
   if (showcase && card) {
     const previous = window.updateArcPreview;
     window.updateArcPreview = () => { previous?.(); updateShowcase(); };
-    card.addEventListener('click', () => open(card));
+    // The whole card opens the survey; its buttons are the keyboard route, and View Results opens the ? panel.
+    card.addEventListener('click', event => {
+      if (event.target.closest('.survey-card-results')) setTimeout(openResults, 0); // after the ? panel's outside-click close
+      else open($('.survey-card-go', card));
+    });
     updateCard();
     updateShowcase();
   }

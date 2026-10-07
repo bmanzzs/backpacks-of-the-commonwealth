@@ -1,14 +1,6 @@
-#arc-showcase { max-width: 1100px; margin: 0 auto 22px; padding: 0 20px; }
-#arc-showcase[hidden], #arc-preview[hidden], #arc-preview [hidden] { display: none !important; }
-.arc-tile { display: flex; align-items: center; gap: 20px; width: 100%; padding: 12px 20px 12px 8px; text-align: left; color: var(--green); background: linear-gradient(110deg, #091215, #071008); border: 1px solid #31514a; cursor: pointer; font-family: 'Share Tech Mono', monospace; }
-.arc-tile:hover, .arc-tile:focus-visible { border-color: #80d9cb; box-shadow: 0 0 20px #43c5bb20; outline: 2px solid transparent; }
-.arc-tile img { width: 116px; height: 116px; object-fit: contain; flex-shrink: 0; }
-.arc-tile-copy { display: grid; gap: 9px; }
+#arc-preview[hidden], #arc-preview [hidden] { display: none !important; }
 .arc-kicker { color: #8dd7cd; font-size: 10px; letter-spacing: 3px; }
-.arc-name { color: #d0e7d5; font-family: 'VT323', monospace; font-size: 27px; line-height: 1.05; }
-.arc-description { color: #86a68d; font-size: 11px; line-height: 1.6; }
-.arc-invite { margin-left: auto; color: #a5e9df; font-size: 11px; letter-spacing: 1px; white-space: nowrap; }
-#arc-preview { position: fixed; z-index: 11000; width: min(440px, calc(100vw - 24px)); max-height: calc(100dvh - 24px); overflow: auto; color: #c6dfd1; background: #080e10; border: 1px solid #65988a; box-shadow: 0 20px 80px #000c, 0 0 26px #66e2d21c; font-family: 'Share Tech Mono', monospace; }
+#arc-preview { position: fixed; z-index: 20500; width: min(440px, calc(100vw - 24px)); max-height: calc(100dvh - 24px); overflow: auto; color: #c6dfd1; background: #080e10; border: 1px solid #65988a; box-shadow: 0 20px 80px #000c, 0 0 26px #66e2d21c; font-family: 'Share Tech Mono', monospace; }
 .arc-preview-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 15px 16px 10px; }
 .arc-preview-head h2 { margin: 4px 0 0; font: 25px/1.1 'VT323', monospace; color: #d0e7d5; }
 .arc-close { border: 1px solid #36584b; background: #101c17; color: #d0e7d5; font-size: 24px; width: 36px; height: 36px; cursor: pointer; }
@@ -22,10 +14,41 @@
 .arc-controls button[aria-pressed="true"] { color: #c4fff0; border-color: #8ad9bd; background: #1d3c30; }
 #arc-preview button:focus-visible, #arc-preview a:focus-visible, #arc-preview canvas:focus-visible { outline: 2px solid #adf5db; outline-offset: 2px; }
 .arc-preview-note { margin: 0; padding: 0 16px 14px; color: #688578; font-size: 10px; line-height: 1.5; }
+/* ARC badge: the special-edition marker on its card, table row, details page and map callout; it opens the 3D preview. */
+.arc-badge { position: relative; display: flex; align-items: center; gap: 9px; width: 100%; padding: 5px 7px 5px 5px; overflow: hidden; text-align: left; cursor: pointer;
+  font-family: 'Share Tech Mono', monospace; color: #d0e7d5; background: linear-gradient(110deg, #0c1c1f, #071008); border: 1px solid #3c6b62;
+  clip-path: polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px));
+  animation: arc-badge-glow 2.6s ease-in-out infinite; }
+.arc-badge::after { content: ''; position: absolute; inset: 0; pointer-events: none; background: linear-gradient(100deg, transparent 35%, #8ef3e324 48%, transparent 60%); transform: translateX(-100%); animation: arc-badge-sweep 5s ease-in-out infinite; }
+@keyframes arc-badge-glow { 0%, 100% { border-color: #3c6b62; box-shadow: inset 0 0 0 #66e2d200; } 50% { border-color: #80d9cb; box-shadow: inset 0 0 14px #66e2d230; } }
+@keyframes arc-badge-sweep { 0%, 60% { transform: translateX(-100%); } 100% { transform: translateX(100%); } }
+.arc-badge:hover, .arc-badge[aria-expanded="true"] { border-color: #a5e9df; box-shadow: inset 0 0 18px #66e2d23d; animation: none; }
+.arc-badge:focus-visible { outline: 2px solid #adf5db; outline-offset: -4px; }
+.arc-badge img { flex: none; width: 34px; height: 34px; object-fit: contain; }
+.arc-badge-copy { display: grid; gap: 2px; min-width: 0; }
+.arc-badge-kicker { color: #8ef3e3; font: 700 9px 'Orbitron', sans-serif; letter-spacing: 2px; white-space: nowrap; text-shadow: 0 0 8px #66e2d266; }
+.arc-badge-sub { overflow: hidden; color: #9dbfa6; font-size: 10px; letter-spacing: 1px; white-space: nowrap; text-overflow: ellipsis; }
+.arc-badge-go { flex: none; margin-left: auto; padding: 3px 6px; color: #061210; background: #8ef3e3; font: 700 9px 'Orbitron', sans-serif; letter-spacing: 1px; white-space: nowrap; }
+.arc-badge:hover .arc-badge-go { background: #c4fff5; }
+.arc-badge--sm { display: inline-flex; width: auto; max-width: 100%; margin-top: 6px; padding: 4px 4px 4px 8px; }
+.arc-badge--sm img { display: none; }
+.arc-badge--sm .arc-badge-copy { display: flex; align-items: baseline; gap: 7px; }
+.arc-badge--sm .arc-badge-kicker { font-size: 8px; }
+.arc-badge--sm .arc-badge-sub { font-size: 9px; }
+.arc-badge--lg { max-width: 330px; margin-top: 10px; padding: 6px 9px 6px 6px; }
+.arc-badge--lg img { width: 42px; height: 42px; }
+.arc-badge--lg .arc-badge-kicker { font-size: 10px; }
+.arc-badge--lg .arc-badge-sub { font-size: 11px; }
+.card-arc { margin: 0 0 10px; }
+/* Details page: under the title on wide screens, full width under the banner's picture on phones. */
+.modal-hero.has-arc { display: grid; grid-template-columns: 160px minmax(0, 1fr); grid-template-areas: "img title" "img arc"; }
+.modal-hero.has-arc .modal-img-wrap { grid-area: img; }
+.modal-hero.has-arc .modal-title-wrap { grid-area: title; padding-bottom: 6px; }
+.modal-hero-arc { grid-area: arc; position: relative; z-index: 1; padding: 0 40px 16px 16px; }
+.modal-hero-arc .arc-badge { margin-top: 0; }
 @media (max-width: 600px) {
-  .arc-tile { gap: 10px; padding-right: 12px; }
-  .arc-tile img { width: 84px; height: 100px; }
-  .arc-name { font-size: 23px; }
-  .arc-invite { display: none; }
-  .arc-description { font-size: 10px; }
+  .modal-hero.has-arc { grid-template-areas: "img title" "arc arc"; }
+  .modal-hero-arc { padding: 10px 12px 12px; }
+  .modal-hero-arc .arc-badge { max-width: none; }
 }
+@media (prefers-reduced-motion: reduce) { .arc-badge, .arc-badge::after { animation: none; } }

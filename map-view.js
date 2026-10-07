@@ -1,4 +1,4 @@
-// Interactive field map of backpack locations.
+// Interactive field map of backpack locations, plus charm and magazine layers on the main catalog.
 // Plain scrolling always scrolls the page. The map zooms with Ctrl/⌘ + scroll, trackpad or
 // touch pinch, double-click, the toolbar, or keys; plain scroll zooms only in the expanded
 // view, where there is no page behind it to scroll.
@@ -6,6 +6,15 @@
   'use strict';
   // Pin positions: percent of the map image's width and height, hand-placed by the author.
   const MAP_PINS = {1: [29.9, 15.0], 2: [37.1, 11.3], 3: [34.8, 21.0], 4: [22.6, 33.7], 5: [40.5, 24.9], 6: [58.8, 18.8], 7: [57.7, 34.5], 8: [69.5, 8.6], 9: [68.0, 27.6], 10: [37.6, 39.9], 11: [56.0, 49.0], 12: [58.6, 27.4], 13: [55.3, 50.9], 14: [70.7, 43.5], 15: [55.6, 58.0], 16: [32.0, 61.8], 17: [46.4, 40.7], 18: [7.0, 35.7], 19: [66.3, 53.5], 20: [10.7, 92.6], 21: [64.4, 72.9], 22: [9.9, 81.2], 23: [84.5, 14.2], 24: [48.5, 70.9], 25: [34.8, 75.7], 26: [61.8, 51.7], 27: [61.0, 75.2], 28: [82.2, 48.3], 29: [17.2, 69.3]};
+  // Charm and magazine pins by catalog row, from the 2.1.2 release plugin (ReleasePipeline\website\collectible_pins.py):
+  // an interior sits at its Commonwealth entrance, found through its doors; a spot shared with a backpack reuses its pin.
+  // Row 43 (Vault 118) is off the map, so it gets a margin marker, as Nuka-World's backpack does. Row 34 is a game-start item.
+  const ITEM_PINS = {35: [33.1, 17.4], 36: [60.9, 41.2], 37: [42.9, 38.5], 38: [61.8, 51.7], 40: [58.1, 46.0], 41: [61.8, 51.7], 42: [39.5, 50.5], 43: [98.0, 19.7], 44: [17.2, 69.3], 45: [60.8, 19.5], 46: [56.8, 48.6], 47: [20.5, 9.1]};
+  const OFF_MAP = {43: 'Off the map: Far Harbor, by boat from Kingsport Lighthouse'};
+  const KINDS = {
+    charms: { label: 'VAULT-TEC CHARM', tag: 'CHARM', glyph: '<svg viewBox="0 0 16 16" aria-hidden="true"><path fill="currentColor" d="M8 1.2l2 4.3 4.7.5-3.5 3.2 1 4.6L8 11.5l-4.2 2.3 1-4.6L1.3 6l4.7-.5z"/></svg>' },
+    magazines: { label: 'MAGAZINE', tag: 'MAG', glyph: '<svg viewBox="0 0 16 16" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" d="M8 3.6C6.4 2.5 4.2 2.2 1.5 2.6v10c2.7-.4 4.9-.1 6.5 1 1.6-1.1 3.8-1.4 6.5-1v-10c-2.7-.4-4.9-.1-6.5 1zM8 4.9v8"/></svg>' }
+  };
   const IMAGE = { base: 'assets/map/commonwealth-2k.webp', baseWidth: 2079, detail: 'assets/map/commonwealth-4k.webp' };
   const W = 4158, H = 4155;             // world units = full-resolution map pixels (.map-img size in CSS)
   const MAX_SCALE = 1.25;               // deepest zoom, relative to full resolution
@@ -34,12 +43,14 @@
   const view = { s: 1, x: 0, y: 0 };    // screen point = world point × s + (x, y)
   const pins = [], images = [];
   let stageW = 0, stageH = 0, fit = 1, built = false, expanded = false, detailed = null, detailLoading = false;
-  let match = () => true, raf = 0, last = 0, anim = null, selected = null, hot = null, tipFor = null;
+  const layers = { backpack: true, charms: true, magazines: true };
+  let match = () => true, itemMatch = () => true, raf = 0, last = 0, anim = null, selected = null, hot = null, tipFor = null;
   let tipSize = { w: 0, h: 0 }, calloutSize = { w: 0, h: 0 }, readout = '', hintTimer = 0;
   const free = () => expanded || immersive;
 
   const pad2 = n => String(n).padStart(2, '0');
   const place = bp => { const parts = bp.location.split(' — '); return parts.length > 1 ? parts.slice(1).join(' — ').trim() : bp.location; };
+  const itemPlace = c => (typeof collectibleLocation === 'function' ? collectibleLocation(c) : c.locationId); // collectibles.js
   const easeOut = t => 1 - Math.pow(1 - t, 3);
   const easeInOut = t => t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
   const pinHalf = () => (detailed ? PIN.large : PIN.small) / 2;
@@ -167,12 +178,19 @@
     for (const img of images) img.style.transform = transform;
     const isDetailed = W * view.s >= DETAIL_WIDTH;
     if (isDetailed !== detailed) { detailed = isDetailed; pinLayer.classList.toggle('is-detailed', detailed); }
-    const shown = pins.filter(p => p.shown);
+    const shown = pins.filter(p => p.shown && p.el);
     for (const p of shown) { p.sx = view.x + p.wx * view.s; p.sy = view.y + p.wy * view.s; p.ox = p.oy = 0; }
     declutter(shown, pinHalf() * 2 + 4);
-    for (const p of shown) p.el.style.translate = `${Math.round(p.sx + p.ox)}px ${Math.round(p.sy + p.oy)}px`;
+    // A pin at the very edge of the map (the off-map margin markers) stays whole inside the frame.
+    const half = pinHalf();
+    for (const p of shown) {
+      const x = p.sx + p.ox, y = p.sy + p.oy;
+      if (x > -half && x < stageW + half) p.ox = Math.min(stageW - half, Math.max(half, x)) - p.sx;
+      if (y > -half && y < stageH + half) p.oy = Math.min(stageH - half, Math.max(half, y)) - p.sy;
+      p.el.style.translate = `${Math.round(p.sx + p.ox)}px ${Math.round(p.sy + p.oy)}px`;
+    }
     if (tipFor) placeTip();
-    if (selected) placeCallout();
+    if (selected?.kind === 'backpack') placeCallout();
     const r = (view.s / fit).toFixed(1) + '×';
     if (r !== readout) { readout = r; zoomEl.textContent = r; }
     setDisabled(zoomOutButton, view.s <= fit * 1.001);
@@ -232,18 +250,19 @@
   // ── Hover tip, selection, list ─────────────────────────────────────────
   function setHot(p) {
     if (hot === p) return;
-    hot?.el.classList.remove('is-hot'); hot?.item.classList.remove('is-hot');
+    hot?.el?.classList.remove('is-hot'); hot?.item.classList.remove('is-hot');
     hot = p || null;
-    hot?.el.classList.add('is-hot'); hot?.item.classList.add('is-hot');
+    hot?.el?.classList.add('is-hot'); hot?.item.classList.add('is-hot');
   }
   function showTip(p) {
-    if (p === selected) return hideTip();
-    const img = tip.querySelector('img');
-    img.hidden = !IMGS[p.idx];
-    if (IMGS[p.idx]) img.src = IMGS[p.idx];
-    tip.querySelector('.map-tip-meta').textContent = `${pad2(p.num)} · LVL ${p.bp.level}`;
-    tip.querySelector('.map-tip-name').textContent = p.bp.name;
-    tip.querySelector('.map-tip-loc').textContent = place(p.bp);
+    if (p === selected || !p.el) return hideTip();
+    const img = tip.querySelector('img'), src = p.kind === 'backpack' ? IMGS[p.idx] : p.c.thumbnail;
+    img.hidden = !src;
+    if (src) img.src = src;
+    tip.dataset.kind = p.kind;
+    tip.querySelector('.map-tip-meta').textContent = p.kind === 'backpack' ? `${pad2(p.num)} · LVL ${p.bp.level}` : KINDS[p.kind].label + (OFF_MAP[p.row] ? ' · OFF MAP' : '');
+    tip.querySelector('.map-tip-name').textContent = p.kind === 'backpack' ? p.bp.name : p.c.name;
+    tip.querySelector('.map-tip-loc').textContent = p.kind === 'backpack' ? place(p.bp) : OFF_MAP[p.row] || itemPlace(p.c);
     tipFor = p;
     tipSize = { w: tip.offsetWidth, h: tip.offsetHeight };
     placeTip();
@@ -260,6 +279,8 @@
     callout.querySelector('.cc').textContent = bp.cc.split('/')[0].replace(/\s*CC\s*$/i, '').trim() + ' CC';
     callout.querySelector('.dr').textContent = bp.dr.split('→')[0].split('|')[0].trim();
     callout.querySelector('.wt').textContent = bp.weight;
+    const arc = callout.querySelector('.map-callout-arc');
+    if (arc) arc.innerHTML = typeof arcBadge === 'function' ? arcBadge(bp, 'md') : '';
     callout.hidden = false;
     calloutSize = { w: callout.offsetWidth, h: callout.offsetHeight };
   }
@@ -275,19 +296,21 @@
     const dy = y < m ? m - y : y > stageH - m ? stageH - m - y : 0;
     if (dx || dy) tween({ s: view.s, x: view.x + dx, y: view.y + dy }, 240);
   }
+  // A backpack opens its callout; a charm or magazine stays marked on the map and opens the catalog's pop-up.
   function select(p, how) {
-    if (selected) { selected.el.classList.remove('is-selected'); selected.item.classList.remove('is-selected'); selected.item.removeAttribute('aria-current'); }
+    if (selected) { selected.el?.classList.remove('is-selected'); selected.item.classList.remove('is-selected'); selected.item.removeAttribute('aria-current'); }
     selected = p || null;
     if (!selected) { callout.hidden = true; return schedule(); }
     hideTip();
-    p.el.classList.add('is-selected'); p.item.classList.add('is-selected'); p.item.setAttribute('aria-current', 'true');
-    fillCallout(p);
-    if (how === 'fly') fly(focusView(p)); else if (how === 'reveal') reveal(p);
+    p.el?.classList.add('is-selected'); p.item.classList.add('is-selected'); p.item.setAttribute('aria-current', 'true');
+    if (p.kind === 'backpack') fillCallout(p); else callout.hidden = true;
+    if (p.el) { if (how === 'fly') fly(focusView(p)); else if (how === 'reveal') reveal(p); }
     keepInList(p);
     schedule();
+    if (p.kind !== 'backpack') window.openCollectible?.(p.row);
   }
   function step(direction) {
-    const shown = pins.filter(p => p.shown);
+    const shown = pins.filter(p => p.shown && p.kind === 'backpack');
     if (!shown.length) return;
     const i = selected ? shown.indexOf(selected) : direction > 0 ? -1 : 0;
     select(shown[(i + direction + shown.length) % shown.length], 'fly');
@@ -299,7 +322,7 @@
     if (top < list.scrollTop + 4) list.scrollTo({ top: top - 4, behavior });
     else if (bottom > list.scrollTop + list.clientHeight - 4) list.scrollTo({ top: bottom - list.clientHeight + 4, behavior });
   }
-  const pinFrom = target => pins.find(p => p.el === target.closest?.('.map-pin'));
+  const pinFrom = target => { const el = target.closest?.('.map-pin'); return el ? pins.find(p => p.el === el) : undefined; };
   const itemFrom = target => pins.find(p => p.item === target.closest?.('.map-list-item'));
 
   // ── Gesture hint and help ──────────────────────────────────────────────
@@ -338,6 +361,14 @@
   function build() {
     if (built) return;
     built = true;
+    const withItems = !immersive && typeof COLLECTIBLES !== 'undefined';
+    const group = (kind, label) => {
+      if (!withItems) return;
+      const li = document.createElement('li');
+      li.className = 'map-list-group'; li.dataset.kind = kind; li.textContent = label;
+      list.append(li);
+    };
+    group('backpack', 'BACKPACKS');
     BACKPACKS.forEach((bp, idx) => {
       const pos = MAP_PINS[bp.num];
       if (!pos) return;
@@ -352,15 +383,50 @@
       li.querySelector('.map-list-name').textContent = bp.name;
       li.querySelector('.map-list-loc').textContent = place(bp);
       list.append(li);
-      pins.push({ bp, idx, num: bp.num, wx: pos[0] / 100 * W, wy: pos[1] / 100 * H, sx: 0, sy: 0, ox: 0, oy: 0, el, item: li.firstElementChild, shown: true });
+      pins.push({ kind: 'backpack', bp, idx, num: bp.num, wx: pos[0] / 100 * W, wy: pos[1] / 100 * H, sx: 0, sy: 0, ox: 0, oy: 0, el, item: li.firstElementChild, shown: true });
     });
+    // Charms, then magazines (main catalog only). An item without a spot on the map is listed but has no pin.
+    if (withItems) for (const kind of ['charms', 'magazines']) {
+      group(kind, kind === 'charms' ? 'VAULT-TEC CHARMS' : 'MAGAZINES');
+      for (const c of COLLECTIBLES.filter(item => item.type === kind).sort((a, b) => a.sourceRow - b.sourceRow)) {
+        const pos = ITEM_PINS[c.sourceRow], k = KINDS[kind];
+        let el = null;
+        if (pos) {
+          el = document.createElement('button');
+          el.type = 'button'; el.className = `map-pin map-pin--item map-pin--${kind}`; el.tabIndex = -1;
+          el.setAttribute('aria-hidden', 'true');
+          el.innerHTML = `<span class="map-pin-body">${k.glyph}</span>`;
+          pinLayer.append(el);
+        }
+        const li = document.createElement('li');
+        li.innerHTML = `<button type="button" class="map-list-item map-list-item--${kind}">${c.thumbnail ? `<img class="map-list-thumb" src="${c.thumbnail}" alt="">` : '<span class="map-list-thumb"></span>'}<span class="map-list-icon">${k.glyph}</span><span class="map-list-text"><span class="map-list-name"></span><span class="map-list-loc"></span></span><span class="map-list-lvl">${pos ? k.tag : 'NO PIN'}</span></button>`;
+        li.querySelector('.map-list-name').textContent = c.name;
+        li.querySelector('.map-list-loc').textContent = OFF_MAP[c.sourceRow] || (pos ? itemPlace(c) : `${itemPlace(c)} · not on the map`);
+        list.append(li);
+        pins.push({ kind, c, row: c.sourceRow, wx: pos ? pos[0] / 100 * W : 0, wy: pos ? pos[1] / 100 * H : 0, sx: 0, sy: 0, ox: 0, oy: 0, el, item: li.firstElementChild, shown: true });
+      }
+    }
+    const toggles = section.querySelector('.map-layers');
+    if (toggles && withItems) {
+      toggles.hidden = false;
+      for (const button of toggles.querySelectorAll('[data-layer]')) {
+        const kind = button.dataset.layer;
+        if (KINDS[kind]) button.querySelector('.map-layer-icon').innerHTML = KINDS[kind].glyph;
+        button.querySelector('.map-layer-count').textContent = pins.filter(p => p.kind === kind).length;
+        button.addEventListener('click', () => {
+          layers[kind] = !layers[kind];
+          button.setAttribute('aria-pressed', String(layers[kind]));
+          filter(match, itemMatch);
+        });
+      }
+    }
     addImage(IMAGE.base, 'Map of the Commonwealth, coloured by expected threat level')
       .then(() => { statusEl.hidden = true; }, () => { statusEl.firstElementChild.textContent = 'MAP IMAGE UNAVAILABLE'; });
     measure();
     Object.assign(view, fitView());
     new ResizeObserver(onResize).observe(stage);
     updateHelp();
-    filter(match);
+    filter(match, itemMatch);
   }
   function measure() { stageW = stage.clientWidth; stageH = stage.clientHeight; fit = Math.min(stageW / W, stageH / H) || 1; }
   // Keep the same spot centred and the same relative zoom when the stage changes size.
@@ -375,16 +441,19 @@
     jump({ s, x: w / 2 - cx * s, y: h / 2 - cy * s });
     if (selected) calloutSize = { w: callout.offsetWidth, h: callout.offsetHeight };
   }
-  function filter(fn) {
+  // fn tests backpacks, itemFn charms and magazines (collectibles.js); the layer toggles apply on top.
+  function filter(fn, itemFn) {
     match = fn || (() => true);
+    itemMatch = itemFn || (() => true);
     if (!built) return;
     let count = 0;
     for (const p of pins) {
-      p.shown = !!match(p.bp);
-      p.el.hidden = !p.shown;
+      p.shown = layers[p.kind] && !!(p.kind === 'backpack' ? match(p.bp) : itemMatch(p.c));
+      if (p.el) p.el.hidden = !p.shown;
       p.item.parentElement.hidden = !p.shown;
       if (p.shown) count++;
     }
+    for (const head of list.querySelectorAll('.map-list-group')) head.hidden = !pins.some(p => p.shown && p.kind === head.dataset.kind);
     if (selected && !selected.shown) select(null);
     if (tipFor && !tipFor.shown) hideTip();
     if (hot && !hot.shown) setHot(null);
@@ -550,7 +619,7 @@
   // Escape closes the innermost layer first: details modal, then callout, then expanded view.
   window.addEventListener('keydown', e => {
     if (e.key !== 'Escape' || !built || section.style.display === 'none' || !stage.getClientRects().length) return;
-    if (document.getElementById('modal-overlay')?.classList.contains('visible') || document.querySelector('[aria-modal="true"]')) return;
+    if (document.getElementById('modal-overlay')?.classList.contains('visible') || document.querySelector('[aria-modal="true"], dialog[open]') || document.getElementById('arc-preview')?.hidden === false) return;
     if (selected) select(null);
     else if (expanded) setExpanded(false);
     else return;
@@ -575,7 +644,7 @@
     else if (action === 'next') step(1);
     else if (action === 'close') select(null);
   });
-  pinLayer.addEventListener('click', e => { const p = pinFrom(e.target); if (p && p !== selected) select(p, 'reveal'); });
+  pinLayer.addEventListener('click', e => { const p = pinFrom(e.target); if (p && (p !== selected || p.kind !== 'backpack')) select(p, 'reveal'); });
   pinLayer.addEventListener('pointerover', e => {
     if (e.pointerType !== 'mouse' || drag?.moved) return;
     const p = pinFrom(e.target);
@@ -591,7 +660,7 @@
     select(p, 'fly');
     // Below the map on narrow screens: bring the map back into view for the flight.
     const r = stage.getBoundingClientRect();
-    if (!free() && (r.top < 0 || r.bottom > innerHeight)) stage.scrollIntoView({ block: 'nearest', behavior: motion.matches ? 'auto' : 'smooth' });
+    if (p.el && !free() && (r.top < 0 || r.bottom > innerHeight)) stage.scrollIntoView({ block: 'nearest', behavior: motion.matches ? 'auto' : 'smooth' });
   });
   list.addEventListener('pointerover', e => { if (e.pointerType === 'mouse') setHot(itemFrom(e.target)); });
   list.addEventListener('pointerleave', () => setHot(null));

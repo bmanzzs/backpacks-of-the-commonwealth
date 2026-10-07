@@ -1345,13 +1345,6 @@
 <div style="text-align:center;font-size:9px;letter-spacing:3px;color:var(--text-dim);margin-bottom:24px;margin-top:-16px;">SELECT AN ENTRY FOR DETAILS</div>
 <div class="catalog-summary"><span id="catalog-count" role="status" aria-live="polite"></span><p id="catalog-description"></p></div>
 <div id="catalog-empty" hidden>No matching entries. Try another name, location, or effect, or choose a different category.</div>
-<section id="arc-showcase" aria-label="Featured animated backpack preview">
-  <button type="button" class="arc-tile" id="arc-tile" aria-haspopup="dialog" aria-controls="arc-preview" aria-expanded="false">
-    <img src="assets/previews/arc-tesla/poster.webp" alt="" width="116" height="116" loading="lazy">
-    <span class="arc-tile-copy"><span class="arc-kicker">FIELD LAB · 3D PREVIEW</span><span class="arc-name">Arc-tesla P.C.D. Mk IV</span><span class="arc-description">Live coils. Spinning reactor. Every angle.<br>Open to explore the backpack in 360°.</span></span>
-    <span class="arc-invite">◈ EXPLORE 3D</span>
-  </button>
-</section>
 <div id="arc-preview" role="dialog" aria-labelledby="arc-preview-title" hidden>
   <div class="arc-preview-head"><div><span class="arc-kicker">ATOMIC RESONANCE CARRIER</span><h2 id="arc-preview-title">Arc-tesla P.C.D. Mk IV</h2></div><button type="button" class="arc-close" aria-label="Close ARC preview">×</button></div>
   <div class="arc-stage"><img class="arc-poster" src="assets/previews/arc-tesla/poster.webp" alt="ARC-Tesla backpack with glowing coils and a front reactor fan"><video hidden controls loop muted playsinline preload="none" poster="assets/previews/arc-tesla/poster.webp" aria-label="Rendered ARC-Tesla turntable"></video></div>
@@ -1360,11 +1353,11 @@
   <p class="arc-preview-note">Presentation preview · lighting and effect timing adapted for the web.</p>
 </div>
 <section id="survey-showcase" aria-label="Vault-Tec survey" hidden>
-  <button type="button" class="survey-card" id="survey-card" aria-haspopup="dialog">
+  <div class="survey-card" id="survey-card">
     <span class="survey-bobble" aria-hidden="true"><img class="survey-bobble-body" src="assets/pipboy/bobble-body.webp" alt=""><img class="survey-bobble-head" src="assets/pipboy/bobble-head.webp" alt=""></span>
     <span class="survey-card-copy"><span class="survey-card-kicker">VAULT-TEC CITIZEN SURVEY</span><span class="survey-card-title">Which backpacks are your favorites?</span><span class="survey-card-desc">Rank your top 5 in about a minute. Results are in the ? panel.</span></span>
-    <span class="survey-card-go">◈ TAKE SURVEY</span>
-  </button>
+    <span class="survey-card-actions"><button type="button" class="survey-card-go" aria-haspopup="dialog">◈ TAKE SURVEY</button><button type="button" class="survey-card-results" hidden>◈ VIEW RESULTS</button></span>
+  </div>
 </section>
 <div class="grid" id="grid"></div>
 <div class="grid" id="collectible-grid" hidden></div>
@@ -1375,7 +1368,7 @@
 </tr></thead><tbody id="collectible-table-body"></tbody></table></div>
 <dialog id="collectible-dialog" class="collectible-dialog" aria-labelledby="collectible-dialog-title"></dialog>
 
-<section id="map-view" aria-label="Backpack world locations">
+<section id="map-view" aria-label="World locations of backpacks, charms and magazines">
   <div class="map-shell" id="map-shell">
     <div class="map-toolbar">
       <div class="map-title">
@@ -1392,7 +1385,7 @@
       </div>
     </div>
     <div class="map-body">
-      <div class="map-stage" id="map-stage" tabindex="0" role="region" aria-roledescription="interactive map" aria-label="Map of the Commonwealth. Drag to pan. Hold Control or Command and scroll, or pinch, to zoom. When the map has focus, arrow keys pan, plus and minus zoom, and 0 shows the whole map. The location list jumps to each backpack.">
+      <div class="map-stage" id="map-stage" tabindex="0" role="region" aria-roledescription="interactive map" aria-label="Map of the Commonwealth. Drag to pan. Hold Control or Command and scroll, or pinch, to zoom. When the map has focus, arrow keys pan, plus and minus zoom, and 0 shows the whole map. The location list jumps to each backpack, charm and magazine.">
         <div class="map-status" id="map-status"><span>LOADING MAP</span></div>
         <div class="map-pins" id="map-pins"></div>
         <div class="map-tip" id="map-tip" aria-hidden="true"><img alt=""><span class="map-tip-text"><span class="map-tip-meta"></span><span class="map-tip-name"></span><span class="map-tip-loc"></span></span></div>
@@ -1407,6 +1400,7 @@
             <button type="button" class="map-callout-close" data-callout="close" aria-label="Close location details">×</button>
           </div>
           <div class="map-callout-stats"><span class="cc"></span><span class="dr"></span><span class="wt"></span></div>
+          <div class="map-callout-arc"></div>
           <div class="map-callout-actions">
             <button type="button" data-callout="prev" aria-label="Previous location">◂</button>
             <button type="button" data-callout="stats">VIEW FULL STATS</button>
@@ -1415,13 +1409,19 @@
         </div>
         <div class="map-hint" id="map-hint" aria-hidden="true"></div>
       </div>
-      <aside class="map-list-panel" aria-label="Backpack locations">
+      <aside class="map-list-panel" aria-label="Locations">
         <div class="map-list-head"><span>LOCATIONS</span><strong id="map-list-count">29</strong></div>
         <ol class="map-list" id="map-list"></ol>
-        <p class="map-list-empty" id="map-list-empty" hidden>No backpacks match this search.</p>
+        <p class="map-list-empty" id="map-list-empty" hidden>Nothing matches this search with the layers that are switched on.</p>
       </aside>
     </div>
     <div class="map-footer">
+      <div class="map-layers" role="group" aria-label="Map layers" hidden>
+        <span class="map-legend-label">SHOW</span>
+        <button type="button" class="map-layer" data-layer="backpack" aria-pressed="true"><span class="map-layer-icon map-layer-icon--backpack" aria-hidden="true"></span>Backpacks <span class="map-layer-count"></span></button>
+        <button type="button" class="map-layer" data-layer="charms" aria-pressed="true"><span class="map-layer-icon map-layer-icon--charms" aria-hidden="true"></span>Charms <span class="map-layer-count"></span></button>
+        <button type="button" class="map-layer" data-layer="magazines" aria-pressed="true"><span class="map-layer-icon map-layer-icon--magazines" aria-hidden="true"></span>Magazines <span class="map-layer-count"></span></button>
+      </div>
       <div class="map-legend">
         <span class="map-legend-label">EXPECTED THREAT LEVEL</span>
         <div class="map-legend-scale" role="img" aria-label="Map colours show expected threat level, from blue for levels 1 to 5 up to dark red for level 45 and above.">
@@ -1924,6 +1924,14 @@ const BACKPACKS = [
   }
 ];
 
+// The Arc-tesla is the special edition and the highest-level pack. Its badge (card, table, details page,
+// map callout) opens the 3D preview in arc-preview.js. Sizes: 'md' card, 'sm' one line, 'lg' details page.
+function arcBadge(bp, size) {
+  if (bp.id !== 'BPArc') return '';
+  const top = BACKPACKS.every(other => other.level <= bp.level);
+  return `<button type="button" class="arc-badge arc-badge--${size}" data-arc-open aria-haspopup="dialog" aria-controls="arc-preview" aria-expanded="false" aria-label="Special edition${top ? ', the highest-level backpack in the game' : ''}. Open the 3D preview."><img src="assets/previews/arc-tesla/poster.webp" alt="" width="34" height="34" loading="lazy" decoding="async"><span class="arc-badge-copy"><span class="arc-badge-kicker">SPECIAL EDITION</span><span class="arc-badge-sub">${top ? 'HIGHEST-LEVEL PACK' : 'LVL ' + bp.level}</span></span><span class="arc-badge-go">◈ 3D</span></button>`;
+}
+
 function renderCard(bp) {
   const tierClass = bp.level >= 50 ? 'tier-high' : bp.level >= 30 ? 'tier-mid' : '';
   const thumb = IMGS[bp.num-1]
@@ -1943,6 +1951,7 @@ function renderCard(bp) {
           <div class="card-id">${bp.id}</div>
         </div>
       </div>
+      ${bp.id === 'BPArc' ? `<div class="card-arc">${arcBadge(bp, 'md')}</div>` : ''}
       <div class="quick-stats">
         <div class="qs-cc-row">
           <span class="qs-chip qs-cc">${bp.cc.split('/')[0].trim()} <span class="qs-cc-label">CARRY CAPACITY</span></span>
@@ -2184,7 +2193,7 @@ function openModal(idx) {
 
   modal.innerHTML = `
     <button class="modal-close" id="modal-close-btn">✕</button>
-    <div class="modal-hero">
+    <div class="modal-hero${bp.id === 'BPArc' ? ' has-arc' : ''}">
       <div class="modal-img-wrap">${imgHTML}</div>
       <div class="modal-title-wrap">
         <div class="modal-name">${bp.name}</div>
@@ -2192,6 +2201,7 @@ function openModal(idx) {
         <div class="modal-id">${bp.id}</div>
         <div class="modal-level">LVL ${bp.level}</div>
       </div>
+      ${bp.id === 'BPArc' ? `<div class="modal-hero-arc">${arcBadge(bp, 'lg')}</div>` : ''}
     </div>
     <div class="modal-body">
       <div class="tt-desc">${bp.desc}</div>
@@ -2347,6 +2357,7 @@ function buildTable() {
       <td>
         <div class="td-name">${bp.name}</div>
         <div class="td-id">${bp.id}</div>
+        ${arcBadge(bp, 'sm')}
       </td>
       <td class="td-cc">${baseCC} <span style="font-size:9px;letter-spacing:2px;opacity:0.6;font-family:'Orbitron',sans-serif;">CC</span></td>
       <td class="td-dr">${baseDR}</td>

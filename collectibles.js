@@ -41,22 +41,18 @@ function setCatalogCategory(category) {
   if (!['backpacks','charms','magazines'].includes(category)) return;
   catalogCategory = category;
   document.querySelectorAll('.catalog-tab').forEach(button => button.setAttribute('aria-pressed', String(button.dataset.category === category)));
-  const mapButton = document.getElementById('btn-map');
-  mapButton.disabled = category !== 'backpacks';
-  mapButton.title = category === 'backpacks' ? '' : 'Map pins are available for backpacks. Collectible locations are listed in cards and tables.';
   document.getElementById('search-input').placeholder = `◈  SEARCH ${category.toUpperCase()}...`;
   document.getElementById('search-input').setAttribute('aria-label', `Search ${category} by name, location, or effect`);
-  if (catalogView === 'map' && category !== 'backpacks') catalogView = 'grid';
   setView(catalogView);
 }
 
 function showCatalogView(view) {
   hideCollectiblePreview();
-  catalogView = view === 'map' && catalogCategory !== 'backpacks' ? 'grid' : view;
+  catalogView = view;
   const backpacks = catalogCategory === 'backpacks';
   document.getElementById('grid').style.display = backpacks && catalogView === 'grid' ? '' : 'none';
   document.getElementById('table-view').style.display = backpacks && catalogView === 'table' ? 'block' : 'none';
-  document.getElementById('map-view').style.display = backpacks && catalogView === 'map' ? 'block' : 'none';
+  document.getElementById('map-view').style.display = catalogView === 'map' ? 'block' : 'none'; // one map with all three layers
   document.getElementById('collectible-grid').hidden = backpacks || catalogView !== 'grid';
   document.getElementById('collectible-table-view').hidden = backpacks || catalogView !== 'table';
   ['grid','table','map'].forEach(mode => {
@@ -65,7 +61,7 @@ function showCatalogView(view) {
     button.setAttribute('aria-pressed', String(catalogView === mode));
   });
   if (backpacks && catalogView === 'table' && !document.getElementById('table-body').children.length) buildTable();
-  if (backpacks && catalogView === 'map') window.catalogMap?.show(); else window.catalogMap?.hide();
+  if (catalogView === 'map') window.catalogMap?.show(); else window.catalogMap?.hide();
   applyCatalogSearch();
 }
 
@@ -75,15 +71,15 @@ function applyCatalogSearch() {
   document.querySelectorAll('#grid .card, #table-body tr').forEach(entry => {
     entry.style.display = backpackMatches(BACKPACKS[Number(entry.dataset.idx)]) ? '' : 'none';
   });
-  window.catalogMap?.filter(backpackMatches);
+  window.catalogMap?.filter(backpackMatches, item => collectibleMatches(item, query));
   const total = catalogCategory === 'backpacks' ? BACKPACKS.length : categoryItems().length;
   const count = catalogCategory === 'backpacks' ? BACKPACKS.filter(backpackMatches).length : renderCollectibles();
   document.getElementById('catalog-count').textContent = `${count} of ${total} ${catalogCategory}`;
   document.getElementById('catalog-description').textContent = catalogCategory === 'backpacks'
     ? 'Carry capacity, upgrades, crafting, and world locations.'
     : catalogCategory === 'charms'
-      ? 'Vault-Tec charms: each unlocks a Vault-Tec Utility Backpack edition that hangs the animated charm from the pack. Locations are listed below; collectible map pins are not yet available.'
-      : 'Magazine effects and acquisition locations. Locations are listed below; collectible map pins are not yet available.';
+      ? 'Vault-Tec charms: each unlocks a Vault-Tec Utility Backpack edition that hangs the animated charm from the pack. Map View shows where each one is.'
+      : 'Magazine effects and acquisition locations. Map View shows where each one is.';
   document.getElementById('catalog-empty').hidden = count > 0;
   window.updateArcPreview?.();
 }
