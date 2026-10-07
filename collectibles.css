@@ -1,11 +1,24 @@
 .catalog-nav { display:flex; justify-content:center; gap:10px; flex-wrap:wrap; padding:0 20px; margin:0 auto 22px; }
-.catalog-tab { font:14px 'Share Tech Mono',monospace; color:var(--green); background:var(--bg2); border:1px solid var(--border); padding:14px 20px; cursor:pointer; }
+.catalog-tab { display:inline-flex; align-items:center; gap:14px; min-height:64px; font:15px 'Share Tech Mono',monospace; color:var(--green); background:var(--bg2); border:1px solid var(--border); padding:8px 24px 8px 12px; cursor:pointer; transition:border-color .15s, background .15s; }
+.catalog-tab:hover { border-color:var(--green-dim); }
 .catalog-tab[aria-pressed="true"] { color:var(--bg); background:var(--green); border-color:var(--green); }
-.catalog-tab span { margin-left:10px; opacity:.75; }
+.catalog-tab .tab-count { margin-left:10px; opacity:.75; }
+/* A fanned hand of three thumbnails; it opens a little on hover. */
+.tab-fan { position:relative; flex:none; width:60px; height:46px; }
+.tab-fan img { position:absolute; left:15px; top:4px; width:30px; height:38px; object-fit:cover; background:#020802; border:1px solid rgba(57,255,20,.45); box-shadow:0 3px 8px rgba(0,0,0,.65); transition:transform .22s ease; }
+.tab-fan img:nth-child(1) { transform:translateX(-11px) rotate(-14deg); }
+.tab-fan img:nth-child(2) { transform:translateX(11px) rotate(14deg); }
+.tab-fan img:nth-child(3) { z-index:1; transform:translateY(-2px); }
+.catalog-tab:hover .tab-fan img:nth-child(1) { transform:translateX(-15px) rotate(-20deg); }
+.catalog-tab:hover .tab-fan img:nth-child(2) { transform:translateX(15px) rotate(20deg); }
+.catalog-tab:hover .tab-fan img:nth-child(3) { transform:translateY(-5px); }
+.catalog-tab[aria-pressed="true"] .tab-fan img { border-color:rgba(4,17,4,.75); box-shadow:0 3px 8px rgba(0,0,0,.45); }
+@media (prefers-reduced-motion:reduce) { .tab-fan img { transition:none; } }
 .catalog-tab:focus-visible, .collectible-card:focus-visible, .collectible-details:focus-visible, .collectible-sort:focus-visible { outline:2px solid var(--amber); outline-offset:4px; }
 .toggle-btn:disabled { opacity:.35; cursor:not-allowed; }
-.catalog-summary { max-width:900px; margin:0 auto 22px; padding:0 20px; text-align:center; font-size:14px; line-height:1.7; color:#99b78d; }
-#catalog-count { display:block; color:var(--amber); margin-bottom:5px; }
+/* The count is announced to screen readers after each search; it is not shown. */
+.catalog-summary { position:absolute; width:1px; height:1px; overflow:hidden; clip-path:inset(50%); white-space:nowrap; }
+#catalog-description { display:none; }
 #catalog-empty { margin:20px auto 60px; padding:24px; max-width:700px; text-align:center; color:var(--amber); line-height:1.7; }
 #collectible-grid[hidden], #collectible-table-view[hidden], #catalog-empty[hidden] { display:none; }
 .collectible-card { display:flex; flex-direction:column; align-items:flex-start; text-align:left; font:inherit; color:inherit; background:var(--card-bg); border:1px solid var(--border); padding:24px; cursor:pointer; min-width:0; transition:border-color .2s, transform .2s; }
@@ -42,7 +55,7 @@
 .collectible-dialog a { color:var(--green); font-size:14px; }
 .collectible-dialog .collectible-close { position:absolute; top:12px; right:14px; background:transparent; border:0; color:var(--green); font-size:28px; cursor:pointer; padding:4px 8px; }
 .collectible-dialog .source-effects { font-size:13px; color:#91ab87; margin-top:12px; }
-@media(max-width:600px) { .catalog-tab { padding:12px; flex:1; } .catalog-tab span { display:block; margin:5px 0 0; } .collectible-dialog { padding:24px 20px; } .collectible-dialog h2 { font-size:18px; } .collectible-card { padding:20px; } }
+@media(max-width:600px) { .catalog-tab { flex:1; flex-direction:column; gap:6px; padding:10px 6px; } .catalog-tab .tab-count { display:block; margin:4px 0 0; } .collectible-dialog { padding:24px 20px; } .collectible-dialog h2 { font-size:18px; } .collectible-card { padding:20px; } }
 @media(prefers-reduced-motion:reduce) { .collectible-card { transition:none; } }
 /* Collectible pop-up: text left, location photo right; everything visible without scrolling on desktop. */
 .collectible-dialog.has-photo { width:min(980px,calc(100% - 28px)); }
