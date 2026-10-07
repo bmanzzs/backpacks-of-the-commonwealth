@@ -174,7 +174,7 @@
   function updateShowcase() {
     if (!showcase) return;
     let show = true;
-    try { show = catalogCategory === 'backpacks' && catalogView === 'grid' && !catalogQuery(); } catch { /* catalog script missing: always show */ }
+    try { show = catalogCategory === 'backpacks' && catalogListView === 'grid' && !catalogQuery(); } catch { /* catalog script missing: always show */ }
     showcase.hidden = !show;
   }
   if (showcase && card) {

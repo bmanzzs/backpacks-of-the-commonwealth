@@ -25,6 +25,7 @@ const COLLECTIBLE_EFFECT_LABELS = {
 };
 let catalogCategory = 'backpacks';
 let catalogView = 'grid';
+let catalogListView = 'grid'; // the card or table view that stays under the full-screen map
 let collectibleSort = { key: 'sourceRow', direction: 1 };
 const escapeCatalog = value => String(value).replace(/[&<>"']/g, char => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
 const collectibleLocation = item => COLLECTIBLE_LOCATIONS[item.locationId] || item.locationId;
@@ -49,18 +50,20 @@ function setCatalogCategory(category) {
 function showCatalogView(view) {
   hideCollectiblePreview();
   catalogView = view;
-  const backpacks = catalogCategory === 'backpacks';
-  document.getElementById('grid').style.display = backpacks && catalogView === 'grid' ? '' : 'none';
-  document.getElementById('table-view').style.display = backpacks && catalogView === 'table' ? 'block' : 'none';
+  if (view !== 'map') catalogListView = view;
+  // The map opens full screen over the page, so the list underneath stays put for when it closes.
+  const backpacks = catalogCategory === 'backpacks', listView = catalogListView;
+  document.getElementById('grid').style.display = backpacks && listView === 'grid' ? '' : 'none';
+  document.getElementById('table-view').style.display = backpacks && listView === 'table' ? 'block' : 'none';
   document.getElementById('map-view').style.display = catalogView === 'map' ? 'block' : 'none'; // one map with all three layers
-  document.getElementById('collectible-grid').hidden = backpacks || catalogView !== 'grid';
-  document.getElementById('collectible-table-view').hidden = backpacks || catalogView !== 'table';
+  document.getElementById('collectible-grid').hidden = backpacks || listView !== 'grid';
+  document.getElementById('collectible-table-view').hidden = backpacks || listView !== 'table';
   ['grid','table','map'].forEach(mode => {
     const button = document.getElementById('btn-' + mode);
     button.classList.toggle('active', catalogView === mode);
     button.setAttribute('aria-pressed', String(catalogView === mode));
   });
-  if (backpacks && catalogView === 'table' && !document.getElementById('table-body').children.length) buildTable();
+  if (backpacks && listView === 'table' && !document.getElementById('table-body').children.length) buildTable();
   if (catalogView === 'map') window.catalogMap?.show(); else window.catalogMap?.hide();
   applyCatalogSearch();
 }
@@ -210,4 +213,7 @@ for (const container of document.querySelectorAll('#collectible-grid, #collectib
 document.addEventListener('scroll',hideCollectiblePreview,true);
 window.addEventListener('resize',hideCollectiblePreview);
 document.addEventListener('keydown',event => {if(event.key==='Escape')hideCollectiblePreview();});
+// Closing the map (its buttons, Escape, or Back) returns to the card or table view.
+document.getElementById('map-view').addEventListener('catalogmap:close', () => setView(catalogListView));
 setCatalogCategory('backpacks');
+if (location.hash === '#map') setView('map'); // a link straight to the map

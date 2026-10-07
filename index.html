@@ -1048,69 +1048,57 @@
 </tr></thead><tbody id="collectible-table-body"></tbody></table></div>
 <dialog id="collectible-dialog" class="collectible-dialog" aria-labelledby="collectible-dialog-title"></dialog>
 
-<section id="map-view" aria-label="World locations of backpacks, charms and magazines">
+<section id="map-view" data-gmap aria-label="Field map of backpacks, charms and magazines">
   <div class="map-shell" id="map-shell">
-    <div class="map-toolbar">
-      <div class="map-title">
-        <span class="map-kicker">◎ FIELD MAP</span>
-        <h2 class="map-heading">The Commonwealth</h2>
-        <span class="map-count" id="map-count">29 LOCATIONS</span>
+    <div class="gm-bar" id="gm-bar">
+      <div class="gm-brand"><span class="map-kicker">◎ FIELD MAP</span><span class="gm-brand-title">The Commonwealth</span></div>
+      <div class="gm-search">
+        <button type="button" class="gm-back" data-map="close" aria-label="Close the map and go back to the catalog" title="Back to the catalog"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M9.5 3 4.5 8l5 5M5 8h8"/></svg></button>
+        <input type="search" id="gm-search" placeholder="Search the Commonwealth" aria-label="Search backpacks, charms and magazines" autocomplete="off" spellcheck="false" enterkeyhint="search">
+        <button type="button" class="gm-clear" aria-label="Clear the search" hidden>×</button><svg class="gm-search-icon" viewBox="0 0 16 16" aria-hidden="true"><circle cx="7" cy="7" r="4.5"/><path d="m10.4 10.4 3.6 3.6"/></svg>
       </div>
-      <div class="map-controls" role="group" aria-label="Map controls">
-        <button type="button" class="map-btn" data-map="zoom-out" aria-label="Zoom out"><span class="map-btn-icon" aria-hidden="true">−</span></button>
-        <span class="map-zoom" id="map-zoom" aria-hidden="true">1.0×</span>
-        <button type="button" class="map-btn" data-map="zoom-in" aria-label="Zoom in"><span class="map-btn-icon" aria-hidden="true">+</span></button>
-        <button type="button" class="map-btn" data-map="fit" aria-label="Show the whole map"><svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M1.5 5.5v-4h4M10.5 1.5h4v4M14.5 10.5v4h-4M5.5 14.5h-4v-4"/></svg><span class="map-btn-label">FIT</span></button>
-        <button type="button" class="map-btn" data-map="expand" aria-pressed="false" aria-label="Expand map to full screen"><svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M9.5 1.5h5v5M14.5 1.5 9 7M6.5 14.5h-5v-5M1.5 14.5 7 9"/></svg><span class="map-btn-label">EXPAND</span></button>
-      </div>
-    </div>
-    <div class="map-body">
-      <div class="map-stage" id="map-stage" tabindex="0" role="region" aria-roledescription="interactive map" aria-label="Map of the Commonwealth. Drag to pan. Hold Control or Command and scroll, or pinch, to zoom. When the map has focus, arrow keys pan, plus and minus zoom, and 0 shows the whole map. The location list jumps to each backpack, charm and magazine.">
-        <div class="map-status" id="map-status"><span>LOADING MAP</span></div>
-        <div class="map-pins" id="map-pins"></div>
-        <div class="map-tip" id="map-tip" aria-hidden="true"><img alt=""><span class="map-tip-text"><span class="map-tip-meta"></span><span class="map-tip-name"></span><span class="map-tip-loc"></span></span></div>
-        <div class="map-callout" id="map-callout" role="group" aria-label="Selected backpack location" hidden>
-          <div class="map-callout-head">
-            <img class="map-callout-img" alt="">
-            <div>
-              <div class="map-callout-meta"></div>
-              <h3 class="map-callout-name"></h3>
-              <div class="map-callout-loc"></div>
-            </div>
-            <button type="button" class="map-callout-close" data-callout="close" aria-label="Close location details">×</button>
-          </div>
-          <div class="map-callout-stats"><span class="cc"></span><span class="dr"></span><span class="wt"></span></div>
-          <div class="map-callout-arc"></div>
-          <div class="map-callout-actions">
-            <button type="button" data-callout="prev" aria-label="Previous location">◂</button>
-            <button type="button" data-callout="stats">VIEW FULL STATS</button>
-            <button type="button" data-callout="next" aria-label="Next location">▸</button>
-          </div>
-        </div>
-        <div class="map-hint" id="map-hint" aria-hidden="true"></div>
-      </div>
-      <aside class="map-list-panel" aria-label="Locations">
-        <div class="map-list-head"><span>LOCATIONS</span><strong id="map-list-count">29</strong></div>
-        <ol class="map-list" id="map-list"></ol>
-        <p class="map-list-empty" id="map-list-empty" hidden>Nothing matches this search with the layers that are switched on.</p>
-      </aside>
-    </div>
-    <div class="map-footer">
-      <div class="map-layers" role="group" aria-label="Map layers" hidden>
-        <span class="map-legend-label">SHOW</span>
+      <div class="map-layers gm-chips" role="group" aria-label="Map layers" hidden>
         <button type="button" class="map-layer" data-layer="backpack" aria-pressed="true"><span class="map-layer-icon map-layer-icon--backpack" aria-hidden="true"></span>Backpacks <span class="map-layer-count"></span></button>
         <button type="button" class="map-layer" data-layer="charms" aria-pressed="true"><span class="map-layer-icon map-layer-icon--charms" aria-hidden="true"></span>Charms <span class="map-layer-count"></span></button>
         <button type="button" class="map-layer" data-layer="magazines" aria-pressed="true"><span class="map-layer-icon map-layer-icon--magazines" aria-hidden="true"></span>Magazines <span class="map-layer-count"></span></button>
       </div>
-      <div class="map-legend">
+    </div>
+    <aside class="gm-side" id="gm-side" aria-label="Locations">
+      <div class="gm-grab" role="button" tabindex="0" aria-controls="gm-side" aria-expanded="false" aria-label="Show more of the list"><span></span></div>
+      <div class="gm-results" id="gm-results">
+        <div class="map-list-head"><span id="map-count">42 LOCATIONS</span></div>
+        <ol class="map-list" id="map-list"></ol>
+        <p class="map-list-empty" id="map-list-empty" hidden>Nothing matches this search with the layers that are switched on.</p>
+      </div>
+      <div class="gm-place" id="gm-place" role="region" aria-labelledby="gm-place-name" hidden>
+        <div class="gm-place-top">
+          <button type="button" class="gm-place-back" data-place="back"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M9.5 3 4.5 8l5 5M5 8h8"/></svg>RESULTS</button>
+          <span class="gm-place-nav"><button type="button" data-place="prev" aria-label="Previous location">◂</button><span class="gm-place-pos"></span><button type="button" data-place="next" aria-label="Next location">▸</button></span>
+        </div>
+        <div class="gm-place-content"></div>
+      </div>
+      <div class="gm-legend">
         <span class="map-legend-label">EXPECTED THREAT LEVEL</span>
         <div class="map-legend-scale" role="img" aria-label="Map colours show expected threat level, from blue for levels 1 to 5 up to dark red for level 45 and above.">
           <div class="map-legend-bar"></div>
           <div class="map-legend-ticks" aria-hidden="true"><span>1-5</span><span>6-14</span><span>15-25</span><span>20+</span><span>25+</span><span>30+</span><span>35+</span><span>40+</span><span>45+</span></div>
         </div>
       </div>
-      <p class="map-help" id="map-help"></p>
+    </aside>
+    <button type="button" class="gm-collapse" aria-controls="gm-side" aria-expanded="true" aria-label="Hide the side panel"><svg viewBox="0 0 10 16" aria-hidden="true"><path d="M7 3 2 8l5 5"/></svg></button>
+    <div class="map-stage" id="map-stage" tabindex="0" role="region" aria-roledescription="interactive map" aria-label="Map of the Commonwealth. Drag to pan, scroll or pinch to zoom, double-click to zoom in. When the map has focus, arrow keys pan, plus and minus zoom, and 0 shows the whole map.">
+      <div class="map-status" id="map-status"><span>LOADING MAP</span></div>
+      <div class="map-pins" id="map-pins"></div>
+      <div class="map-tip" id="map-tip" aria-hidden="true"><img alt=""><span class="map-tip-text"><span class="map-tip-meta"></span><span class="map-tip-name"></span><span class="map-tip-loc"></span></span></div>
+      <div class="map-callout" id="map-callout" hidden></div>
+      <div class="map-hint" id="map-hint" aria-hidden="true"></div>
     </div>
+    <div class="map-controls gm-zoom" role="group" aria-label="Zoom">
+      <button type="button" class="map-btn" data-map="zoom-in" aria-label="Zoom in"><span class="map-btn-icon" aria-hidden="true">+</span></button>
+      <button type="button" class="map-btn" data-map="zoom-out" aria-label="Zoom out"><span class="map-btn-icon" aria-hidden="true">−</span></button>
+      <button type="button" class="map-btn gm-fit" data-map="fit" aria-label="Show the whole map" title="Show the whole map"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M1.5 5.5v-4h4M10.5 1.5h4v4M14.5 10.5v4h-4M5.5 14.5h-4v-4"/></svg></button>
+    </div>
+    <button type="button" class="gm-close" data-map="close"><span aria-hidden="true">✕</span> CLOSE MAP</button>
   </div>
 </section>
 <div id="table-view"><table class="bp-table" id="bp-table-el"><thead><tr><th class="sortable" data-col="num">#<span class="sort-arrow">↕</span></th><th></th><th class="sortable" data-col="level">LVL<span class="sort-arrow">↕</span></th><th class="sortable" data-col="name">Backpack<span class="sort-arrow">↕</span></th><th class="sortable" data-col="ccNum">Base CC<span class="sort-arrow">↕</span></th><th>DR</th><th class="sortable" data-col="weight">Weight<span class="sort-arrow">↕</span></th><th class="sortable" data-col="value">Value<span class="sort-arrow">↕</span></th><th>Location</th><th></th></tr></thead><tbody id="table-body"></tbody></table></div>

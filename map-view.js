@@ -1,7 +1,10 @@
 // Interactive field map of backpack locations, plus charm and magazine layers on the main catalog.
-// Plain scrolling always scrolls the page. The map zooms with Ctrl/⌘ + scroll, trackpad or
-// touch pinch, double-click, the toolbar, or keys; plain scroll zooms only in the expanded
-// view, where there is no page behind it to scroll.
+// Three hosts share this file:
+// - the main catalog (data-gmap): a full-screen map that works like Google Maps. Plain scroll zooms,
+//   one finger pans, a sidebar (a bottom sheet on phones) lists results and shows the selected place,
+//   and Back, Escape, the back arrow or Close leaves it;
+// - the Pip-Boy (data-immersive): the map fills the Pip-Boy screen, plain scroll zooms;
+// - an inline map on a page (neither): plain scroll scrolls the page, Ctrl/⌘ + scroll zooms.
 (() => {
   'use strict';
   // Pin positions: percent of the map image's width and height, hand-placed by the author.
@@ -35,6 +38,12 @@
   const control = name => shell.querySelector(`[data-map="${name}"]`);
   // An immersive map (the Pip-Boy) has no page behind it: plain scroll zooms and one finger pans.
   const immersive = section.hasAttribute('data-immersive');
+  // The main catalog's full-screen map: sidebar on wide screens, bottom sheet on phones.
+  const gmap = section.hasAttribute('data-gmap');
+  const side = document.getElementById('gm-side'), bar = document.getElementById('gm-bar');
+  const placeEl = document.getElementById('gm-place'), resultsEl = document.getElementById('gm-results');
+  const searchEl = document.getElementById('gm-search');
+  const phone = matchMedia('(max-width: 760px)');
   const zoomInButton = control('zoom-in'), zoomOutButton = control('zoom-out'), expandButton = control('expand');
   const motion = matchMedia('(prefers-reduced-motion: reduce)');
   const coarse = matchMedia('(pointer: coarse)');
@@ -46,7 +55,10 @@
   const layers = { backpack: true, charms: true, magazines: true };
   let match = () => true, itemMatch = () => true, raf = 0, last = 0, anim = null, selected = null, hot = null, tipFor = null;
   let tipSize = { w: 0, h: 0 }, calloutSize = { w: 0, h: 0 }, readout = '', hintTimer = 0;
-  const free = () => expanded || immersive;
+  // Full-screen map state: open, whether we added the #map history entry, the phone sheet's snap.
+  let open = false, pushed = false, skipPop = false, sheet = 'peek', inset = { t: 0, b: 0 };
+  const free = () => expanded || immersive || gmap;
+  const esc = value => String(value).replace(/[&<>"']/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[ch]));
 
   const pad2 = n => String(n).padStart(2, '0');
   const place = bp => { const parts = bp.location.split(' — '); return parts.length > 1 ? parts.slice(1).join(' — ').trim() : bp.location; };
@@ -56,12 +68,14 @@
   const pinHalf = () => (detailed ? PIN.large : PIN.small) / 2;
   const maxScale = () => Math.max(MAX_SCALE, fit * 2);
   const clampScale = s => Math.min(maxScale(), Math.max(fit, s));
+  // Keep the map on screen. On phones the floating search bar (inset.t) and the bottom sheet's
+  // resting height (inset.b) cover the stage, so the map fits and pans within the space between.
   function clamp(v) {
-    const s = clampScale(v.s), w = W * s, h = H * s;
+    const s = clampScale(v.s), w = W * s, h = H * s, room = stageH - inset.t - inset.b;
     return {
       s,
       x: w <= stageW ? (stageW - w) / 2 : Math.min(0, Math.max(stageW - w, v.x)),
-      y: h <= stageH ? (stageH - h) / 2 : Math.min(0, Math.max(stageH - h, v.y))
+      y: h <= room ? inset.t + (room - h) / 2 : Math.min(inset.t, Math.max(stageH - inset.b - h, v.y))
     };
   }
   const fitView = () => clamp({ s: fit, x: 0, y: 0 });
@@ -190,9 +204,9 @@
       p.el.style.translate = `${Math.round(p.sx + p.ox)}px ${Math.round(p.sy + p.oy)}px`;
     }
     if (tipFor) placeTip();
-    if (selected?.kind === 'backpack') placeCallout();
+    if (selected?.kind === 'backpack' && !gmap) placeCallout();
     const r = (view.s / fit).toFixed(1) + '×';
-    if (r !== readout) { readout = r; zoomEl.textContent = r; }
+    if (r !== readout) { readout = r; if (zoomEl) zoomEl.textContent = r; }
     setDisabled(zoomOutButton, view.s <= fit * 1.001);
     setDisabled(zoomInButton, view.s >= maxScale() * 0.999);
     if (W * view.s * (devicePixelRatio || 1) > IMAGE.baseWidth * 1.15) loadDetail();
@@ -284,37 +298,155 @@
     callout.hidden = false;
     calloutSize = { w: callout.offsetWidth, h: callout.offsetHeight };
   }
-  // Frame a pin a little below centre, leaving room for its callout above.
-  function focusView(p) {
-    const s = clampScale(Math.max(view.s, fit * 3, 0.34));
-    return clamp({ s, x: stageW / 2 - p.wx * s, y: stageH * 0.62 - p.wy * s });
+  // The part of the stage the visitor can see: on phones, between the search bar and the bottom sheet.
+  function visibleBand() {
+    if (!gmap || !phone.matches) return { top: 0, bottom: stageH };
+    return { top: inset.t, bottom: Math.max(inset.t + 80, stageH - sheetHeight(sheet)) };
+  }
+  // Frame a pin: a little below centre to leave room for its callout above, or (full-screen map)
+  // in the middle of the visible part of the map.
+  function focusView(p, zoom = 3) {
+    const s = clampScale(Math.max(view.s, fit * zoom, 0.34)), band = visibleBand();
+    const y = gmap ? (band.top + band.bottom) / 2 : stageH * 0.62;
+    return clamp({ s, x: stageW / 2 - p.wx * s, y: y - p.wy * s });
   }
   // Pan just enough to bring a pin clicked near the edge fully into view.
   function reveal(p) {
-    const m = pinHalf() + 14, x = view.x + p.wx * view.s, y = view.y + p.wy * view.s;
+    const m = pinHalf() + 14, x = view.x + p.wx * view.s, y = view.y + p.wy * view.s, band = visibleBand();
     const dx = x < m ? m - x : x > stageW - m ? stageW - m - x : 0;
-    const dy = y < m ? m - y : y > stageH - m ? stageH - m - y : 0;
+    const dy = y < band.top + m ? band.top + m - y : y > band.bottom - m ? band.bottom - m - y : 0;
     if (dx || dy) tween({ s: view.s, x: view.x + dx, y: view.y + dy }, 240);
   }
-  // A backpack opens its callout; a charm or magazine stays marked on the map and opens the catalog's pop-up.
+  // A backpack opens its callout; a charm or magazine stays marked on the map and opens the catalog's
+  // pop-up. On the full-screen map every selection opens its place card in the sidebar instead.
   function select(p, how) {
+    const previous = selected;
     if (selected) { selected.el?.classList.remove('is-selected'); selected.item.classList.remove('is-selected'); selected.item.removeAttribute('aria-current'); }
     selected = p || null;
-    if (!selected) { callout.hidden = true; return schedule(); }
+    if (!selected) {
+      callout.hidden = true;
+      if (gmap) showPlace(null, previous);
+      return schedule();
+    }
     hideTip();
     p.el?.classList.add('is-selected'); p.item.classList.add('is-selected'); p.item.setAttribute('aria-current', 'true');
-    if (p.kind === 'backpack') fillCallout(p); else callout.hidden = true;
+    if (gmap) showPlace(p);
+    else if (p.kind === 'backpack') fillCallout(p);
+    else callout.hidden = true;
     if (p.el) { if (how === 'fly') fly(focusView(p)); else if (how === 'reveal') reveal(p); }
     keepInList(p);
     schedule();
-    if (p.kind !== 'backpack') window.openCollectible?.(p.row);
+    if (p.kind !== 'backpack' && !gmap) window.openCollectible?.(p.row);
   }
+  // Prev/next: backpacks on the inline and Pip-Boy maps; everything on the map on the full-screen one.
+  const stepList = () => pins.filter(p => p.shown && (gmap ? p.el : p.kind === 'backpack'));
   function step(direction) {
-    const shown = pins.filter(p => p.shown && p.kind === 'backpack');
+    const shown = stepList();
     if (!shown.length) return;
     const i = selected ? shown.indexOf(selected) : direction > 0 ? -1 : 0;
     select(shown[(i + direction + shown.length) % shown.length], 'fly');
   }
+
+  // ── Full-screen map: place card, bottom sheet, opening and closing ─────
+  function placeHTML(p) {
+    if (p.kind === 'backpack') {
+      const bp = p.bp, img = IMGS[p.idx];
+      return `<figure class="gm-place-hero is-pack">${img ? `<img src="${img}" alt="">` : ''}</figure>
+        <div class="gm-place-body">
+          <div class="gm-place-kicker"><span class="gm-kind gm-kind--backpack" aria-hidden="true"></span>BACKPACK ${pad2(bp.num)} · LVL ${bp.level}</div>
+          <h3 class="gm-place-name" id="gm-place-name">${esc(bp.name)}</h3>
+          <p class="gm-place-loc">${esc(place(bp))}</p>
+          <div class="gm-place-stats"><span class="cc">${esc(bp.cc.split('/')[0].replace(/\s*CC\s*$/i, '').trim())} CC</span><span class="dr">${esc(bp.dr.split('→')[0].split('|')[0].trim())}</span><span class="wt">${esc(bp.weight)}</span></div>
+          ${typeof arcBadge === 'function' ? arcBadge(bp, 'md') : ''}
+          <div class="gm-place-actions"><button type="button" class="gm-act is-primary" data-place="stats">VIEW FULL STATS</button><button type="button" class="gm-act" data-place="zoom">ZOOM IN</button></div>
+        </div>`;
+    }
+    const c = p.c, k = KINDS[p.kind], photo = c.locationImage || c.thumbnail;
+    const effects = typeof collectibleEffects === 'function' ? collectibleEffects(c) : c.effects; // collectibles.js
+    return `<figure class="gm-place-hero${c.locationImage ? ' is-photo' : ' is-pack'}">${photo ? `<img src="${esc(photo)}" alt="${c.locationImage ? esc(`${c.name}, ${c.locationHint || 'where to find it'}`) : ''}">` : ''}${c.locationHint ? `<figcaption>${esc(c.locationHint)}</figcaption>` : ''}</figure>
+      <div class="gm-place-body">
+        <div class="gm-place-kicker"><span class="gm-kind gm-kind--${p.kind}" aria-hidden="true">${k.glyph}</span>${k.label}</div>
+        <h3 class="gm-place-name" id="gm-place-name">${esc(c.name)}</h3>
+        <p class="gm-place-loc">${esc(OFF_MAP[p.row] || (p.el ? itemPlace(c) : `${itemPlace(c)} · not on the map`))}</p>
+        <div class="gm-place-effects">${effects.map(e => `<span>${esc(e)}</span>`).join('')}</div>
+        <div class="gm-place-actions"><button type="button" class="gm-act is-primary" data-place="details">DETAILS &amp; PHOTOS</button>${p.el ? '<button type="button" class="gm-act" data-place="zoom">ZOOM IN</button>' : ''}</div>
+      </div>`;
+  }
+  // The sidebar shows the results list, or one place's card.
+  function showPlace(p, previous) {
+    if (!gmap) return;
+    if (!p) {
+      placeEl.hidden = true; resultsEl.hidden = false;
+      if (previous) requestAnimationFrame(() => keepInList(previous));
+      return;
+    }
+    const shown = stepList(), i = shown.indexOf(p);
+    placeEl.querySelector('.gm-place-content').innerHTML = placeHTML(p);
+    placeEl.querySelector('.gm-place-pos').textContent = i >= 0 ? `${i + 1} / ${shown.length}` : '';
+    placeEl.querySelectorAll('[data-place="prev"], [data-place="next"]').forEach(b => { b.disabled = shown.length < 2 || i < 0; });
+    resultsEl.hidden = true; placeEl.hidden = false;
+    placeEl.scrollTop = 0;
+    if (phone.matches && sheet === 'peek') setSheet('half');
+  }
+  // Phone bottom sheet: peek (header only), half, or full height. inset.b is the peek height.
+  function sheetHeight(state) {
+    const h = shell.clientHeight, top = inset.t + 8;
+    return state === 'full' ? h - top : state === 'half' ? Math.round(Math.min(h - top, Math.max(260, h * 0.48))) : inset.b;
+  }
+  function setSheet(state, instant) {
+    if (!gmap) return;
+    sheet = state;
+    side.dataset.sheet = state;
+    if (!phone.matches) { side.style.removeProperty('--sheet-y'); return; }
+    side.classList.toggle('is-instant', Boolean(instant));
+    side.style.setProperty('--sheet-y', `${side.offsetHeight - sheetHeight(state)}px`);
+    side.querySelector('.gm-grab').setAttribute('aria-expanded', String(state !== 'peek'));
+  }
+  function measureInsets() {
+    inset = gmap && phone.matches ? { t: bar.offsetTop + bar.offsetHeight, b: 104 } : { t: 0, b: 0 };
+    if (gmap) side.style.setProperty('--sheet-top', `${inset.t + 8}px`);
+  }
+  // While the map is open, the page behind it is out of reach of Tab and screen readers; the details
+  // page, pop-ups and the 3D preview that open over the map stay usable.
+  const OVERLAYS = '#modal-overlay, #arc-preview, dialog, #copy-flash, #img-preview, #collectible-preview';
+  let inerted = [];
+  function isolate(on) {
+    inerted.forEach(el => { el.inert = false; });
+    inerted = [];
+    if (!on) return;
+    for (let node = section; node.parentElement && node !== document.body; node = node.parentElement)
+      for (const other of node.parentElement.children)
+        if (other !== node && !other.inert && !/^(SCRIPT|STYLE|LINK)$/.test(other.tagName) && !other.matches(OVERLAYS) && !other.querySelector(OVERLAYS)) { other.inert = true; inerted.push(other); }
+  }
+  function openMap() {
+    if (!gmap || open) return;
+    open = true;
+    document.body.classList.add('map-expanded');
+    isolate(true);
+    if (location.hash !== '#map') { history.pushState({ catalogMap: true }, '', '#map'); pushed = true; }
+    else if (!history.state?.catalogMap) history.replaceState({ catalogMap: true }, '', location.href);
+    const main = document.getElementById('search-input');
+    if (main && searchEl.value !== main.value) { searchEl.value = main.value; syncClear(); }
+    requestAnimationFrame(() => { measureInsets(); setSheet(selected ? 'half' : 'peek', true); onResize(true); });
+    stage.focus({ preventScroll: true });
+  }
+  // Leave the full-screen map: tidy up and drop our #map history entry unless Back already did.
+  function leave(fromHistory) {
+    if (!open) return false;
+    open = false;
+    select(null); stop(); hideTip(); hideHint(); setHot(null);
+    document.body.classList.remove('map-expanded');
+    isolate(false);
+    if (!fromHistory) {
+      if (pushed && history.state?.catalogMap) { skipPop = true; history.back(); }
+      else if (location.hash === '#map') history.replaceState(null, '', location.pathname + location.search);
+    }
+    pushed = false;
+    return true;
+  }
+  // Close buttons, Escape and Back end up here; the catalog puts back the card or table view.
+  function requestClose(fromHistory) { if (leave(fromHistory)) section.dispatchEvent(new CustomEvent('catalogmap:close')); }
+  function syncClear() { const clear = shell.querySelector('.gm-clear'); if (clear) clear.hidden = !searchEl.value; }
   function keepInList(p) {
     if (list.scrollHeight <= list.clientHeight + 1) return; // the list only scrolls on its own beside the map
     const item = p.item.parentElement, top = item.offsetTop, bottom = top + item.offsetHeight;
@@ -334,6 +466,7 @@
   }
   function hideHint() { clearTimeout(hintTimer); hint.classList.remove('is-visible'); }
   function updateHelp() {
+    if (!help) return;
     const touchFirst = coarse.matches;
     help.innerHTML = free()
       ? touchFirst ? '<kbd>Drag</kbd> to pan · <kbd>Pinch</kbd> to zoom · <kbd>Double-tap</kbd> to zoom in'
@@ -424,15 +557,17 @@
       .then(() => { statusEl.hidden = true; }, () => { statusEl.firstElementChild.textContent = 'MAP IMAGE UNAVAILABLE'; });
     measure();
     Object.assign(view, fitView());
-    new ResizeObserver(onResize).observe(stage);
+    new ResizeObserver(() => onResize()).observe(stage);
     updateHelp();
     filter(match, itemMatch);
   }
-  function measure() { stageW = stage.clientWidth; stageH = stage.clientHeight; fit = Math.min(stageW / W, stageH / H) || 1; }
-  // Keep the same spot centred and the same relative zoom when the stage changes size.
-  function onResize() {
+  function measure() { stageW = stage.clientWidth; stageH = stage.clientHeight; fit = Math.min(stageW / W, (stageH - inset.t - inset.b) / H) || 1; }
+  // Keep the same spot centred and the same relative zoom when the stage changes size
+  // (force: the phone's search bar or sheet changed the visible area).
+  function onResize(force = false) {
     const w = stage.clientWidth, h = stage.clientHeight;
-    if (!w || !h || (w === stageW && h === stageH)) return;
+    if (gmap && open) { measureInsets(); setSheet(sheet, true); }
+    if (!w || !h || (!force && w === stageW && h === stageH)) return;
     const hadSize = stageW > 0, rel = view.s / fit;
     const cx = (stageW / 2 - view.x) / view.s, cy = (stageH / 2 - view.y) / view.s;
     measure(); stop();
@@ -458,12 +593,13 @@
     if (tipFor && !tipFor.shown) hideTip();
     if (hot && !hot.shown) setHot(null);
     document.getElementById('map-count').textContent = count === pins.length ? `${count} LOCATIONS` : `${count} OF ${pins.length} LOCATIONS`;
-    document.getElementById('map-list-count').textContent = count;
+    const listCount = document.getElementById('map-list-count');
+    if (listCount) listCount.textContent = count;
     document.getElementById('map-list-empty').hidden = count > 0;
     schedule();
   }
-  function show() { build(); schedule(); }
-  function hide() { if (!built) return; setExpanded(false); stop(); hideTip(); hideHint(); setHot(null); if (immersive) select(null); }
+  function show() { build(); openMap(); schedule(); }
+  function hide() { if (!built) return; leave(false); setExpanded(false); stop(); hideTip(); hideHint(); setHot(null); if (immersive) select(null); }
 
   // ── Input: mouse and pen ───────────────────────────────────────────────
   let drag = null, suppressClick = false, lastDoubleTap = -1e9;
@@ -622,6 +758,7 @@
     if (document.getElementById('modal-overlay')?.classList.contains('visible') || document.querySelector('[aria-modal="true"], dialog[open]') || document.getElementById('arc-preview')?.hidden === false) return;
     if (selected) select(null);
     else if (expanded) setExpanded(false);
+    else if (gmap && open) requestClose();
     else return;
     e.preventDefault();
   }, true);
@@ -644,7 +781,8 @@
     else if (action === 'next') step(1);
     else if (action === 'close') select(null);
   });
-  pinLayer.addEventListener('click', e => { const p = pinFrom(e.target); if (p && (p !== selected || p.kind !== 'backpack')) select(p, 'reveal'); });
+  // On a phone the sheet rises over the map, so the pin flies into the clear part above it.
+  pinLayer.addEventListener('click', e => { const p = pinFrom(e.target); if (p && (p !== selected || p.kind !== 'backpack')) select(p, gmap && phone.matches ? 'fly' : 'reveal'); });
   pinLayer.addEventListener('pointerover', e => {
     if (e.pointerType !== 'mouse' || drag?.moved) return;
     const p = pinFrom(e.target);
@@ -676,7 +814,7 @@
   if (mapButton) {
     for (const type of ['pointerenter', 'focus', 'touchstart']) mapButton.addEventListener(type, preload, { passive: true });
     mapButton.addEventListener('click', () => requestAnimationFrame(() => {
-      if (section.style.display === 'none') return;
+      if (gmap || section.style.display === 'none') return; // the full-screen map needs no scrolling
       const r = shell.getBoundingClientRect(), gap = 12;
       if (r.top >= gap && r.bottom <= innerHeight - gap) return;
       const top = r.height + gap * 2 <= innerHeight ? r.top - (innerHeight - r.height) / 2 : r.top - gap;
@@ -694,5 +832,83 @@
     select(p, 'fly');
   }
 
-  window.catalogMap = { show, hide, filter, focus, pins: MAP_PINS };
+  // ── Full-screen map: wiring ──────────────────────────────────────────
+  if (gmap) {
+    // Any [data-map="close"] (the back arrow, Close map) leaves; Back and Forward follow history.
+    shell.addEventListener('click', e => { if (e.target.closest('[data-map="close"]')) requestClose(); });
+    addEventListener('popstate', () => {
+      if (skipPop) { skipPop = false; return; }
+      if (open && !history.state?.catalogMap) requestClose(true);
+      else if (!open && history.state?.catalogMap && typeof setView === 'function') setView('map');
+    });
+    // The sidebar search drives the catalog's own search box, which filters cards, tables and the map.
+    searchEl.addEventListener('input', () => {
+      const main = document.getElementById('search-input');
+      syncClear();
+      if (!main) return;
+      main.value = searchEl.value;
+      main.dispatchEvent(new Event('input'));
+      if (selected && !selected.shown) select(null);
+    });
+    shell.querySelector('.gm-clear')?.addEventListener('click', () => { searchEl.value = ''; searchEl.dispatchEvent(new Event('input')); searchEl.focus(); });
+    addEventListener('keydown', e => {
+      if (!open || e.key !== '/' || e.target.closest?.('input, textarea, select') || document.querySelector('dialog[open]')) return;
+      e.preventDefault(); searchEl.focus();
+    });
+    // Place card: back to results, prev/next, and its actions.
+    placeEl.addEventListener('click', e => {
+      const action = e.target.closest('[data-place]')?.dataset.place;
+      if (!action) return;
+      if (action === 'back') select(null);
+      else if (action === 'prev') step(-1);
+      else if (action === 'next') step(1);
+      else if (action === 'zoom' && selected?.el) fly(focusView(selected, 9));
+      else if (action === 'stats' && selected) (window.openBackpack ? window.openBackpack(selected.num) : window.openModal?.(selected.idx));
+      else if (action === 'details' && selected) window.openCollectible?.(selected.row);
+    });
+    // Wide screens: fold the sidebar away for more map.
+    const fold = shell.querySelector('.gm-collapse');
+    fold?.addEventListener('click', () => {
+      const folded = shell.classList.toggle('is-folded');
+      fold.setAttribute('aria-expanded', String(!folded));
+      fold.setAttribute('aria-label', folded ? 'Show the side panel' : 'Hide the side panel');
+    });
+    // Phones: drag the sheet's handle (or the results heading) between peek, half and full; a tap
+    // steps it open or closed.
+    const grab = side.querySelector('.gm-grab');
+    let pull = null;
+    for (const handle of [grab, side.querySelector('.gm-results .map-list-head')]) handle.addEventListener('pointerdown', e => {
+      if (!phone.matches || e.button !== 0) return;
+      pull = { id: e.pointerId, y0: e.clientY, from: side.offsetHeight - sheetHeight(sheet), moved: false, t: e.timeStamp, y: e.clientY, v: 0 };
+      side.setPointerCapture(e.pointerId);
+    });
+    side.addEventListener('pointermove', e => {
+      if (!pull || e.pointerId !== pull.id) return;
+      const dy = e.clientY - pull.y0;
+      if (!pull.moved && Math.abs(dy) < 6) return;
+      pull.moved = true;
+      side.classList.add('is-instant');
+      const max = side.offsetHeight - sheetHeight('peek');
+      side.style.setProperty('--sheet-y', `${Math.max(0, Math.min(max, pull.from + dy))}px`);
+      pull.v = (e.clientY - pull.y) / Math.max(1, e.timeStamp - pull.t); pull.y = e.clientY; pull.t = e.timeStamp;
+    });
+    const release = e => {
+      if (!pull || e.pointerId !== pull.id) return;
+      const moved = pull.moved, v = pull.v, at = parseFloat(side.style.getPropertyValue('--sheet-y')) || 0;
+      pull = null;
+      if (!moved) return setSheet(sheet === 'peek' ? 'half' : sheet === 'half' ? 'full' : 'peek');
+      const snaps = ['full', 'half', 'peek'].map(s => [s, side.offsetHeight - sheetHeight(s)]);
+      const aim = at + v * 160; // a flick carries on in its direction
+      setSheet(snaps.reduce((a, b) => Math.abs(b[1] - aim) < Math.abs(a[1] - aim) ? b : a)[0]);
+    };
+    side.addEventListener('pointerup', release);
+    side.addEventListener('pointercancel', release);
+    grab.addEventListener('keydown', e => {
+      if (e.key !== 'Enter' && e.key !== ' ') return;
+      e.preventDefault(); setSheet(sheet === 'peek' ? 'half' : 'peek');
+    });
+    phone.addEventListener('change', () => { if (open) { measureInsets(); setSheet(sheet, true); onResize(true); } });
+  }
+
+  window.catalogMap = { show, hide, filter, focus, close: () => requestClose(), pins: MAP_PINS };
 })();
