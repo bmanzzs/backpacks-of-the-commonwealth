@@ -32,7 +32,9 @@ const collectibleLocation = item => COLLECTIBLE_LOCATIONS[item.locationId] || it
 const collectibleEffects = item => [...new Set(item.effects)]
   .filter(effect => effect !== '+PACC' || !item.effects.includes('+20PACC'))
   .map(effect => COLLECTIBLE_EFFECT_LABELS[effect] || effect);
-const categoryItems = () => COLLECTIBLES.filter(item => item.type === catalogCategory);
+const CATEGORY_LABELS = { backpacks: 'BACKPACKS', charms: 'VAULT-TEC CHARMS', magazines: 'MAGAZINES' };
+const CATEGORY_TOTALS = { backpacks: BACKPACKS.length, charms: COLLECTIBLES.filter(item => item.type === 'charms').length, magazines: COLLECTIBLES.filter(item => item.type === 'magazines').length };
+const backpackMatches = (bp, query) => [bp.name, bp.id, bp.location].join(' ').toLowerCase().includes(query);
 const catalogQuery = () => document.getElementById('search-input').value.trim().toLowerCase();
 function collectibleMatches(item, query) {
   return [item.name, item.locationId, collectibleLocation(item), ...item.effects, ...collectibleEffects(item)].join(' ').toLowerCase().includes(query);
@@ -42,8 +44,6 @@ function setCatalogCategory(category) {
   if (!['backpacks','charms','magazines'].includes(category)) return;
   catalogCategory = category;
   document.querySelectorAll('.catalog-tab').forEach(button => button.setAttribute('aria-pressed', String(button.dataset.category === category)));
-  document.getElementById('search-input').placeholder = `◈  SEARCH ${category.toUpperCase()}...`;
-  document.getElementById('search-input').setAttribute('aria-label', `Search ${category} by name, location, or effect`);
   setView(catalogView);
 }
 
@@ -51,52 +51,74 @@ function showCatalogView(view) {
   hideCollectiblePreview();
   catalogView = view;
   if (view !== 'map') catalogListView = view;
-  // The map opens full screen over the page, so the list underneath stays put for when it closes.
-  const backpacks = catalogCategory === 'backpacks', listView = catalogListView;
-  document.getElementById('grid').style.display = backpacks && listView === 'grid' ? '' : 'none';
-  document.getElementById('table-view').style.display = backpacks && listView === 'table' ? 'block' : 'none';
+  // The map opens full screen over the page; the list underneath (laid out by applyCatalogSearch)
+  // stays put for when it closes.
   document.getElementById('map-view').style.display = catalogView === 'map' ? 'block' : 'none'; // one map with all three layers
-  document.getElementById('collectible-grid').hidden = backpacks || listView !== 'grid';
-  document.getElementById('collectible-table-view').hidden = backpacks || listView !== 'table';
   ['grid','table','map'].forEach(mode => {
     const button = document.getElementById('btn-' + mode);
     button.classList.toggle('active', catalogView === mode);
     button.setAttribute('aria-pressed', String(catalogView === mode));
   });
-  if (backpacks && listView === 'table' && !document.getElementById('table-body').children.length) buildTable();
   if (catalogView === 'map') window.catalogMap?.show(); else window.catalogMap?.hide();
   applyCatalogSearch();
 }
 
+// The search box looks through every category: results come in groups, one per category with
+// matches. With the box empty, only the open tab's entries show.
 function applyCatalogSearch() {
-  const query = catalogQuery();
-  const backpackMatches = bp => [bp.name, bp.id, bp.location].join(' ').toLowerCase().includes(query);
+  const query = catalogQuery(), searching = Boolean(query), listView = catalogListView;
+  const bpMatch = bp => backpackMatches(bp, query), itemMatch = item => collectibleMatches(item, query);
+  const counts = { backpacks: BACKPACKS.filter(bpMatch).length };
+  for (const type of ['charms', 'magazines']) counts[type] = COLLECTIBLES.filter(item => item.type === type && itemMatch(item)).length;
+  const shown = searching ? ['backpacks', 'charms', 'magazines'].filter(c => counts[c]) : [catalogCategory];
+  const packs = shown.includes('backpacks'), types = shown.filter(c => c !== 'backpacks');
+  document.body.classList.toggle('catalog-searching', searching);
+  document.getElementById('grid').style.display = packs && listView === 'grid' ? '' : 'none';
+  document.getElementById('table-view').style.display = packs && listView === 'table' ? 'block' : 'none';
+  if (packs && listView === 'table' && !document.getElementById('table-body').children.length) buildTable();
   document.querySelectorAll('#grid .card, #table-body tr').forEach(entry => {
-    entry.style.display = backpackMatches(BACKPACKS[Number(entry.dataset.idx)]) ? '' : 'none';
+    entry.style.display = bpMatch(BACKPACKS[Number(entry.dataset.idx)]) ? '' : 'none';
   });
-  window.catalogMap?.filter(backpackMatches, item => collectibleMatches(item, query));
-  const total = catalogCategory === 'backpacks' ? BACKPACKS.length : categoryItems().length;
-  const count = catalogCategory === 'backpacks' ? BACKPACKS.filter(backpackMatches).length : renderCollectibles();
-  document.getElementById('catalog-count').textContent = `${count} of ${total} ${catalogCategory}`;
-  document.getElementById('catalog-description').textContent = catalogCategory === 'backpacks'
-    ? 'Carry capacity, upgrades, crafting, and world locations.'
-    : catalogCategory === 'charms'
-      ? 'Vault-Tec charms: each unlocks a Vault-Tec Utility Backpack edition that hangs the animated charm from the pack. Map View shows where each one is.'
-      : 'Magazine effects and acquisition locations. Map View shows where each one is.';
-  document.getElementById('catalog-empty').hidden = count > 0;
+  const head = document.getElementById('sg-backpacks');
+  head.hidden = !(searching && packs);
+  head.querySelector('span').textContent = `${counts.backpacks} ${counts.backpacks === 1 ? 'MATCH' : 'MATCHES'}`;
+  renderCollectibles(types, searching);
+  document.getElementById('collectible-grid').hidden = !types.length || listView !== 'grid';
+  document.getElementById('collectible-table-view').hidden = !types.length || listView !== 'table';
+  window.catalogMap?.filter(bpMatch, itemMatch);
+  document.querySelectorAll('.catalog-tab').forEach(tab => {
+    const c = tab.dataset.category;
+    tab.querySelector('.tab-count').textContent = searching ? counts[c] : CATEGORY_TOTALS[c];
+    tab.classList.toggle('is-empty', searching && !counts[c]);
+  });
+  const total = shown.reduce((sum, c) => sum + counts[c], 0);
+  document.getElementById('catalog-count').textContent = searching
+    ? `${total} ${total === 1 ? 'match' : 'matches'}: ` + ['backpacks', 'charms', 'magazines'].map(c => `${counts[c]} ${counts[c] === 1 ? c.slice(0, -1) : c}`).join(', ')
+    : `${counts[catalogCategory]} ${catalogCategory}`;
+  document.getElementById('catalog-empty').hidden = !searching || total > 0;
   window.updateArcPreview?.();
 }
 
-function renderCollectibles() {
+// Collectible cards and table rows for the given categories; grouped adds a heading per category.
+function renderCollectibles(types, grouped) {
   hideCollectiblePreview();
-  const items = categoryItems().filter(item => collectibleMatches(item, catalogQuery())).sort((a,b) => {
+  const query = catalogQuery(), sort = (a, b) => {
     if (collectibleSort.key === 'sourceRow') return a.sourceRow - b.sourceRow;
     const left = collectibleSort.key === 'name' ? a.name : collectibleLocation(a);
     const right = collectibleSort.key === 'name' ? b.name : collectibleLocation(b);
     return left.localeCompare(right) * collectibleSort.direction;
-  });
-  const kind = catalogCategory === 'charms' ? 'VAULT-TEC CHARM' : 'MAGAZINE';
-  document.getElementById('collectible-grid').innerHTML = items.map(item => `
+  };
+  let cards = '', rows = '';
+  for (const type of types) {
+    const items = COLLECTIBLES.filter(item => item.type === type && collectibleMatches(item, query)).sort(sort);
+    if (!items.length) continue;
+    const kind = type === 'charms' ? 'VAULT-TEC CHARM' : 'MAGAZINE';
+    if (grouped) {
+      const label = `${CATEGORY_LABELS[type]} <span>${items.length} ${items.length === 1 ? 'MATCH' : 'MATCHES'}</span>`;
+      cards += `<h2 class="search-group" id="sg-${type}">${label}</h2>`;
+      rows += `<tr class="search-group-row"><th colspan="3" scope="colgroup" id="sg-${type}-table">${label}</th></tr>`;
+    }
+    cards += items.map(item => `
     <button class="collectible-card" data-collectible-row="${item.sourceRow}" aria-label="View details for ${escapeCatalog(item.name)}">
       <div class="collectible-kicker">${kind}</div>
       <div class="collectible-card-heading">${item.thumbnail ? `<img class="collectible-thumbnail" src="${escapeCatalog(item.thumbnail)}" alt="" width="64" height="76" loading="lazy">` : ''}<h2>${escapeCatalog(item.name)}</h2></div>
@@ -105,11 +127,13 @@ function renderCollectibles() {
       <div class="collectible-id">${escapeCatalog(item.locationId)}</div>
       <span class="collectible-hint">◉ VIEW EFFECTS & LOCATION</span>
     </button>`).join('');
-  document.getElementById('collectible-table-body').innerHTML = items.map(item => `
+    rows += items.map(item => `
     <tr><td><button class="collectible-details collectible-table-name" data-collectible-row="${item.sourceRow}">${item.thumbnail ? `<img class="collectible-thumbnail" src="${escapeCatalog(item.thumbnail)}" alt="" width="44" height="52" loading="lazy">` : ''}<span>${escapeCatalog(item.name)}</span></button></td>
       <td>${collectibleEffects(item).map(escapeCatalog).join('<br>')}</td>
       <td>${escapeCatalog(collectibleLocation(item))}<div class="collectible-id">${escapeCatalog(item.locationId)}</div></td></tr>`).join('');
-  return items.length;
+  }
+  document.getElementById('collectible-grid').innerHTML = cards;
+  document.getElementById('collectible-table-body').innerHTML = rows;
 }
 
 const collectibleDialog = document.getElementById('collectible-dialog');
@@ -157,7 +181,13 @@ collectibleDialog.addEventListener('click', event => {
   const rect = collectibleDialog.getBoundingClientRect();
   if (event.target === collectibleDialog && (event.clientX < rect.left || event.clientX > rect.right || event.clientY < rect.top || event.clientY > rect.bottom)) collectibleDialog.close();
 });
-document.querySelectorAll('.catalog-tab').forEach(button => button.addEventListener('click', () => setCatalogCategory(button.dataset.category)));
+document.querySelectorAll('.catalog-tab').forEach(button => button.addEventListener('click', () => {
+  const category = button.dataset.category;
+  setCatalogCategory(category);
+  if (!catalogQuery()) return;
+  const group = document.getElementById(category === 'backpacks' ? 'sg-backpacks' : catalogListView === 'table' ? `sg-${category}-table` : `sg-${category}`);
+  if (group && group.getClientRects().length) group.scrollIntoView({ block: 'start', behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
+}));
 document.querySelectorAll('#collectible-grid, #collectible-table-body').forEach(container => container.addEventListener('click', event => {
   const button = event.target.closest('[data-collectible-row]');
   if (button) openCollectible(Number(button.dataset.collectibleRow));
@@ -169,7 +199,7 @@ document.querySelectorAll('.collectible-sort').forEach(button => button.addEvent
     other.closest('th').setAttribute('aria-sort', active ? (collectibleSort.direction === 1 ? 'ascending' : 'descending') : 'none');
     other.querySelector('span').textContent = active ? (collectibleSort.direction === 1 ? '↑' : '↓') : '↕';
   });
-  renderCollectibles();
+  applyCatalogSearch();
 }));
 document.getElementById('search-input').addEventListener('input', applyCatalogSearch);
 

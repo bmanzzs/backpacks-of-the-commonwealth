@@ -21,6 +21,20 @@
 #catalog-description { display:none; }
 #catalog-empty { margin:20px auto 60px; padding:24px; max-width:700px; text-align:center; color:var(--amber); line-height:1.7; }
 #collectible-grid[hidden], #collectible-table-view[hidden], #catalog-empty[hidden] { display:none; }
+/* Search results across categories: one heading per group, the tabs show match counts. */
+.search-group { display:flex; align-items:center; gap:12px; margin:0; font:700 11px 'Orbitron',sans-serif; letter-spacing:3px; color:#92e27c; }
+.search-group::before { content:''; flex:none; width:3px; height:13px; background:var(--green); box-shadow:0 0 8px rgba(57,255,20,.6); }
+.search-group::after { content:''; order:2; flex:1; height:1px; background:linear-gradient(90deg, rgba(57,255,20,.4), rgba(57,255,20,.05)); }
+.search-group span { order:3; font:12px 'Share Tech Mono',monospace; letter-spacing:1px; color:var(--text-dim); }
+.search-group[hidden] { display:none; }
+#sg-backpacks { max-width:1400px; margin:4px auto 14px; padding:0 20px; }
+#collectible-grid .search-group { grid-column:1 / -1; margin:10px 0 0; }
+#collectible-grid .search-group:first-child { margin-top:0; }
+.catalog-searching #grid, .catalog-searching #table-view { padding-bottom:30px; }
+.search-group-row th { padding:22px 0 10px; border-bottom:0; background:none; font:700 11px 'Orbitron',sans-serif; letter-spacing:3px; color:#92e27c; }
+.search-group-row th span { margin-left:12px; font:12px 'Share Tech Mono',monospace; letter-spacing:1px; color:var(--text-dim); }
+.search-group-row:hover th { background:none; }
+.catalog-tab.is-empty { opacity:.45; }
 .collectible-card { display:flex; flex-direction:column; align-items:flex-start; text-align:left; font:inherit; color:inherit; background:var(--card-bg); border:1px solid var(--border); padding:24px; cursor:pointer; min-width:0; transition:border-color .2s, transform .2s; }
 .collectible-card:hover { border-color:var(--amber); transform:translateY(-3px); }
 .collectible-kicker { font-size:12px; letter-spacing:2px; color:var(--amber); margin-bottom:16px; }
