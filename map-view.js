@@ -689,7 +689,8 @@
     build();
     const p = pins.find(q => q.num === num);
     if (!p) return;
-    if (!p.shown) filter(null);
+    if (!layers.backpack) { layers.backpack = true; section.querySelector('[data-layer="backpack"]')?.setAttribute('aria-pressed', 'true'); }
+    if (!p.shown) filter(null, itemMatch);
     select(p, 'fly');
   }
 

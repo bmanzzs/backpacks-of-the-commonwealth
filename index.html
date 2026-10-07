@@ -11,7 +11,7 @@
 <link rel="apple-touch-icon" sizes="180x180" href="assets/icons/apple-touch-icon.png">
 <link rel="manifest" href="site.webmanifest">
 <meta name="theme-color" content="#050f03">
-<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@400;700;900&family=VT323&family=Cinzel:wght@700;900&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@400;700;900&family=VT323&family=Roboto+Condensed:wght@400;700&family=Cinzel:wght@700;900&display=swap" rel="stylesheet">
 <style>
   :root {
     --green: #39ff14;
@@ -550,232 +550,6 @@
     align-self: flex-start;
   }
 
-  .modal-body {
-    padding: 18px;
-  }
-
-  .tt-header {
-    background: var(--green);
-    color: var(--bg);
-    padding: 10px 14px;
-    font-family: 'Orbitron', sans-serif;
-    font-size: 10px;
-    font-weight: 700;
-    letter-spacing: 2px;
-    text-transform: uppercase;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-  }
-
-  .tt-level-tag {
-    background: var(--bg);
-    color: var(--green);
-    padding: 2px 8px;
-    font-size: 9px;
-    letter-spacing: 2px;
-  }
-
-  .tt-body {
-    padding: 14px;
-  }
-
-  .tt-desc {
-    font-family: 'VT323', monospace;
-    font-size: 17px;
-    color: #aaddaa;
-    line-height: 1.4;
-    margin-bottom: 14px;
-    padding-bottom: 12px;
-    border-bottom: 1px solid var(--border);
-  }
-
-  .tt-section-label {
-    font-size: 9px;
-    color: var(--text-dim);
-    letter-spacing: 3px;
-    text-transform: uppercase;
-    margin-bottom: 6px;
-    margin-top: 12px;
-  }
-
-  .tt-section-label:first-of-type { margin-top: 0; }
-
-  .tt-stat-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 6px;
-  }
-
-  .tt-stat {
-    display: flex;
-    flex-direction: column;
-  }
-
-  .tt-stat-key {
-    font-size: 8px;
-    color: var(--text-dim);
-    letter-spacing: 2px;
-    text-transform: uppercase;
-  }
-
-  .tt-stat-val {
-    font-family: 'VT323', monospace;
-    font-size: 20px;
-    line-height: 1.2;
-  }
-
-  .tt-stat-val.green { color: var(--green); text-shadow: 0 0 8px var(--green-glow); }
-  .tt-stat-val.blue { color: #66aaff; }
-  .tt-stat-val.amber { color: var(--amber); }
-  .tt-stat-val.red { color: var(--red); }
-  .tt-stat-val.purple { color: #cc88ff; }
-
-  /* OMOD upgrade list */
-  .omod-list { list-style: none; margin-top: 2px; }
-  .omod-item {
-    display: flex;
-    gap: 10px;
-    padding: 6px 0;
-    border-bottom: 1px solid rgba(30,58,30,0.5);
-    align-items: flex-start;
-  }
-  .omod-item:last-child { border-bottom: none; }
-  .omod-tier {
-    font-family: 'Orbitron', sans-serif;
-    font-size: 8px;
-    color: var(--green-dim);
-    letter-spacing: 1px;
-    flex-shrink: 0;
-    padding-top: 3px;
-    width: 20px;
-    text-align: right;
-  }
-  .omod-content { flex: 1; min-width: 0; position: relative; }
-  .omod-name {
-    font-family: 'VT323', monospace;
-    font-size: 16px;
-    color: var(--green);
-    line-height: 1.2;
-  }
-  .cc-val {
-    color: #00e5ff;
-    font-weight: bold;
-    text-shadow: 0 0 6px rgba(0,229,255,0.3);
-  }
-  .omod-desc {
-    font-size: 9px;
-    color: #7aaa7a;
-    line-height: 1.4;
-    letter-spacing: 0.3px;
-  }
-  .omod-dr .omod-name { color: #4466aa; }
-  .omod-dr .omod-tier { color: #886633; }
-
-  /* Tier progression table */
-  .tier-table {
-    width: 100%;
-    border-collapse: collapse;
-    margin-top: 2px;
-  }
-
-  .tier-table tr {
-    border-bottom: 1px solid rgba(30,58,30,0.6);
-    transition: background 0.1s;
-  }
-
-  .tier-table tr:last-child { border-bottom: none; }
-  .tier-table tr:hover { background: rgba(57,255,20,0.04); }
-
-  .tier-num {
-    font-family: 'Orbitron', sans-serif;
-    font-size: 8px;
-    color: var(--green-dim);
-    padding: 5px 6px 5px 0;
-    white-space: nowrap;
-    vertical-align: middle;
-    width: 28px;
-    letter-spacing: 1px;
-  }
-
-  .tier-cells {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 4px;
-    padding: 5px 0;
-    align-items: center;
-  }
-
-  .tier-cell {
-    font-family: 'VT323', monospace;
-    font-size: 15px;
-    padding: 1px 6px;
-    line-height: 1.4;
-    border: 1px solid;
-  }
-
-  .tier-cell.cc  { color: var(--green);  border-color: rgba(57,255,20,0.35); background: rgba(57,255,20,0.05); }
-  .tier-cell.pos { color: #66dd66;       border-color: rgba(80,200,80,0.3);  background: rgba(80,200,80,0.04); }
-  .tier-cell.neg { color: #dd6666;       border-color: rgba(200,80,80,0.3);  background: rgba(200,80,80,0.04); }
-  .tier-cell.fx  { color: #aaaaff;       border-color: rgba(120,120,255,0.3);background: rgba(120,120,255,0.04); }
-  .tier-cell.neu { color: #88aacc;       border-color: rgba(100,150,200,0.3);background: rgba(100,150,200,0.04); }
-
-  .colors-row {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 4px;
-  }
-
-  .color-tag {
-    font-size: 9px;
-    letter-spacing: 1px;
-    padding: 2px 8px 2px 20px;
-    text-transform: uppercase;
-    position: relative;
-    border: 1px solid rgba(255,255,255,0.15);
-    color: #cccccc;
-  }
-  .color-tag::before {
-    content: '';
-    position: absolute;
-    left: 6px;
-    top: 50%;
-    transform: translateY(-50%);
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    background: var(--swatch, #888);
-  }
-
-  .location-box {
-    padding: 8px 10px;
-    background: rgba(57,255,20,0.04);
-    border-left: 2px solid var(--green-dim);
-    margin-top: 10px;
-  }
-  .location-name {
-    font-family: 'VT323', monospace;
-    font-size: 18px;
-    color: #55dd55;
-    line-height: 1.3;
-  }
-  .location-edid {
-    font-family: 'Share Tech Mono', monospace;
-    font-size: 10px;
-    color: #336633;
-    letter-spacing: 1px;
-    margin-top: 2px;
-    cursor: pointer;
-    user-select: none;
-    transition: color 0.15s;
-  }
-  .location-edid:hover { color: #55aa55; }
-  .location-edid:hover::after {
-    content: ' ⧉';
-    color: var(--green-dim);
-    font-size: 9px;
-  }
-
   /* Bottom bar */
   .card-footer {
     display: flex;
@@ -1067,101 +841,6 @@
   .bp-table th.sorted .sort-arrow { opacity: 1; }
 
 
-  .crafting-list {
-    list-style: none;
-    margin: 0;
-    padding: 6px 10px;
-    background: rgba(57,255,20,0.04);
-    border-left: 2px solid var(--green-dim);
-    margin-top: 10px;
-  }
-  .crafting-item {
-    font-family: 'VT323', monospace;
-    font-size: 16px;
-    color: #88aa88;
-    padding: 3px 0;
-    border-bottom: 1px solid rgba(30,58,30,0.35);
-    display: flex;
-    align-items: center;
-    gap: 6px;
-  }
-  .crafting-item:last-child { border-bottom: none; }
-  .crafting-item::before {
-    content: '·';
-    color: var(--green-dim);
-    flex-shrink: 0;
-  }
-  .crafting-perks {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 4px;
-    padding: 6px 10px 4px;
-  }
-
-  .omod-perks {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 4px;
-    margin-top: 4px;
-  }
-  .perk-tag {
-    font-family: 'Orbitron', sans-serif;
-    font-size: 8px;
-    letter-spacing: 1px;
-    color: var(--amber);
-    border: 1px solid rgba(255,176,0,0.35);
-    background: rgba(255,176,0,0.07);
-    padding: 2px 7px;
-    text-transform: uppercase;
-  }
-
-
-  /* Collapsible upgrade ingredients */
-  .omod-item { cursor: pointer; user-select: none; }
-  .omod-toggle {
-    font-size: 9px;
-    color: var(--green-dim);
-    letter-spacing: 1px;
-    margin-top: 0;
-    font-family: 'Orbitron', sans-serif;
-    display: inline-flex;
-    align-items: center;
-    gap: 4px;
-    user-select: none;
-    transition: color 0.15s;
-  }
-  .omod-toggle:hover { color: var(--green); }
-  .omod-toggle .toggle-arrow { transition: transform 0.2s; display: inline-block; }
-  .omod-toggle .toggle-label { transition: opacity 0.15s; }
-  .omod-toggle { transition: opacity 0.2s; margin-top: 0; position: relative; }
-  .omod-toggle.open { opacity: 0; pointer-events: none; position: absolute; }
-  .upgrade-ings {
-    display: grid;
-    grid-template-rows: 0fr;
-    margin-top: 0;
-    padding: 0 8px;
-    background: rgba(0,0,0,0.25);
-    border-left: 2px solid transparent;
-    font-family: 'Share Tech Mono', monospace;
-    font-size: 10px;
-    color: #557755;
-    line-height: 1.8;
-    letter-spacing: 0.5px;
-    transition: grid-template-rows 0.25s ease, padding 0.25s ease, border-color 0.25s ease;
-    overflow: hidden;
-  }
-  .upgrade-ings > * { overflow: hidden; }
-  .upgrade-ings > * > .upgrade-ing-item:first-child { padding-top: 5px; }
-  .upgrade-ings > * > .upgrade-ing-item:last-child { padding-bottom: 4px; }
-  .upgrade-ings.open {
-    grid-template-rows: 1fr;
-    padding: 0 8px;
-    border-left-color: var(--border);
-  }
-  .upgrade-ing-item::before { content: '· '; color: var(--green-dim); }
-  /* Tier hover highlight */
-  .omod-item { transition: background 0.15s; }
-  .omod-item:hover { background: rgba(57,255,20,0.04); }
   /* Click-to-copy editorID */
   .modal-id { cursor: pointer; position: relative; user-select: none; }
   .modal-id:hover::after {
@@ -1292,6 +971,7 @@
 <link rel="stylesheet" href="analytics.css">
 <link rel="stylesheet" href="arc-preview.css">
 <link rel="stylesheet" href="map-view.css">
+<link rel="stylesheet" href="detail.css">
 <link rel="stylesheet" href="survey.css">
 </head>
 <body>
@@ -2014,21 +1694,6 @@ document.getElementById('grid').innerHTML = BACKPACKS.map(renderCard).join('');
 const OMODS = {"BPShoulder": {"cc": [{"name": "Cloth Bag", "desc": "Increases the wearer's overall carry capacity by +10. +1 Perception while Dogmeat is with you.", "perks": [], "ingredients": ["Adhesive ×1"]}, {"name": "Additional Cloth Pouch", "desc": "Increases the wearer's overall carry capacity by +15. +1 Perception while Dogmeat is with you.", "perks": ["Armorer I"], "ingredients": ["Adhesive ×3", "Cloth ×7"]}, {"name": "Large Cloth Bag", "desc": "Increases the wearer's overall carry capacity by +20. +1 Perception while Dogmeat is with you.", "perks": ["Armorer I"], "ingredients": ["Adhesive ×5", "Cloth ×10"]}], "dr": []}, "BPMailbag": {"cc": [{"name": "Cloth Frame", "desc": "Increases the wearer's overall carry capacity by +15.", "perks": [], "ingredients": ["Adhesive ×1"]}, {"name": "Flexible Cloth Frame", "desc": "Increases the wearer's overall carry capacity by +20.", "perks": ["Armorer I"], "ingredients": ["Adhesive ×3", "Leather ×2", "Cloth ×4"]}, {"name": "Additional Pocket", "desc": "Increases the wearer's overall carry capacity by +25.", "perks": ["Armorer I"], "ingredients": ["Adhesive ×4", "Leather ×3", "Cloth ×7"]}], "dr": [{"name": "Cloth Shell", "desc": "Damage resistance +2.", "perks": [], "ingredients": ["Adhesive ×1"]}, {"name": "Hardened Cloth Shell", "desc": "Damage resistance +10.", "perks": ["Armorer I"], "ingredients": ["Adhesive ×2", "Leather ×4"]}]}, "BPLeather": {"cc": [{"name": "Leather Frame", "desc": "Increases the wearer's overall carry capacity by +20. Stimpaks restore an extra 5% Health.", "perks": [], "ingredients": ["Adhesive ×1"]}, {"name": "Sturdy Leather Frame", "desc": "Increases the wearer's overall carry capacity by +25. Stimpaks restore an extra 5% Health.", "perks": ["Armorer I"], "ingredients": ["Adhesive ×3", "Leather ×4", "Cloth ×4"]}], "dr": [{"name": "Leather Shell", "desc": "Damage resistance +5.", "perks": [], "ingredients": ["Adhesive ×1"]}, {"name": "Treated Leather Shell", "desc": "Damage resistance +15.", "perks": ["Armorer I"], "ingredients": ["Aluminum ×1", "Adhesive ×2", "Leather ×4"]}]}, "BPRaider": {"cc": [{"name": "Aluminum Frame", "desc": "Increases the wearer's overall carry capacity by +30. -1 Agility. Raiders deal 10% less damage to you.", "perks": [], "ingredients": ["Adhesive ×1"]}, {"name": "Softened Metal Frame", "desc": "Increases the wearer's overall carry capacity by +35. Raiders deal 10% less damage to you.", "perks": ["Armorer I", "Strong Back I"], "ingredients": ["Aluminum ×4", "Adhesive ×3", "Leather ×4"]}], "dr": [{"name": "Aluminum Plating", "desc": "Damage resistance +10.", "perks": [], "ingredients": ["Adhesive ×1"]}, {"name": "Steel Plating", "desc": "Damage resistance +30.", "perks": ["Armorer I"], "ingredients": ["Aluminum ×4", "Adhesive ×2", "Leather ×2"]}]}, "BPOutcast": {"cc": [{"name": "Leather Frame", "desc": "Increases the wearer's overall carry capacity by +25. -2 Agility.", "perks": [], "ingredients": ["Adhesive ×1"]}, {"name": "Sturdy Leather Frame", "desc": "Increases the wearer's overall carry capacity by +30. -1 Agility.", "perks": ["Armorer I", "Strong Back I"], "ingredients": ["Adhesive ×2", "Leather ×8", "Plastic ×2", "Cloth ×6"]}, {"name": "Reinforced Leather Frame", "desc": "Increases the wearer's overall carry capacity by +35.", "perks": ["Armorer II", "Strong Back I"], "ingredients": ["Adhesive ×3", "Leather ×8", "Plastic ×2", "Cloth ×10"]}, {"name": "Strengthened Leather Frame", "desc": "Increases the wearer's overall carry capacity by +40. +1 Endurance.", "perks": ["Armorer II", "Strong Back II"], "ingredients": ["Adhesive ×3", "Leather ×12", "Plastic ×2", "Cloth ×10"]}], "dr": [{"name": "Canvas Shell", "desc": "Damage resistance +5.", "perks": ["Armorer I"], "ingredients": ["Adhesive ×1"]}, {"name": "Hardened Canvas Shell", "desc": "Damage resistance +20.", "perks": ["Armorer II"], "ingredients": ["Acid ×2", "Adhesive ×3", "Leather ×8"]}]}, "BPMakeshift": {"cc": [{"name": "Leather Frame", "desc": "Increases the wearer's overall carry capacity by +30. -1 Agility.", "perks": [], "ingredients": ["Adhesive ×1"]}, {"name": "Sturdy Leather Frame", "desc": "Increases the wearer's overall carry capacity by +35. -1 Agility.", "perks": ["Armorer I", "Strong Back I"], "ingredients": ["Adhesive ×4", "Leather ×6", "Plastic ×2", "Cloth ×6"]}, {"name": "Strengthened Leather Frame", "desc": "Increases the wearer's overall carry capacity by +40.", "perks": ["Armorer II", "Strong Back I"], "ingredients": ["Adhesive ×5", "Leather ×8", "Plastic ×2", "Cloth ×6"]}, {"name": "Strapped Water Canteen", "desc": "Increases the wearer's overall carry capacity by +40. Fresh water drink periodically.", "perks": ["Armorer II", "Lead Belly I"], "ingredients": ["Adhesive ×4", "Leather ×4", "Plastic ×2", "Purified Water ×1", "Cloth ×2"]}, {"name": "Lucky Sloth", "desc": "Increases the wearer's overall carry capacity by +40. +1 Luck.", "perks": ["Armorer II", "Local Leader I"], "ingredients": ["Adhesive ×6", "Leather ×4", "Plastic ×2", "Souvenir Sloth Toy ×1"]}], "dr": [{"name": "Leather Shell", "desc": "Damage resistance +10.", "perks": [], "ingredients": ["Adhesive ×1"]}, {"name": "Hardened Leather Shell", "desc": "Damage resistance +20.", "perks": ["Armorer II"], "ingredients": ["Adhesive ×2", "Leather ×4", "Plastic ×2", "Cloth ×2"]}]}, "BPTrapper": {"cc": [{"name": "Leather Frame", "desc": "Increases the wearer's overall carry capacity by +35. -1 Agility. +10% damage against animals and sea creatures.", "perks": [], "ingredients": ["Adhesive ×1"]}, {"name": "Sturdy Leather Frame", "desc": "Increases the wearer's overall carry capacity by +40. +15% damage against animals and sea creatures.", "perks": ["Armorer II", "Strong Back I"], "ingredients": ["Adhesive ×3", "Leather ×8", "Cloth ×6"]}, {"name": "Reinforced Leather Frame", "desc": "Increases the wearer's overall carry capacity by +45. +20% damage against animals and sea creatures.", "perks": ["Armorer III", "Toughness I"], "ingredients": ["Aluminum ×8", "Adhesive ×5", "Leather ×10", "Cloth ×6"]}], "dr": [{"name": "Brahmin Leather Shell", "desc": "Damage resistance +5.", "perks": [], "ingredients": ["Adhesive ×1"]}, {"name": "Radstag Leather Shell", "desc": "Damage resistance +15.", "perks": ["Armorer I", "Strong Back I"], "ingredients": ["Adhesive ×2", "Leather ×6", "Plastic ×2"]}, {"name": "Yao Guai Hide Shell", "desc": "Damage resistance +30.", "perks": ["Armorer II", "Strong Back I"], "ingredients": ["Adhesive ×3", "Leather ×10", "Plastic ×2", "Cloth ×2"]}]}, "BPBedroll": {"cc": [{"name": "Single Pouch", "desc": "Increases the wearer's overall carry capacity by +30. -1 Agility.", "perks": [], "ingredients": ["Adhesive ×1"]}, {"name": "Additional Side Pouch", "desc": "Increases the wearer's overall carry capacity by +35.", "perks": ["Armorer I"], "ingredients": ["Adhesive ×2", "Leather ×8", "Plastic ×2", "Cloth ×6"]}, {"name": "Brahmin Leather Frame", "desc": "Increases the wearer's overall carry capacity by +40.", "perks": ["Armorer II"], "ingredients": ["Adhesive ×4", "Leather ×10", "Plastic ×2", "Cloth ×6"]}, {"name": "Souvenir Badges", "desc": "Increases the wearer's overall carry capacity by +45. +1 Charisma.", "perks": ["Armorer II", "Local Leader II"], "ingredients": ["Adhesive ×5", "Souvenir Magnet Cow ×1", "Souvenir Magnet Badge ×1", "Souvenir Magnet Flower ×1", "Souvenir Magnet Frog ×1", "Souvenir Magnet Cat ×1"]}], "dr": []}, "BPDuffle": {"cc": [{"name": "Large Bag", "desc": "Increases the wearer's overall carry capacity by +40. -1 Agility. Weapon reload speed slightly increased.", "perks": [], "ingredients": ["Adhesive ×1"]}, {"name": "Side Pouch", "desc": "Increases the wearer's overall carry capacity by +45. Weapon reload speed slightly increased.", "perks": ["Armorer I", "Strong Back I"], "ingredients": ["Adhesive ×3", "Leather ×8", "Cloth ×6"]}, {"name": "Ammo Strap", "desc": "Increases the wearer's overall carry capacity by +50. Weapon reload speed slightly increased.", "perks": ["Armorer II", "Commando I"], "ingredients": ["Adhesive ×3", "Leather ×10", "Steel ×6", "Cloth ×6"]}], "dr": [{"name": "Canvas Shell", "desc": "Damage resistance +10.", "perks": [], "ingredients": ["Adhesive ×1"]}, {"name": "Reinforced Canvas Shell", "desc": "Damage resistance +20.", "perks": ["Armorer II"], "ingredients": ["Adhesive ×2", "Leather ×6", "Plastic ×2", "Steel ×4"]}]}, "BPTinker": {"cc": [{"name": "Brahmin Leather Frame", "desc": "Increases the wearer's overall carry capacity by +40. -2 Agility.", "perks": [], "ingredients": ["Adhesive ×1"]}, {"name": "Additional Canvas Bag", "desc": "Increases the wearer's overall carry capacity by +45. -2 Agility.", "perks": ["Armorer I", "Strong Back I"], "ingredients": ["Adhesive ×2", "Leather ×4", "Plastic ×2", "Cloth ×6"]}, {"name": "Stash Toolbox", "desc": "Increases the wearer's overall carry capacity by +50. -1 Agility.", "perks": ["Armorer I", "Strong Back I"], "ingredients": ["Aluminum ×6", "Adhesive ×2", "Leather ×4", "Screw ×2"]}, {"name": "Extra Leather Pouch", "desc": "Increases the wearer's overall carry capacity by +55.", "perks": ["Armorer II", "Strong Back I"], "ingredients": ["Aluminum ×10", "Adhesive ×4", "Leather ×8", "Cloth ×2"]}, {"name": "Strapped Water Flask", "desc": "Increases the wearer's overall carry capacity by +55. Fresh water drink periodically.", "perks": ["Armorer II", "Lead Belly I"], "ingredients": ["Adhesive ×4", "Leather ×4", "Plastic ×4", "Purified Water ×2", "Cloth ×2"]}], "dr": []}, "BPSling": {"cc": [{"name": "Small Pouch", "desc": "Increases the wearer's overall carry capacity by +40. -1 Agility. Increased AP regeneration rate when AP is below 10%.", "perks": [], "ingredients": ["Adhesive ×1"]}, {"name": "Medium Pouch", "desc": "Increases the wearer's overall carry capacity by +45. Increased AP regeneration rate when AP is below 15%.", "perks": ["Armorer II"], "ingredients": ["Adhesive ×3", "Leather ×7", "Psycho ×2", "Jet ×1"]}, {"name": "Large Pouch", "desc": "Increases the wearer's overall carry capacity by +50. Increased AP regeneration rate when AP is below 20%.", "perks": ["Armorer III", "Chemist I"], "ingredients": ["Adhesive ×4", "Leather ×8", "Psycho ×2", "Jet ×4"]}, {"name": "Large Pouch with Action Belt", "desc": "Increases the wearer's overall carry capacity by +55. Significantly increased AP regeneration rate when AP is below 20%.", "perks": ["Armorer IV", "Chemist II"], "ingredients": ["Adhesive ×6", "Leather ×10", "Psycho Jet ×5"]}], "dr": []}, "BPMountaineer": {"cc": [{"name": "Leather Frame", "desc": "Increases the wearer's overall carry capacity by +45. -1 Agility.", "perks": [], "ingredients": ["Adhesive ×1"]}, {"name": "Sturdy Leather Frame", "desc": "Increases the wearer's overall carry capacity by +50.", "perks": ["Armorer II", "Strong Back II"], "ingredients": ["Adhesive ×4", "Leather ×6", "Plastic ×2", "Cloth ×4"]}, {"name": "Reinforced Leather Frame", "desc": "Increases the wearer's overall carry capacity by +55. +1 Endurance.", "perks": ["Armorer III", "Toughness I"], "ingredients": ["Adhesive ×6", "Leather ×10", "Plastic ×5", "Cloth ×5"]}], "dr": []}, "BPWastelander": {"cc": [{"name": "Canvas Frame", "desc": "Increases the wearer's overall carry capacity by +50. -1 Agility.", "perks": [], "ingredients": ["Adhesive ×1"]}, {"name": "Sturdy Canvas Frame", "desc": "Increases the wearer's overall carry capacity by +55. -1 Agility.", "perks": ["Armorer II", "Strong Back I"], "ingredients": ["Adhesive ×3", "Leather ×5", "Plastic ×2", "Cloth ×2"]}, {"name": "Strengthened Canvas Frame", "desc": "Increases the wearer's overall carry capacity by +60.", "perks": ["Armorer III", "Strong Back I"], "ingredients": ["Adhesive ×5", "Leather ×6", "Plastic ×2", "Cloth ×4"]}, {"name": "Water Bottle with Rad-X Pouch", "desc": "Increases the wearer's overall carry capacity by +60. Fresh water drink and rads removed periodically.", "perks": ["Armorer III", "Chemist I"], "ingredients": ["Adhesive ×5", "Leather ×6", "Plastic ×2", "Rad-X ×1", "Purified Water ×1", "Cloth ×4"]}, {"name": "Strapped Water Bottle", "desc": "Increases the wearer's overall carry capacity by +60. Fresh water drink periodically.", "perks": ["Armorer III", "Lead Belly I"], "ingredients": ["Adhesive ×6", "Leather ×8", "Plastic ×2", "Purified Water ×1", "Cloth ×4"]}], "dr": []}, "BPSquire": {"cc": [{"name": "Leather Frame", "desc": "Increases the wearer's overall carry capacity by +50. -2 Agility.", "perks": [], "ingredients": ["Adhesive ×1"]}, {"name": "Sturdy Leather Frame", "desc": "Increases the wearer's overall carry capacity by +55. -1 Agility.", "perks": ["Armorer II", "Strong Back I"], "ingredients": ["Acid ×2", "Aluminum ×2", "Adhesive ×4", "Leather ×6", "Plastic ×2", "Cloth ×3"]}, {"name": "Supplementary Pocket", "desc": "Increases the wearer's overall carry capacity by +60.", "perks": ["Armorer II", "Strong Back II"], "ingredients": ["Acid ×3", "Adhesive ×5", "Leather ×8", "Plastic ×4", "Cloth ×4"]}, {"name": "Sturdy Pocketed Frame", "desc": "Increases the wearer's overall carry capacity by +60. +1 Endurance.", "perks": ["Armorer III", "Strong Back II"], "ingredients": ["Acid ×4", "Adhesive ×4", "Leather ×4", "Plastic ×2", "Cloth ×3"]}], "dr": [{"name": "Leather Shell", "desc": "Damage resistance +10.", "perks": [], "ingredients": ["Adhesive ×1"]}, {"name": "Sturdy Leather Shell", "desc": "Damage resistance +20.", "perks": ["Armorer II"], "ingredients": ["Aluminum ×4", "Adhesive ×1", "Leather ×4", "Cloth ×2"]}, {"name": "Reinforced Leather Shell", "desc": "Damage resistance +30.", "perks": ["Armorer III"], "ingredients": ["Aluminum ×4", "Adhesive ×1", "Leather ×4", "Cloth ×2"]}]}, "BPMutant": {"cc": [{"name": "Wooden Trunk", "desc": "Increases the wearer's overall carry capacity by +50. -2 Agility.", "perks": [], "ingredients": ["Adhesive ×1"]}, {"name": "Strapped Toolbox", "desc": "Increases the wearer's overall carry capacity by +55. -1 Agility. +1 Endurance.", "perks": ["Armorer II", "Strong Back I"], "ingredients": ["Aluminum ×3", "Adhesive ×6", "Leather ×4", "Adjustable Wrench ×1"]}, {"name": "Extra Pouch", "desc": "Increases the wearer's overall carry capacity by +60. +1 Endurance.", "perks": ["Armorer II", "Strong Back I"], "ingredients": ["Aluminum ×3", "Adhesive ×6", "Leather ×5", "Cloth ×10"]}, {"name": "Lucky Teddy Bear", "desc": "Increases the wearer's overall carry capacity by +65. +1 Endurance. +1 Luck.", "perks": ["Armorer II", "Strong Back II"], "ingredients": ["Adhesive ×7", "Leather ×5", "Teddy Bear ×1"]}, {"name": "Super Mutant's Strength", "desc": "Increases the wearer's overall carry capacity by +65. +1 Endurance. +25% unarmed damage.", "perks": ["Armorer II", "Strong Back II"], "ingredients": ["Adhesive ×7", "Leather ×5", "Teddy Bear ×1"]}], "dr": [{"name": "Trunk Shell", "desc": "Damage resistance +30.", "perks": [], "ingredients": ["Adhesive ×1"]}, {"name": "Reinforced Trunk Shell", "desc": "Damage resistance +40.", "perks": ["Armorer II"], "ingredients": ["Aluminum ×10", "Adhesive ×4"]}]}, "BPRadio": {"cc": [{"name": "SCR-3000", "desc": "Increases the wearer's overall carry capacity by +50. -2 Agility. +5% accuracy in VATS.", "perks": [], "ingredients": ["Adhesive ×1"]}, {"name": "SCR-3001", "desc": "Increases the wearer's overall carry capacity by +55. -1 Agility. +10% accuracy in VATS.", "perks": ["Armorer I"], "ingredients": ["Circuitry ×2", "Copper ×5", "Fiberglass ×4", "Nuclear Material ×3"]}, {"name": "SCR-3002", "desc": "Increases the wearer's overall carry capacity by +60. +15% accuracy in VATS.", "perks": ["Armorer II", "Local Leader I"], "ingredients": ["Circuitry ×8", "Copper ×5", "Fiberglass ×3", "Nuclear Material ×7"]}, {"name": "SCR-3003", "desc": "Increases the wearer's overall carry capacity by +65. +20% accuracy in VATS.", "perks": ["Armorer III", "Local Leader II"], "ingredients": ["Circuitry ×9", "Copper ×8", "Fiberglass ×3", "Nuclear Material ×10"]}], "dr": []}, "BPStealth": {"cc": [{"name": "Electron Charged Coil", "desc": "Increases the wearer's overall carry capacity by +55. -1 Agility.", "perks": [], "ingredients": ["Aluminum ×2"]}, {"name": "Modulating Stealth Boy Mini-Field Generator", "desc": "Increases the wearer's overall carry capacity by +60. 10% harder to detect.", "perks": ["Armorer II", "Sneak I"], "ingredients": ["Aluminum ×6", "Crystal ×2", "Silver ×2", "Screw ×4", "Stealth Boy ×2"]}, {"name": "Third-Ion Plasma Reactor", "desc": "Increases the wearer's overall carry capacity by +65. +1 Endurance. +10 Rad Resist and +20 Energy Resist.", "perks": ["Armorer III", "Science! II"], "ingredients": ["Aluminum ×5", "Gold ×5", "Oil ×2", "Silver ×6", "Spring ×2", "Screw ×2"]}, {"name": "AutoDispense All-In-One Reactor", "desc": "Increases the wearer's overall carry capacity by +65. Water drink and rads removed periodically.", "perks": ["Armorer III", "Science! III"], "ingredients": ["Aluminum ×3", "Gold ×8", "Silver ×10", "Spring ×4", "Purified Water ×1", "Screw ×4"]}, {"name": "Anti-Radioisotope Micro Generator", "desc": "Increases the wearer's overall carry capacity by +65. Removes rads periodically.", "perks": ["Armorer III", "Science! II"], "ingredients": ["Acid ×4", "Aluminum ×3", "Gold ×8", "Silver ×10", "Spring ×4", "RadAway ×1", "Screw ×4"]}], "dr": []}, "BPNuka": {"cc": [{"name": "Nuka-Cola", "desc": "Increases the wearer's overall carry capacity by +60.", "perks": [], "ingredients": ["Nuka-Cola ×1"]}, {"name": "Nuka-Cola Victory", "desc": "Increases the wearer's overall carry capacity by +70. +2 Strength.", "perks": ["Chemist I"], "ingredients": ["Nuka-Cola ×4", "Nuka-Cola Victory ×4"]}, {"name": "Nuka-Cola Quartz", "desc": "Increases the wearer's overall carry capacity by +70. +2 Perception.", "perks": ["Chemist I"], "ingredients": ["Nuka-Cola ×4", "Nuka-Cola Quartz ×4"]}, {"name": "Nuka-Cola Grape", "desc": "Increases the wearer's overall carry capacity by +70. +2 Endurance.", "perks": ["Chemist I"], "ingredients": ["Nuka-Cola ×4", "Nuka-Grape ×2"]}, {"name": "Nuka-Cola Wild", "desc": "Increases the wearer's overall carry capacity by +70. +2 Luck.", "perks": ["Chemist I"], "ingredients": ["Nuka-Cola ×4", "Nuka-Cola Wild ×4"]}, {"name": "Nuka-Cola Rush", "desc": "Increases the wearer's overall carry capacity by +70. +2 Agility.", "perks": ["Chemist I"], "ingredients": ["Nuka-Cola ×4", "Nuka-Rush ×4"]}, {"name": "Nuka-Cola Quantum", "desc": "Increases the wearer's overall carry capacity by +65. +2 Intelligence.", "perks": ["Chemist I"], "ingredients": ["Nuka-Cola ×4", "Nuka-Cola Quantum ×6"]}, {"name": "Nuka-Lixir", "desc": "Increases the wearer's overall carry capacity by +70. +20 additional damage resistance and rad resistance.", "perks": ["Armorer II", "Chemist II"], "ingredients": ["Nuclear Material ×2", "Nuka-Cola ×4", "Nuka-Power ×3"]}, {"name": "Nuka-Power", "desc": "Increases the wearer's overall carry capacity by +100.", "perks": ["Armorer II", "Chemist II"], "ingredients": ["Nuclear Material ×2", "Nuka-Cola ×4", "Nuka-Power ×3"]}, {"name": "Nuka-Gold", "desc": "Increases the wearer's overall carry capacity by +110.", "perks": ["Armorer III", "Chemist II"], "ingredients": ["Nuclear Material ×2", "Nuka-Cola ×4", "Nuka-Gold ×2"]}, {"name": "Nuka-Cooler", "desc": "Increases the wearer's overall carry capacity by +70. +25 max HP and +10 max AP.", "perks": ["Chemist II", "Armorer I"], "ingredients": ["Nuclear Material ×2", "Nuka-Cola ×4", "Nuka-Cooler ×3"]}, {"name": "Nuka-Punch", "desc": "Increases the wearer's overall carry capacity by +70. Water drink regularly and rads removed periodically.", "perks": ["Armorer I", "Chemist II"], "ingredients": ["Nuclear Material ×2", "Nuka-Cola ×4", "Nuka-Punch ×3"]}], "dr": []}, "BPChem": {"cc": [{"name": "User's Collection", "desc": "Increases the wearer's overall carry capacity by +55. -2 Agility. +5% damage resistance per withdrawal effect.", "perks": [], "ingredients": ["Adhesive ×1"]}, {"name": "Gateway Chem", "desc": "Increases the wearer's overall carry capacity by +60. -1 Agility. +5% damage resistance and +5% weapon damage per withdrawal effect.", "perks": ["Chemist II"], "ingredients": ["Adhesive ×4", "Stimpak ×1", "Med-X ×1", "Table Spoon ×1"]}, {"name": "Hidden Stash", "desc": "Increases the wearer's overall carry capacity by +65. +10% damage resistance and +5% weapon damage per withdrawal effect.", "perks": ["Chemist III"], "ingredients": ["Adhesive ×4", "Stimpak ×1", "Psycho ×1", "Table Spoon ×1"]}, {"name": "Intervention", "desc": "Increases the wearer's overall carry capacity by +70. +10% weapon damage and +10% damage resistance per withdrawal effect.", "perks": ["Chemist IV"], "ingredients": ["Adhesive ×4", "Stimpak ×1", "Med-X ×1", "Psycho ×1", "Table Spoon ×1"]}], "dr": []}, "BPScribe": {"cc": [{"name": "Leather Pouches", "desc": "Increases the wearer's overall carry capacity by +60. -2 Agility.", "perks": [], "ingredients": ["Leather ×2", "Cloth ×2"]}, {"name": "Sturdy Leather Pouches", "desc": "Increases the wearer's overall carry capacity by +65. -1 Agility.", "perks": ["Armorer II", "Strong Back I"], "ingredients": ["Adhesive ×5", "Leather ×6", "Plastic ×2", "Cloth ×6"]}, {"name": "Additional Front Pockets", "desc": "Increases the wearer's overall carry capacity by +70.", "perks": ["Armorer II", "Strong Back II"], "ingredients": ["Aluminum ×4", "Adhesive ×5", "Leather ×6", "Plastic ×4", "Cloth ×10"]}, {"name": "Front Pockets with Harness", "desc": "Increases the wearer's overall carry capacity by +75. +1 Endurance.", "perks": ["Armorer III", "Strong Back II"], "ingredients": ["Aluminum ×8", "Adhesive ×6", "Leather ×8", "Plastic ×4", "Cloth ×12"]}], "dr": []}, "BPMilitary": {"cc": [{"name": "Canvas Frame", "desc": "Increases the wearer's overall carry capacity by +70. -1 Agility.", "perks": [], "ingredients": ["Adhesive ×1"]}, {"name": "Military Canvas Frame", "desc": "Increases the wearer's overall carry capacity by +75.", "perks": ["Armorer III", "Strong Back II"], "ingredients": ["Adhesive ×5", "Leather ×6", "Plastic ×2", "Cloth ×6"]}, {"name": "Military Ammo Harness", "desc": "Increases the wearer's overall carry capacity by +80. Weapon reload speed increased.", "perks": ["Armorer III", "Gun Nut III"], "ingredients": ["Aluminum ×6", "Adhesive ×5", "Leather ×8", "Plastic ×2"]}, {"name": "Military Ballistic Fiber Frame", "desc": "Increases the wearer's overall carry capacity by +80. +1 Endurance.", "perks": ["Armorer III", "Strong Back III"], "ingredients": ["Ballistic Fiber ×3", "Adhesive ×5", "Leather ×6", "Plastic ×2"]}], "dr": [{"name": "Canvas Shell", "desc": "Damage resistance +10.", "perks": [], "ingredients": ["Adhesive ×1"]}, {"name": "Military Canvas Shell", "desc": "Damage resistance +30.", "perks": ["Armorer III"], "ingredients": ["Aluminum ×2", "Adhesive ×3", "Leather ×10", "Plastic ×2"]}]}, "BPBattery": {"cc": [{"name": "High-Powered Battery", "desc": "Increases the wearer's overall carry capacity by +80. -1 Agility.", "perks": [], "ingredients": ["Adhesive ×1"]}, {"name": "Anti-Gravity Electromagnetic Field Generator", "desc": "Increases the wearer's overall carry capacity by +85. Generates an anti-gravity field after jumping.", "perks": ["Armorer II", "Science! IV"], "ingredients": ["Aluminum ×18", "Gold ×8", "Nuclear Material ×10", "Oil ×2", "Silver ×6", "Screw ×4", "Fusion Core ×8", "High-Powered Magnet ×3"]}, {"name": "Electromagnetic Close Proximity Field Projectile Accelerator", "desc": "Increases the wearer's overall carry capacity by +85. +15% damage with ballistic guns.", "perks": ["Rifleman II", "Science! III"], "ingredients": ["Aluminum ×5", "Fiber Optics ×2", "Gold ×5", "Nuclear Material ×10", "Oil ×2", "Screw ×4", "Fusion Core ×8", "High-Powered Magnet ×2"]}], "dr": []}, "BPWoodsman": {"cc": [{"name": "Leather Frame", "desc": "Increases the wearer's overall carry capacity by +75. -2 Agility.", "perks": [], "ingredients": ["Adhesive ×1"]}, {"name": "Reinforced Leather Frame", "desc": "Increases the wearer's overall carry capacity by +80. -1 Agility.", "perks": ["Armorer II"], "ingredients": ["Adhesive ×2", "Leather ×8", "Plastic ×6", "Cloth ×4"]}, {"name": "Water Canteen with RadAway First Aid Kit", "desc": "Increases the wearer's overall carry capacity by +85. Water drink regularly and rads removed periodically.", "perks": ["Medic II", "Lead Belly I"], "ingredients": ["Adhesive ×6", "Leather ×5", "RadAway ×1", "Purified Water ×1", "Cloth ×4"]}, {"name": "Knife Sharpening Sheath", "desc": "Increases the wearer's overall carry capacity by +85. +10% melee weapon damage.", "perks": ["Armorer III", "Big Leagues II"], "ingredients": ["Aluminum ×5", "Leather ×8", "Plastic ×4", "Combat Knife ×1", "Cloth ×4"]}, {"name": "Reinforced Shadowed Frame", "desc": "Increases the wearer's overall carry capacity by +90. Ranged sneak attacks do 1.5x normal damage.", "perks": ["Armorer III", "Ninja II"], "ingredients": ["Leather ×8", "Nuclear Material ×12", "Plastic ×4", "Stealth Boy ×1", "Cloth ×4"]}], "dr": []}, "BPMercenary": {"cc": [{"name": "Leather Frame", "desc": "Increases the wearer's overall carry capacity by +80. -1 Agility.", "perks": [], "ingredients": ["Adhesive ×1"]}, {"name": "Military Leather Frame", "desc": "Increases the wearer's overall carry capacity by +85. +1 Endurance.", "perks": ["Armorer IV", "Strong Back III"], "ingredients": ["Adhesive ×4", "Leather ×8", "Plastic ×2", "Cloth ×2"]}, {"name": "Military Ammunition Belt", "desc": "Increases the wearer's overall carry capacity by +85. +1 Endurance. Weapon reload speed increased.", "perks": ["Armorer IV", "Strong Back III"], "ingredients": ["Adhesive ×8", "Leather ×10", "Screw ×7", "Cloth ×2"]}], "dr": [{"name": "Military Canvas Shell", "desc": "Damage resistance +10.", "perks": [], "ingredients": ["Adhesive ×1"]}, {"name": "Hardened Military Canvas Shell", "desc": "Damage resistance +20.", "perks": ["Armorer IV"], "ingredients": ["Adhesive ×5", "Leather ×6", "Plastic ×2", "Cloth ×6"]}]}, "BPVault": {"cc": [{"name": "Vault-Tec Standard Edition", "desc": "Increases the wearer's overall carry capacity by +90. -2 Agility.", "perks": [], "ingredients": ["Cloth ×1"]}, {"name": "Vault-Tec “Plenty-O'-Pockets” Edition", "desc": "Increases the wearer's overall carry capacity by +95.", "perks": ["Armorer II", "Science! II"], "ingredients": ["Adhesive ×8", "Gold ×12", "Lead ×8", "Nuclear Material ×10", "Cloth ×20"]}, {"name": "Vault-Tec “Stealthy-Boy” Edition", "desc": "Increases the wearer's overall carry capacity by +100. 10% harder to detect while sneaking, 15% at night.", "perks": ["Armorer III", "Sneak III"], "ingredients": ["Adhesive ×15", "Gold ×10", "Nuclear Material ×13", "Silver ×8", "Vault-Tec “Stealthy-Boy” Charm ×1"]}, {"name": "Vault-Tec “Big-Boom” Edition", "desc": "Increases the wearer's overall carry capacity by +100. +15% ballistic damage against targets at full health.", "perks": ["Armorer III", "Gun Nut III"], "ingredients": ["Adhesive ×15", "Gold ×10", "Nuclear Material ×13", "Silver ×8", "Vault-Tec “Big-Boom” Charm ×1"]}, {"name": "Vault-Tec “Smooth-Operator” Edition", "desc": "Increases the wearer's overall carry capacity by +100. +1 Charisma while your weapon is holstered, and 5% better prices.", "perks": ["Armorer III", "Local Leader II"], "ingredients": ["Adhesive ×15", "Gold ×10", "Nuclear Material ×13", "Silver ×8", "Vault-Tec “Smooth-Operator” Charm ×1"]}, {"name": "Vault-Tec “Goo-On-My-Shoe” Edition", "desc": "Increases the wearer's overall carry capacity by +100. Energy weapon kills restore 10 Action Points.", "perks": ["Armorer III", "Science! III"], "ingredients": ["Adhesive ×15", "Gold ×10", "Nuclear Material ×13", "Silver ×8", "Vault-Tec “Goo-On-My-Shoe” Charm ×1"]}, {"name": "Vault-Tec “Rad-Ical” Edition", "desc": "Increases the wearer's overall carry capacity by +100. +15 Radiation Resistance, and +1 Endurance while above 300 rads.", "perks": ["Armorer III", "Rad Resistant I"], "ingredients": ["Adhesive ×15", "Gold ×10", "Nuclear Material ×13", "Silver ×8", "Vault-Tec “Rad-Ical” Charm ×1"]}, {"name": "Vault-Tec “Iron-Fist” Edition", "desc": "Increases the wearer's overall carry capacity by +100. Unarmed and melee power attacks do 10% more damage.", "perks": ["Armorer III", "Blacksmith III"], "ingredients": ["Adhesive ×15", "Gold ×10", "Nuclear Material ×13", "Silver ×8", "Vault-Tec “Iron-Fist” Charm ×1"]}, {"name": "Vault-Tec “Jet-Setter” Edition", "desc": "Increases the wearer's overall carry capacity by +100. 5% faster movement out of combat.", "perks": ["Armorer III", "Moving Target I"], "ingredients": ["Adhesive ×15", "Gold ×10", "Nuclear Material ×13", "Silver ×8", "Vault-Tec “Jet-Setter” Charm ×1"]}, {"name": "Vault-Tec “Night-Owl” Edition", "desc": "Increases the wearer's overall carry capacity by +100. +1 Perception and +1 Intelligence from 8 PM to 6 AM.", "perks": ["Armorer III", "Night Person I"], "ingredients": ["Adhesive ×15", "Gold ×10", "Nuclear Material ×13", "Silver ×8", "Vault-Tec “Night-Owl” Charm ×1"]}], "dr": []}, "BPFusion": {"cc": [{"name": "Energy Cell Powered Coil", "desc": "Increases the wearer's overall carry capacity by +85. -2 Agility.", "perks": [], "ingredients": ["Aluminum ×1"]}, {"name": "Wattz Fission Battery", "desc": "Increases the wearer's overall carry capacity by +90. -1 Agility.", "perks": ["Armorer II", "Science! II"], "ingredients": ["Aluminum ×4", "Silver ×4", "Spring ×2", "Screw ×2"]}, {"name": "Poseidon Energy Plasma Accelerator", "desc": "Increases the wearer's overall carry capacity by +95.", "perks": ["Armorer III", "Science! III"], "ingredients": ["Aluminum ×3", "Gold ×2", "Silver ×2", "Spring ×4", "Screw ×4"]}, {"name": "TX-28 Microfusion Reactor", "desc": "Increases the wearer's overall carry capacity by +100. +1 Endurance.", "perks": ["Science! IV", "Strong Back II"], "ingredients": ["Aluminum ×10", "Gold ×6", "Nuclear Material ×2", "Silver ×6", "Spring ×4", "Fusion Core ×1", "Fusion Cell ×12"]}, {"name": "AutoDispense All-In-One Microfusion Reactor", "desc": "Increases the wearer's overall carry capacity by +100. Water drink regularly and rads removed periodically.", "perks": ["Armorer III", "Science! IV"], "ingredients": ["Aluminum ×5", "Glass ×2", "Gold ×8", "Nuclear Material ×4", "Plastic ×6", "Silver ×5", "Spring ×5", "RadAway ×1", "Purified Water ×1", "Fusion Core ×1", "Fusion Cell ×24"]}, {"name": "AutoDispense TX-30 Microfusion Reactor", "desc": "Increases the wearer's overall carry capacity by +100. +1 Endurance. Water drink regularly and rads removed periodically.", "perks": ["Science! IV", "Strong Back II"], "ingredients": ["Aluminum ×5", "Glass ×2", "Gold ×8", "Nuclear Material ×6", "Plastic ×6", "Silver ×8", "RadAway ×1", "Purified Water ×1", "Fusion Core ×1", "Fusion Cell ×36"]}], "dr": [{"name": "Ballistic Fiber Plating", "desc": "+30 Damage Resist, +10 Energy Resist, +10 Rad Resist.", "perks": [], "ingredients": []}, {"name": "Ballistic Fiber and Titanium Carbide Plating", "desc": "+50 Damage Resist, +20 Energy Resist, +30 Rad Resist.", "perks": ["Armorer IV", "Strong Back II"], "ingredients": ["Acid ×6", "Aluminum ×8", "Glass ×2", "Gold ×4", "Nuclear Material ×2", "Silver ×10", "Spring ×4"]}]}, "BPRobCo": {"cc": [{"name": "Standard Nukatility Frame", "desc": "Increases the wearer's overall carry capacity by +85. -1 Agility. Chills one Nuka-Cola or Nuka-Cherry to its Ice-Cold variant every six hours.", "perks": [], "ingredients": ["Aluminum ×1"]}, {"name": "Reinforced Cooler Frame", "desc": "Increases the wearer's overall carry capacity by +90. Chills one Nuka-Cola or Nuka-Cherry to its Ice-Cold variant every four hours.", "perks": ["Armorer II", "Science! II"], "ingredients": ["Aluminum ×4", "Adhesive ×2", "Screw ×2", "Gear ×2", "Spring ×2"]}, {"name": "Quantum Thermoelectric Module", "desc": "Increases the wearer's overall carry capacity by +100. +15 Action Points. Chills one bottled Nuka-Cola of any flavor except Quantum to its Ice-Cold variant every three hours.", "perks": ["Armorer III", "Science! IV"], "ingredients": ["Aluminum ×5", "Adhesive ×3", "Circuitry ×3", "Copper ×3", "Fiber Optics ×2", "Nuclear Material ×1", "Screw ×3", "Nuka-Cola Quantum ×1"]}], "dr": [{"name": "Standard Lining", "desc": "+15 Damage Resist and +10 Rad Resist.", "perks": [], "ingredients": []}, {"name": "Insulated Lining", "desc": "+25 Damage Resist, +10 Energy Resist and +10 Rad Resist.", "perks": ["Armorer III", "Science! II"], "ingredients": ["Aluminum ×4", "Adhesive ×3", "Ballistic Fiber ×2", "Rubber ×3", "Screw ×2"]}, {"name": "Shielded Insulated Lining", "desc": "+30 Damage Resist, +15 Energy Resist and +30 Rad Resist.", "perks": ["Armorer IV", "Science! III"], "ingredients": ["Aluminum ×4", "Adhesive ×4", "Ballistic Fiber ×3", "Rubber ×3", "Fiberglass ×2", "Lead ×4", "Screw ×2"]}]}, "BPSentry": {"cc": [{"name": "S.E.N.T.R.Y. Field Relay", "desc": "Increases the wearer's overall carry capacity by +90. -2 Agility. Reconnaissance Burst highlights nearby hostiles for six seconds during combat if fully charged.", "perks": [], "ingredients": ["Aluminum ×1"]}, {"name": "Reinforced Relay Chassis", "desc": "Increases the wearer's overall carry capacity by +95. -1 Agility. Reconnaissance Burst highlights nearby hostiles for six seconds during combat if fully charged.", "perks": ["Armorer III", "Science! III"], "ingredients": ["Aluminum ×5", "Adhesive ×3", "Screw ×3", "Gear ×3", "Spring ×2", "Circuitry ×2"]}, {"name": "Paladin Targeting Uplink", "desc": "Increases the wearer's overall carry capacity by +100. +10% VATS hit chance. Reconnaissance Burst periodically highlights nearby hostiles in combat or while sneaking with a weapon drawn.", "perks": ["Armorer IV", "Science! IV"], "ingredients": ["Aluminum ×6", "Adhesive ×4", "Screw ×4", "Circuitry ×5", "Fiber Optics ×4", "Gold ×2", "Nuclear Material ×2", "Military-Grade Circuit Board ×1"]}, {"name": "Powered Stabilization Harness", "desc": "Increases the wearer's overall carry capacity by +100. +75 DR/ER for 5 seconds at 35% health, 60-second recharge. Includes Reconnaissance Burst.", "perks": ["Armorer IV", "Science! IV"], "ingredients": ["Aluminum ×6", "Adhesive ×4", "Screw ×4", "Circuitry ×4", "Copper ×4", "Ceramic ×3", "Nuclear Material ×3"]}], "dr": [{"name": "Standard Relay Plating", "desc": "+25 Damage Resist, +15 Energy Resist.", "perks": [], "ingredients": []}, {"name": "Reinforced Composite Plating", "desc": "+30 Damage Resist, +20 Energy Resist.", "perks": ["Armorer III", "Science! II"], "ingredients": ["Steel ×6", "Ballistic Fiber ×3", "Adhesive ×3", "Screw ×3", "Fiberglass ×2"]}, {"name": "Paladin Shielded Plating", "desc": "+40 Damage Resist, +35 Energy Resist, +20 Rad Resist.", "perks": ["Armorer IV", "Science! III"], "ingredients": ["Steel ×8", "Ballistic Fiber ×5", "Adhesive ×4", "Screw ×4", "Ceramic ×4", "Lead ×4", "Fiberglass ×3"]}]}, "BPArc": {"cc": [{"name": "Standard Capacitor Frame", "desc": "Increases the wearer's overall carry capacity by +100. Capacitor Overload charges during combat. A fully charged bash releases chain lightning that leaps between up to five hostiles.", "perks": [], "ingredients": ["Aluminum ×1"]}, {"name": "Reinforced Capacitor Frame", "desc": "Increases the wearer's overall carry capacity by +110. Capacitor Overload charges during combat. A fully charged bash releases chain lightning that leaps between up to five hostiles.", "perks": ["Armorer IV", "Science! IV"], "ingredients": ["Aluminum ×8", "Adhesive ×5", "Screw ×4", "Gear ×4", "Spring ×3", "Circuitry ×3"]}], "dr": []}};
 
 
-function highlightDesc(desc) {
-  let s = desc;
-  // 1. Red: just the negative number before Agility
-  s = s.replace(/(-[12])(?=\s+Agility)/g, '<span style="color:#dd4444">$1</span>');
-  // 2. Teal bold: carry capacity value only
-  s = s.replace(/carry capacity by (\+\d+)/g, 'carry capacity by <span style="color:#00e5ff;font-weight:bold;font-size:14px;text-shadow:0 0 8px rgba(0,229,255,0.4)">$1</span>');
-  // 3. Off-white: all other numeric values and percentages
-  s = s.replace(/(?<![\w<])(\+[\d.]+x?%?)(?![\d])/g, function(match, p1, offset, str) {
-    const before = str.substring(0, offset);
-    if ((before.match(/<span/g)||[]).length > (before.match(/<\/span>/g)||[]).length) return match;
-    return '<span style="color:#ccccaa">' + p1 + '</span>';
-  });
-  return s;
-}
-
 // ── Image preview on hover ──────────────────────────────────────────────────
 const preview = document.createElement('div');
 preview.id = 'img-preview';
@@ -2047,22 +1712,6 @@ overlay.innerHTML = `<div id="modal"></div>`;
 overlay.inert = true;
 document.body.appendChild(overlay);
 const modal = document.getElementById('modal');
-
-function buildTierRows(bp) {
-  return bp.upgrades.map((u, i) => {
-    const segs = u.split('|').map(s => s.trim()).filter(s => !/^\+0\s*[A-Z]/.test(s));
-    const cells = segs.map((seg, si) => {
-      let cls = si === 0 ? 'cc'
-        : /^[+-]?\d+\s*(AGI|STR|END|INT|PER|CHR|LCK)/.test(seg)
-          ? (seg.startsWith('-') ? 'neg' : 'pos')
-        : seg.startsWith('-') ? 'neg'
-        : seg.startsWith('+') ? 'pos'
-        : 'neu';
-      return `<span class="tier-cell ${cls}">${seg}</span>`;
-    }).join('');
-    return `<tr><td class="tier-num">T${i+1}</td><td><div class="tier-cells">${cells}</div></td></tr>`;
-  }).join('');
-}
 
 // Color name → CSS swatch color
 const COLOR_MAP = {
@@ -2112,71 +1761,116 @@ const COLOR_MAP = {
   'quantum edition':   '#7d4bd1',
 };
 
-function buildColorTags(colors) {
-  return colors.map(c => {
-    const sw = COLOR_MAP[c.toLowerCase()] || '#888888';
-    const textCol = sw === '#888888' ? '#aaaaaa' : sw;
-    return `<span class="color-tag" style="--swatch:${sw};border-color:${sw}55;color:${textCol};">${c}</span>`;
-  }).join('');
+// ── Details page (below the banner) ───────────────────────────────────────
+// A Pip-Boy readout and workbench mod rows; styles in detail.css. Each mod row opens its components.
+const CC_SENTENCE = /^Increases the wearer's overall carry capacity by \+(\d+)\.\s*/;
+const RESIST_KEYS = { damage: 'DR', energy: 'ER', rad: 'RR', radiation: 'RR' };
+
+// Signed numbers and percentages in effect text, coloured by sign at the same size as the text.
+function markNumbers(text) {
+  return text.replace(/(^|[\s(])([+-]\d+(?:\.\d+)?%?|\d+(?:\.\d+)?%|\d+(?:\.\d+)?x)(?=[\s.,;:)]|$)/g,
+    (m, lead, n) => `${lead}<span class="${n.startsWith('-') ? 'neg' : 'num'}">${n}</span>`);
 }
-
-function buildOmodList(mods, cls) {
-  if (!mods || mods.length === 0) return '';
-  return '<ul class="omod-list">' + mods.map((m, i) => {
-    const perksHTML = (m.perks && m.perks.length)
-      ? '<div class="omod-perks">' + m.perks.map(p => `<span class="perk-tag">${p}</span>`).join('') + '</div>'
-      : '';
-    const uid = cls + '_' + i;
-    const ingsHTML = (m.ingredients && m.ingredients.length)
-      ? `<div class="omod-toggle" onclick="toggleIng('${uid}',this)">
-           <span class="toggle-arrow">▸</span><span class="toggle-label"> COMPONENTS</span>
-         </div>
-         <div class="upgrade-ings" id="ings_${uid}"><div>
-           ${m.ingredients.map(ing => `<div class="upgrade-ing-item">${ing}</div>`).join('')}
-         </div></div>`
-      : '';
-    return `<li class="omod-item ${cls}">
-      <span class="omod-tier">T${i+1}</span>
-      <div class="omod-content">
-        <div class="omod-name">${m.name}</div>
-        <div class="omod-desc">${highlightDesc(m.desc)}</div>
-        ${perksHTML}
-        ${ingsHTML}
-      </div>
-    </li>`;
-  }).join('') + '</ul>';
+function markDescription(text) {
+  return markNumbers(text)
+    .replace(/carry capacity by <span class="num">(\+\d+)<\/span>/, 'carry capacity by <span class="cc">$1</span>')
+    .replace(/<span class="num">(\+\d+)<\/span> carry capacity/, '<span class="cc">$1</span> carry capacity');
 }
-
-function toggleIng(uid, btn) {
-  const el = document.getElementById('ings_' + uid);
-  if (!el) return;
-  el.classList.toggle('open');
-  btn.classList.toggle('open');
+// "+25 Damage Resist, +15 Energy Resist" or "Damage resistance +10" → [{k:'DR', v:'+25'}, ...]
+function parseResist(text) {
+  const out = [];
+  text.replace(/([+-]\d+)\s+(Damage|Energy|Rad(?:iation)?)\s+Resist/gi, (m, v, k) => { out.push({ k: RESIST_KEYS[k.toLowerCase()], v }); return m; });
+  text.replace(/(Damage|Energy|Rad(?:iation)?)\s+resistance\s+([+-]\d+)/gi, (m, k, v) => { out.push({ k: RESIST_KEYS[k.toLowerCase()], v }); return m; });
+  return out;
 }
+// bp.dr "+25 DR | +15 ER → +40 DR | +35 ER | +20 RR" → [{DR:'+25', ER:'+15'}, {DR:'+40', ...}]
+function resistTiers(dr) {
+  return dr.split('→').map(tier => Object.fromEntries(tier.split('|').map(s => s.trim().match(/^([+-]?\d+)\s*(DR|ER|RR)$/)).filter(Boolean).map(m => [m[2], m[1]])));
+}
+// One tier, or a range from the first tier to the last ({DR:'+25'} or {DR:'+25 → +35'}).
+const resistHTML = (tier, from = tier) => ['DR', 'ER', 'RR'].filter(k => tier[k]).map(k => `<span class="dt-res"><b>${from[k] && from[k] !== tier[k] ? `${from[k]}<span class="dt-to">→</span>${tier[k]}` : tier[k]}</b><i>${k}</i></span>`).join('');
 
-// Make entire omod-item click expand its ingredients
-document.addEventListener('click', function(e) {
-  const item = e.target.closest('.omod-item');
-  if (!item) return;
-  // Don't double-fire if user clicked the toggle button directly
-  if (e.target.closest('.omod-toggle')) return;
-  const toggle = item.querySelector('.omod-toggle');
-  if (!toggle) return;
-  const uid = toggle.getAttribute('onclick').match(/'([^']+)'/)[1];
-  toggleIng(uid, toggle);
-});
+function partsList(parts) {
+  return `<ul class="dt-parts">${parts.map(part => {
+    const m = part.match(/^(.*?)\s*×\s*(\d+)$/), name = m ? m[1] : part;
+    return `<li${/\bcharm\b/i.test(name) ? ' class="is-key"' : ''}><span>${name}</span>${m ? `<b>×${m[2]}</b>` : ''}</li>`;
+  }).join('')}</ul>`;
+}
+function modRows(mods, kind, idPrefix) {
+  let previous = null;
+  return `<ol class="dt-mods">${mods.map((mod, i) => {
+    let value = '', fx = mod.desc;
+    if (kind === 'cc') {
+      const m = mod.desc.match(CC_SENTENCE);
+      if (m) {
+        const v = Number(m[1]);
+        value = `<b>+${v}</b>${previous !== null && v > previous ? `<small>▲ ${v - previous}</small>` : ''}`;
+        fx = mod.desc.replace(CC_SENTENCE, '');
+        previous = v;
+      }
+    } else {
+      const res = parseResist(mod.desc);
+      if (res.length) { value = resistHTML(Object.fromEntries(res.map(r => [r.k, r.v]))); fx = ''; }
+    }
+    const parts = mod.ingredients || [], id = `${idPrefix}-${i}`;
+    const meta = (mod.perks || []).map(perk => `<span class="dt-perk">${perk}</span>`).join('')
+      + (parts.length ? `<span class="dt-count">${parts.length} component${parts.length === 1 ? '' : 's'}</span>` : '');
+    const inner = `<span class="dt-mod-tier">${String(i + 1).padStart(2, '0')}</span>
+        <span class="dt-mod-main"><span class="dt-mod-name">${mod.name}</span>${fx ? `<span class="dt-mod-fx">${markNumbers(fx)}</span>` : ''}<span class="dt-mod-meta">${meta}</span></span>
+        <span class="dt-mod-val">${value}</span>`;
+    return parts.length
+      ? `<li class="dt-mod"><button type="button" class="dt-mod-row" aria-expanded="false" aria-controls="${id}">${inner}
+        <svg class="dt-chev" viewBox="0 0 14 14" aria-hidden="true"><path d="M3.5 5.5 7 9l3.5-3.5"/></svg></button>
+        <div class="dt-drawer" id="${id}" role="region" aria-label="Components for ${mod.name.replace(/"/g, '&quot;')}"><div>${partsList(parts)}</div></div></li>`
+      : `<li class="dt-mod"><div class="dt-mod-row">${inner}<span></span></div></li>`;
+  }).join('')}</ol>`;
+}
+function detailSection(title, meta, body, note) {
+  return `<section class="dt-sec"><h3 class="dt-head"><span>${title}</span>${meta ? `<span class="dt-head-meta">${meta}</span>` : ''}</h3>${note ? `<p class="dt-note">${note}</p>` : ''}${body}</section>`;
+}
+function detailBody(bp, omod) {
+  // Readout: carry weight range, resistances, weight, value.
+  const ccValues = omod.cc.map(m => m.desc.match(CC_SENTENCE)).filter(Boolean).map(m => Number(m[1]));
+  const ccAll = ccValues.length ? ccValues : (bp.cc.match(/\d+/g) || []).map(Number);
+  const ccTop = Math.max(...ccAll), ccFirst = ccAll[0];
+  const ccText = ccAll.length > 1 && ccTop !== ccFirst ? `+${ccFirst}<span class="dt-to">→</span>+${ccTop}` : `+${ccTop}`;
+  const tiers = resistTiers(bp.dr), first = tiers[0] || {}, last = tiers[tiers.length - 1] || {};
+  const drText = first.DR && last.DR && first.DR !== last.DR ? `${first.DR}<span class="dt-to">→</span>${last.DR}` : (last.DR || first.DR || '—');
+  const others = ['ER', 'RR'].filter(k => last[k]).map(k => `${k} ${last[k]}`).join(' · ');
+  const [weight, wUnit = ''] = bp.weight.split(' '), [value, vUnit = ''] = bp.value.split(' ');
+  const readout = `<dl class="dt-readout">
+      <div class="dt-read dt-read--cc"><dt>CARRY WEIGHT</dt><dd>${ccText}</dd></div>
+      <div class="dt-read dt-read--res"><dt>DAMAGE RESIST</dt><dd>${drText}${others ? `<span class="dt-sub">${others}</span>` : ''}</dd></div>
+      <div class="dt-read"><dt>WEIGHT</dt><dd>${weight}<small>${wUnit}</small></dd></div>
+      <div class="dt-read"><dt>VALUE</dt><dd>${value}<small>${vUnit}</small></dd></div>
+    </dl>`;
 
-function buildLocationHTML(loc) {
-  const parts = loc.split(' — ');
-  if (parts.length >= 2) {
-    const edid = parts[0].trim();
-    const name = parts.slice(1).join(' — ').trim();
-    return `<div class="location-box">
-      <div class="location-name">${name}</div>
-      <div class="location-edid">${edid}</div>
+  const perkNote = mods => mods.some(m => m.perks && m.perks.length) ? 'Fit one at a time at a workbench. Higher tiers need the perks shown.' : 'Fit one at a time at a workbench.';
+  const resNote = 'A separate slot: fit one alongside the carry capacity mod.';
+  const ccSection = omod.cc.length
+    ? detailSection('Carry capacity mods', `${omod.cc.length} ${omod.cc.length === 1 ? 'TIER' : 'TIERS'}`, modRows(omod.cc, 'cc', 'dt-cc'), perkNote(omod.cc)) : '';
+  const resSection = omod.dr.length
+    ? detailSection('Resistance mods', `${omod.dr.length} ${omod.dr.length === 1 ? 'TIER' : 'TIERS'}`, modRows(omod.dr, 'dr', 'dt-dr'), resNote)
+    : detailSection('Resistance', 'BUILT IN', `<div class="dt-fixed"><p>${tiers.length > 1 ? 'Set by the carry capacity mod; no resistance mods of its own.' : 'Built into the pack. It has no resistance mods.'}</p><span class="dt-mod-val">${resistHTML(last, first)}</span></div>`);
+
+  const perkMatch = bp.crafting.match(/\[([^\]]+)\]/);
+  const perks = perkMatch ? perkMatch[1].split(',').map(s => s.trim()) : [];
+  const recipe = bp.crafting.split(' · ').filter(s => !s.startsWith('['));
+  const craftSection = detailSection('Crafting recipe', `${recipe.length} COMPONENTS`,
+    `${perks.length ? `<p class="dt-req">Requires ${perks.map(perk => `<span class="dt-perk">${perk}</span>`).join('')}</p>` : ''}${partsList(recipe)}`);
+
+  const colors = bp.colors.length > 1 || (bp.colors[0] && bp.colors[0].toLowerCase() !== 'default')
+    ? detailSection('Colors', `${bp.colors.length} ${bp.colors.length === 1 ? 'OPTION' : 'OPTIONS'}`,
+      `<ul class="dt-colors">${bp.colors.map(c => `<li style="--sw:${COLOR_MAP[c.toLowerCase()] || '#888888'}">${c}</li>`).join('')}</ul>`) : '';
+
+  const parts = bp.location.split(' — '), edid = parts.length > 1 ? parts[0].trim() : '', where = parts.length > 1 ? parts.slice(1).join(' — ').trim() : bp.location;
+  const location = detailSection('Location', '', `<div class="dt-loc"><div class="dt-loc-text"><span class="dt-loc-name">${where}</span>${edid ? `<span class="location-edid" title="Copy the cell ID">${edid}</span>` : ''}</div>
+      ${window.catalogMap?.pins?.[bp.num] ? `<button type="button" class="dt-loc-map" data-map-num="${bp.num}">◎ SHOW ON MAP</button>` : ''}</div>`);
+
+  return `<div class="modal-body dt">
+      <p class="dt-desc">${markDescription(bp.desc)}</p>
+      ${readout}${ccSection}${resSection}${craftSection}${colors}${location}
     </div>`;
-  }
-  return `<div class="location-box"><div class="location-name">${loc}</div></div>`;
 }
 
 function openModal(idx) {
@@ -2187,9 +1881,6 @@ function openModal(idx) {
   const imgHTML = img
     ? `<img src="${img}" alt="${bp.name}" referrerpolicy="no-referrer">`
     : `<div class="no-img">NO IMAGE<br>AVAILABLE</div>`;
-
-  const ccList = buildOmodList(omod.cc, '');
-  const drList = buildOmodList(omod.dr, 'omod-dr');
 
   modal.innerHTML = `
     <button class="modal-close" id="modal-close-btn">✕</button>
@@ -2203,68 +1894,7 @@ function openModal(idx) {
       </div>
       ${bp.id === 'BPArc' ? `<div class="modal-hero-arc">${arcBadge(bp, 'lg')}</div>` : ''}
     </div>
-    <div class="modal-body">
-      <div class="tt-desc">${bp.desc}</div>
-
-      <div class="tt-section-label">▸ Item Stats</div>
-      <div class="tt-stat-grid">
-        <div class="tt-stat">
-          <span class="tt-stat-key">Item Weight</span>
-          <span class="tt-stat-val amber">${bp.weight}</span>
-        </div>
-        <div class="tt-stat">
-          <span class="tt-stat-key">Value</span>
-          <span class="tt-stat-val amber">${bp.value}</span>
-        </div>
-      </div>
-
-      ${ccList ? `<div class="tt-section-label">▸ Carry Capacity Upgrades</div>${ccList}` : ''}
-
-      <div class="tt-section-label">▸ Resistance Upgrades</div>
-      ${drList || `<ul class="omod-list"><li class="omod-item omod-dr">
-        <span class="omod-tier">T1</span>
-        <div class="omod-content">
-          <div class="omod-name">Base Resistance</div>
-          <div class="omod-desc">${(function(){
-            const OW = '<span style="color:#ccccaa">';
-            const C = '</span>';
-            return bp.dr
-              .replace(/\+(\d+)\s*DR/g, 'Damage resistance ' + OW + '+$1' + C + '.')
-              .replace(/\+(\d+)\s*ER/g, ' Energy resistance ' + OW + '+$1' + C + '.')
-              .replace(/\+(\d+)\s*RR/g, ' Rad resistance ' + OW + '+$1' + C + '.')
-              .replace(/→.*$/, '')
-              .replace(/\s*\|\s*/g, ' ')
-              .trim()
-              .replace(/\.\s*\./g, '.')
-              .replace(/\s+/g, ' ');
-          })()}</div>
-        </div>
-      </li></ul>`}
-
-      <div class="tt-section-label">▸ Crafting Requirements</div>
-      <div class="location-box" style="padding:0;">
-        ${(function() {
-          const parts = bp.crafting.split(' · ');
-          const perkMatch = bp.crafting.match(/\[([^\]]+)\]/);
-          const junk = parts.filter(p => !p.startsWith('['));
-          const perks = perkMatch ? perkMatch[1].split(',').map(p => p.trim()) : [];
-          const junkHTML = '<ul class="crafting-list">' +
-            junk.map(j => `<li class="crafting-item">${j}</li>`).join('') +
-            '</ul>';
-          const perksHTML = perks.length
-            ? '<div class="crafting-perks">' + perks.map(p => `<span class="perk-tag">${p}</span>`).join('') + '</div>'
-            : '';
-          return junkHTML + perksHTML;
-        })()}
-      </div>
-
-      ${bp.colors.length > 0 ? `
-      <div class="tt-section-label">▸ Available Colors</div>
-      <div class="colors-row">${buildColorTags(bp.colors)}</div>` : ''}
-
-      <div class="tt-section-label">▸ World Location</div>
-      ${buildLocationHTML(bp.location)}
-    </div>`;
+    ${detailBody(bp, omod)}`;
 
   document.body.classList.add('modal-open');
   overlay.inert = false;
@@ -2272,6 +1902,23 @@ function openModal(idx) {
 
   document.getElementById('modal-close-btn').addEventListener('click', closeModal);
 }
+
+modal.addEventListener('click', e => {
+  const row = e.target.closest('button.dt-mod-row');
+  if (row) {
+    const open = row.getAttribute('aria-expanded') !== 'true';
+    row.setAttribute('aria-expanded', String(open));
+    row.parentElement.classList.toggle('is-open', open);
+    return;
+  }
+  const mapButton = e.target.closest('[data-map-num]');
+  if (mapButton) {
+    const num = Number(mapButton.dataset.mapNum);
+    closeModal();
+    document.getElementById('btn-map').click();
+    window.catalogMap?.focus(num); // the map is on screen now
+  }
+});
 
 function closeModal() {
   overlay.inert = true;

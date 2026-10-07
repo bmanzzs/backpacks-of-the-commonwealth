@@ -110,23 +110,38 @@
 .survey-intro .survey-onfile { color: var(--vt-yellow); }
 .survey-intro .survey-notice { margin-top: 8px; padding: 7px 10px; border-left: 3px solid var(--vt-yellow); background: #ffcd3c17; color: var(--vt-cream); }
 .survey-intro .survey-notice[hidden] { display: none; }
-.survey-body { display: grid; grid-template-columns: 340px minmax(0, 1fr); flex: 1; min-height: 0; }
+.survey-body { display: grid; grid-template-columns: 370px minmax(0, 1fr); flex: 1; min-height: 0; }
 .survey-slots-panel { min-height: 0; overflow-y: auto; overscroll-behavior: contain; padding: 14px 14px 16px 18px; border-right: 1px solid var(--vt-line); background: #00000026; }
 .survey-slots-title { margin: 0 0 10px; color: var(--vt-dim); font: 700 10px 'Orbitron', sans-serif; letter-spacing: 2px; }
+.survey-slots-title span { color: var(--vt-ink); font-weight: 400; letter-spacing: 1px; }
 .survey-slots { display: grid; gap: 8px; margin: 0; padding: 0; list-style: none; }
-.survey-slot { display: grid; grid-template-columns: 30px 40px minmax(0, 1fr) auto; align-items: center; gap: 8px; min-height: 58px; padding: 6px 6px 6px 8px; border: 1px dashed var(--vt-line); color: var(--vt-dim); }
+/* Slot sizes step down with the place: #1 largest, then #2, #3, and #4-#5 a touch smaller. */
+.survey-slot { --thumb: 42px; --rank: 15px; --name: 13px; --h: 56px;
+  display: grid; grid-template-columns: 14px calc(var(--rank) * 1.6) var(--thumb) minmax(0, 1fr) auto; align-items: center; gap: 8px; min-height: var(--h); padding: 6px 6px 6px 6px; border: 1px dashed var(--vt-line); color: var(--vt-dim);
+  transition: translate .18s ease, min-height .15s ease, box-shadow .15s ease; }
+.survey-slot:nth-child(1) { --thumb: 60px; --rank: 22px; --name: 16px; --h: 78px; }
+.survey-slot:nth-child(2) { --thumb: 52px; --rank: 19px; --name: 14.5px; --h: 68px; }
+.survey-slot:nth-child(3) { --thumb: 46px; --rank: 17px; --name: 13.5px; --h: 61px; }
+.survey-slot.is-filled { cursor: grab; touch-action: none; user-select: none; -webkit-user-select: none; }
+.survey-slots.is-sorting, .survey-slots.is-sorting .survey-slot { cursor: grabbing; }
+.survey-slot.is-dragging { position: relative; z-index: 2; transition: min-height .15s ease; border-color: var(--vt-yellow); box-shadow: 0 12px 28px #000c, 0 0 0 1px var(--vt-yellow); }
+.survey-slot-grip { display: grid; place-items: center; width: 14px; height: 100%; min-height: 28px; padding: 0; border: 0; background: none; color: var(--vt-dim); cursor: inherit; }
+.survey-slot-grip svg { width: 8px; height: 14px; fill: currentColor; }
+.survey-slot.is-filled:hover .survey-slot-grip, .survey-slot.is-dragging .survey-slot-grip { color: var(--vt-yellow); }
+.survey-slot-grip:focus-visible { outline: 2px solid var(--vt-yellow); outline-offset: 1px; }
+.survey-slot-x { width: 30px; height: 30px; border: 1px solid var(--vt-line); background: #0a1a3c; color: var(--vt-ink); font: 13px 'Share Tech Mono', monospace; cursor: pointer; }
+.survey-slot-x:hover { border-color: var(--vt-yellow); color: var(--vt-yellow); }
+.survey-slot-x:focus-visible { outline: 2px solid var(--vt-yellow); outline-offset: 1px; }
 .survey-slot.is-filled { border-style: solid; border-color: var(--vt-line); background: linear-gradient(90deg, #1a3c80cc, #0c1f45cc); color: var(--vt-cream); }
 .survey-slot.is-filled:first-child { border-color: var(--vt-yellow); box-shadow: 0 0 16px #ffcd3c22; }
 .survey-slot.is-next { border-color: var(--vt-yellow-dim); color: var(--vt-ink); }
-.survey-slot-rank { color: var(--vt-yellow); font: 900 16px 'Orbitron', sans-serif; text-align: center; }
-.survey-slot-thumb { width: 40px; height: 40px; object-fit: contain; background: #000; }
+.survey-slot-rank { color: var(--vt-yellow); font: 900 var(--rank) 'Orbitron', sans-serif; text-align: center; }
+.survey-slot-thumb { width: var(--thumb); height: var(--thumb); object-fit: contain; background: #000; -webkit-user-drag: none; }
 .survey-slot-thumb.is-empty { display: grid; place-items: center; border: 1px dashed var(--vt-line); background: transparent; font-size: 18px; }
-.survey-slot-name { min-width: 0; font-size: 13px; line-height: 1.3; }
+.survey-slot-name { min-width: 0; font-size: var(--name); line-height: 1.3; }
+.survey-slot-fav { display: none; }
+.survey-slot:nth-child(1) .survey-slot-fav { display: inline; }
 .survey-slot-name small { display: block; color: var(--vt-dim); font-size: 10px; letter-spacing: 1px; }
-.survey-slot-tools { display: flex; gap: 2px; }
-.survey-slot-tools button { width: 28px; height: 28px; border: 1px solid var(--vt-line); background: #0a1a3c; color: var(--vt-ink); font: 13px 'Share Tech Mono', monospace; cursor: pointer; }
-.survey-slot-tools button:hover:not(:disabled) { border-color: var(--vt-yellow); color: var(--vt-yellow); }
-.survey-slot-tools button:disabled { opacity: .3; cursor: default; }
 .survey-points { margin: 12px 0 0; color: var(--vt-dim); font-size: 11px; line-height: 1.5; }
 .survey-grid { min-height: 0; overflow-y: auto; overscroll-behavior: contain; padding: 14px 18px 18px; display: grid; grid-template-columns: repeat(auto-fill, minmax(146px, 1fr)); gap: 10px; align-content: start; }
 .survey-pick { position: relative; display: grid; grid-template-rows: auto auto 1fr; gap: 6px; padding: 8px 8px 10px; text-align: left; cursor: pointer;
@@ -210,24 +225,27 @@
 .survey-thanks .survey-row-bar span { background: var(--vt-yellow); }
 .survey-thanks .survey-row-mine { color: var(--vt-yellow); }
 
-/* ── 👍 Like on each backpack page: styled like a social network's button on purpose ── */
-.like-bar { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; padding: 10px 18px; border-bottom: 1px solid var(--border); background: #071107;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; }
-.like-btn { display: inline-flex; align-items: center; gap: 6px; height: 32px; padding: 0 14px 0 11px; border: 0; border-radius: 6px; cursor: pointer;
-  color: #fff; background: #0866ff; font: 600 14px/1 -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; letter-spacing: normal; text-transform: none;
-  -webkit-tap-highlight-color: transparent; transition: background-color .15s ease, transform .1s ease; }
-.like-btn:hover { background: #0759e0; }
+/* ── Like on each backpack page: a Pip-Boy take on a social network's like button ── */
+.like-bar { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; padding: 10px 22px; border-bottom: 1px solid var(--border);
+  background: repeating-linear-gradient(0deg, transparent 0 2px, #00000038 2px 3px), linear-gradient(90deg, #0a1d08, #061206 70%); font-family: 'Share Tech Mono', monospace; }
+.like-btn { display: inline-flex; align-items: center; gap: 8px; height: 32px; padding: 0 15px 0 11px; border: 1px solid #39ff1499; cursor: pointer;
+  color: var(--green); background: #39ff140f; font: 700 10px/1 'Orbitron', sans-serif; letter-spacing: 2px; text-transform: uppercase; text-shadow: 0 0 6px #39ff1480;
+  clip-path: polygon(0 0, calc(100% - 7px) 0, 100% 7px, 100% 100%, 7px 100%, 0 calc(100% - 7px));
+  -webkit-tap-highlight-color: transparent; transition: background-color .15s ease, color .15s ease, transform .1s ease; }
+.like-btn:hover { background: #39ff1429; }
 .like-btn:active { transform: scale(.96); }
-.like-btn:focus-visible { outline: 2px solid #4599ff; outline-offset: 2px; }
-.like-btn .like-icon { flex: none; width: 16px; height: 16px; fill: currentColor; }
-.like-btn.is-liked { color: #4599ff; background: #1c2b41; }
-.like-btn.is-liked:hover { background: #22344f; }
+.like-btn:focus-visible { outline: 2px solid var(--amber); outline-offset: -4px; }
+.like-btn .like-icon { flex: none; width: 15px; height: 15px; fill: currentColor; filter: drop-shadow(0 0 4px #39ff1480); }
+.like-btn.is-liked { color: #041104; background: var(--green); text-shadow: none; }
+.like-btn.is-liked .like-icon { filter: none; }
+.like-btn.is-liked:hover { background: #6dff4f; }
 .like-btn.is-pop .like-icon { animation: like-pop .45s cubic-bezier(.3, 1.6, .5, 1); }
 @keyframes like-pop { 35% { transform: scale(1.45) rotate(-14deg); } }
-.like-text { display: inline-flex; align-items: center; gap: 6px; min-width: 0; color: #b0b3b8; font-size: 13px; line-height: 1.35; }
+.like-text { display: inline-flex; align-items: center; gap: 8px; min-width: 0; color: #86b77a; font-size: 13px; line-height: 1.35; }
 .like-text:empty { display: none; }
-.like-badge { display: inline-grid; place-items: center; flex: none; width: 18px; height: 18px; border-radius: 50%; background: linear-gradient(#18afff, #0062e0); }
-.like-badge .like-icon { width: 10px; height: 10px; fill: #fff; }
+.like-text b { color: #dcffcf; font-weight: normal; }
+.like-badge { display: inline-grid; place-items: center; flex: none; width: 20px; height: 20px; border: 1px solid #39ff148c; background: #39ff141a; }
+.like-badge .like-icon { width: 11px; height: 11px; fill: var(--green); }
 
 /* ── Short screens: the whole ballot step scrolls ───────────────────── */
 @media (max-height: 600px) {
@@ -256,13 +274,13 @@
   .survey-slots-panel { overflow: visible; padding: 10px 12px; border-right: 0; border-bottom: 1px solid var(--vt-line); }
   .survey-slots-title, .survey-points { display: none; }
   .survey-slots { gap: 5px; }
-  .survey-slot { grid-template-columns: 28px 30px minmax(0, 1fr) auto; min-height: 40px; padding: 3px 4px 3px 6px; }
+  .survey-slot { --thumb: 30px; --rank: 13px; --name: 12px; --h: 40px; padding: 3px 4px 3px 4px; }
+  .survey-slot:nth-child(1) { --thumb: 40px; --rank: 17px; --name: 14px; --h: 50px; }
+  .survey-slot:nth-child(2) { --thumb: 36px; --rank: 15px; --name: 13px; --h: 46px; }
+  .survey-slot:nth-child(3) { --thumb: 33px; --rank: 14px; --name: 12.5px; --h: 43px; }
   .survey-slot:not(.is-filled):not(.is-next) { display: none; }
-  .survey-slot-rank { font-size: 13px; }
-  .survey-slot-thumb { width: 30px; height: 30px; }
-  .survey-slot-name { font-size: 12px; }
   .survey-slot-name small { display: none; }
-  .survey-slot-tools button { width: 34px; height: 34px; }
+  .survey-slot-x { width: 34px; height: 34px; }
   .survey-grid { grid-template-columns: repeat(auto-fill, minmax(104px, 1fr)); gap: 8px; padding: 10px 12px 14px; }
   .survey-pick { padding: 6px 6px 8px; font-size: 11px; }
   .survey-pick-name { font-size: 11px; }

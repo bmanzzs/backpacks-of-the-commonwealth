@@ -201,7 +201,7 @@
       <section class="survey-step" data-step="ballot">
         <div class="survey-intro"><h2 id="survey-title" tabindex="-1">Which backpacks are your favorites?</h2><p class="survey-lede"></p><p class="survey-notice" hidden></p></div>
         <div class="survey-body">
-          <div class="survey-slots-panel"><p class="survey-slots-title">YOUR RANKING</p><ol class="survey-slots" aria-label="Your ranking"></ol>
+          <div class="survey-slots-panel"><p class="survey-slots-title">YOUR RANKING <span id="survey-drag-hint">· DRAG TO REORDER</span></p><ol class="survey-slots" aria-label="Your ranking"></ol>
             <p class="survey-points">Points: a #1 pick earns ${POINTS}, each place below earns one less.</p></div>
           <div class="survey-grid" role="group" aria-label="Backpacks to choose from">${PACKS.map(p => `<button type="button" class="survey-pick" data-num="${p.num}" aria-pressed="false">
             <span class="survey-pick-rank" aria-hidden="true"></span><img src="${esc(p.img)}" alt="" loading="lazy" decoding="async">
@@ -233,9 +233,15 @@
       else if (action.dataset.act === 'send') send();
       else if (action.dataset.act === 'edit') { step('ballot'); $('#survey-title', dialog).focus({ preventScroll: true }); }
       else if (action.dataset.act === 'results') { close(); setTimeout(openResults, 0); }
-      else if (action.dataset.act === 'up' || action.dataset.act === 'down') move(i, action.dataset.act === 'up' ? -1 : 1);
       else if (action.dataset.act === 'remove') remove(i);
     });
+    dialog.addEventListener('keydown', event => {
+      const grip = event.target.closest?.('[data-act="grip"]');
+      if (!grip || (event.key !== 'ArrowUp' && event.key !== 'ArrowDown')) return;
+      event.preventDefault();
+      move(Number(grip.dataset.i), event.key === 'ArrowUp' ? -1 : 1);
+    });
+    wireDrag($('.survey-slots', dialog));
     // While the survey is open, Escape closes only the survey: this runs before the catalog's own
     // Escape handlers (the backpack page, the ? panel), wherever focus is.
     addEventListener('keydown', event => {
@@ -301,9 +307,9 @@
       : `Pick up to ${MAX} backpacks, in order. Your first pick is your favorite.`;
     $('.survey-slots', dialog).innerHTML = Array.from({ length: MAX }, (_, i) => {
       const pack = byNum.get(draft[i]);
-      if (!pack) return `<li class="survey-slot${i === draft.length ? ' is-next' : ''}"><span class="survey-slot-rank">#${i + 1}</span><span class="survey-slot-thumb is-empty" aria-hidden="true">?</span><span class="survey-slot-name">${i === draft.length ? (i ? 'Pick your next favorite' : 'Pick your favorite') : 'Empty'}</span></li>`;
-      return `<li class="survey-slot is-filled"><span class="survey-slot-rank">#${i + 1}</span><img class="survey-slot-thumb" src="${esc(pack.img)}" alt=""><span class="survey-slot-name">${esc(pack.name)}<small>LVL ${pack.level}${i === 0 ? ' · FAVORITE' : ''}</small></span>
-        <span class="survey-slot-tools"><button type="button" data-act="up" data-i="${i}" aria-label="Move ${esc(pack.name)} up"${i === 0 ? ' disabled' : ''}>▲</button><button type="button" data-act="down" data-i="${i}" aria-label="Move ${esc(pack.name)} down"${i === draft.length - 1 ? ' disabled' : ''}>▼</button><button type="button" data-act="remove" data-i="${i}" aria-label="Remove ${esc(pack.name)}">✕</button></span></li>`;
+      if (!pack) return `<li class="survey-slot${i === draft.length ? ' is-next' : ''}"><span class="survey-slot-grip" aria-hidden="true"></span><span class="survey-slot-rank">#${i + 1}</span><span class="survey-slot-thumb is-empty" aria-hidden="true">?</span><span class="survey-slot-name">${i === draft.length ? (i ? 'Pick your next favorite' : 'Pick your favorite') : 'Empty'}</span></li>`;
+      return `<li class="survey-slot is-filled" data-i="${i}"><button type="button" class="survey-slot-grip" data-act="grip" data-i="${i}" aria-label="${esc(pack.name)}, number ${i + 1}. Drag, or press the up and down arrow keys, to change its place." aria-describedby="survey-drag-hint"><svg viewBox="0 0 8 14" aria-hidden="true" focusable="false"><circle cx="2" cy="2" r="1.2"/><circle cx="6" cy="2" r="1.2"/><circle cx="2" cy="7" r="1.2"/><circle cx="6" cy="7" r="1.2"/><circle cx="2" cy="12" r="1.2"/><circle cx="6" cy="12" r="1.2"/></svg></button><span class="survey-slot-rank">#${i + 1}</span><img class="survey-slot-thumb" src="${esc(pack.img)}" alt="" draggable="false"><span class="survey-slot-name">${esc(pack.name)}<small>LVL ${pack.level}<span class="survey-slot-fav"> · FAVORITE</span></small></span>
+        <button type="button" class="survey-slot-x" data-act="remove" data-i="${i}" aria-label="Remove ${esc(pack.name)}">✕</button></li>`;
     }).join('');
     dialog.querySelectorAll('.survey-pick').forEach(tile => {
       const num = Number(tile.dataset.num), rank = draft.indexOf(num) + 1, pack = byNum.get(num);
@@ -340,8 +346,78 @@
     notice = '';
     live(`${byNum.get(draft[j]).name} is now number ${j + 1}.`);
     renderBallot();
-    const [same, other] = by < 0 ? ['up', 'down'] : ['down', 'up'];
-    ($(`.survey-slots [data-act="${same}"][data-i="${j}"]:not(:disabled)`, dialog) || $(`.survey-slots [data-act="${other}"][data-i="${j}"]:not(:disabled)`, dialog) || $(`.survey-slots [data-act="remove"][data-i="${j}"]`, dialog))?.focus({ preventScroll: true });
+    $(`.survey-slots [data-act="grip"][data-i="${j}"]`, dialog)?.focus({ preventScroll: true });
+  }
+  // Drag a pick to a new place. The list reorders live (the slot sizes follow the position, so a pick
+  // grows as it climbs), the others slide aside, and the drop commits the new order to the draft.
+  function wireDrag(slots) {
+    let drag = null, suppress = false;
+    const filled = () => [...slots.querySelectorAll('.survey-slot.is-filled')];
+    const follow = y => {
+      const li = drag.li;
+      li.style.translate = '';
+      const r = li.getBoundingClientRect();
+      li.style.translate = `0 ${Math.round(y - drag.grab * r.height - r.top)}px`;
+    };
+    slots.addEventListener('pointerdown', event => {
+      const li = event.target.closest('.survey-slot.is-filled');
+      if (!li || sending || event.button !== 0 || event.target.closest('[data-act="remove"]')) return;
+      const r = li.getBoundingClientRect();
+      drag = { li, id: event.pointerId, y0: event.clientY, grab: (event.clientY - r.top) / r.height, moved: false };
+    });
+    slots.addEventListener('pointermove', event => {
+      if (!drag || event.pointerId !== drag.id) return;
+      if (!drag.moved) {
+        if (Math.abs(event.clientY - drag.y0) < 5) return;
+        drag.moved = true;
+        slots.setPointerCapture(event.pointerId);
+        drag.li.classList.add('is-dragging');
+        slots.classList.add('is-sorting');
+      }
+      event.preventDefault();
+      const list = filled(), others = list.filter(el => el !== drag.li);
+      let to = 0;
+      for (const el of others) { const r = el.getBoundingClientRect(); if (event.clientY > r.top + r.height / 2) to++; }
+      if (to !== list.indexOf(drag.li)) {
+        const before = new Map(others.map(el => [el, el.getBoundingClientRect().top]));
+        if (to >= others.length) others[others.length - 1].after(drag.li); else others[to].before(drag.li);
+        filled().forEach((el, k) => { $('.survey-slot-rank', el).textContent = `#${k + 1}`; });
+        if (!motion.matches) for (const el of others) {
+          const dy = before.get(el) - el.getBoundingClientRect().top;
+          if (!dy) continue;
+          el.style.transition = 'none'; el.style.translate = `0 ${dy}px`;
+          void el.offsetHeight; // commit the offset, then let it slide home
+          el.style.transition = ''; el.style.translate = '';
+        }
+      }
+      follow(event.clientY);
+    });
+    const end = event => {
+      if (!drag || event.pointerId !== drag.id) return;
+      const { li, moved } = drag;
+      drag = null;
+      if (!moved) return;
+      suppress = true;
+      setTimeout(() => { suppress = false; }, 0);
+      const order = filled().map(el => draft[Number(el.dataset.i)]), at = order.indexOf(draft[Number(li.dataset.i)]);
+      const lastTop = li.getBoundingClientRect().top, changed = order.some((num, k) => num !== draft[k]);
+      slots.classList.remove('is-sorting');
+      draft = order;
+      notice = '';
+      renderBallot();
+      const dropped = filled()[at];
+      if (dropped && !motion.matches) {
+        const dy = lastTop - dropped.getBoundingClientRect().top;
+        dropped.style.transition = 'none'; dropped.style.translate = `0 ${dy}px`;
+        void dropped.offsetHeight;
+        dropped.style.transition = ''; dropped.style.translate = '';
+      }
+      if (changed) live(`${byNum.get(order[at]).name} is now number ${at + 1}.`);
+    };
+    slots.addEventListener('pointerup', end);
+    slots.addEventListener('pointercancel', end);
+    // A drag that ends over a button must not press it.
+    slots.addEventListener('click', event => { if (suppress) { event.stopPropagation(); event.preventDefault(); } }, true);
   }
   function remove(i) {
     if (sending) return;
@@ -446,7 +522,7 @@
     });
   }
 
-  // ── 👍 Like on each backpack's detail page (styled like a social network's button) ──
+  // ── 👍 Like on each backpack's detail page (a Pip-Boy take on a social network's button) ──
   // It opens the survey with that backpack on the ballot; "Liked" means it is on the ballot on file.
   const THUMB = '<svg class="like-icon" viewBox="0 0 16 16" aria-hidden="true" focusable="false"><rect x="1" y="7" width="3" height="8" rx=".8"/><path d="M5 7.4 8.1 1.9c.3-.6 1-.8 1.6-.5.8.4 1.2 1.4.9 2.3L9.9 6h3.7c1 0 1.7 1 1.4 2l-1.4 5.6c-.2.8-.9 1.4-1.7 1.4H5z"/></svg>';
   const compact = new Intl.NumberFormat('en-US', { notation: 'compact', maximumFractionDigits: 1 });
@@ -468,10 +544,11 @@
     const entry = results?.results.find(r => Number(r.id) === likeNum);
     if (!results) { text.innerHTML = ''; return; }
     const likes = count(entry?.picks), others = Math.max(0, likes - (rank ? 1 : 0));
+    const n = value => `<b>${esc(compact.format(value))}</b>`;
     const sentence = rank
-      ? (others ? `You and ${compact.format(others)} other${others === 1 ? '' : 's'} like this` : 'You like this')
-      : likes ? `${compact.format(likes)} ${likes === 1 ? 'person likes' : 'people like'} this` : 'Be the first to like this';
-    text.innerHTML = `${rank || likes ? `<span class="like-badge" aria-hidden="true">${THUMB}</span>` : ''}<span>${esc(sentence)}</span>`;
+      ? (others ? `You and ${n(others)} other citizen${others === 1 ? '' : 's'} like this` : 'You like this')
+      : likes ? `${n(likes)} ${likes === 1 ? 'citizen likes' : 'citizens like'} this` : 'Be the first citizen to like this';
+    text.innerHTML = `${rank || likes ? `<span class="like-badge" aria-hidden="true">${THUMB}</span>` : ''}<span>${sentence}</span>`;
   }
   const showDetails = window.openModal;
   if (typeof showDetails === 'function') {
